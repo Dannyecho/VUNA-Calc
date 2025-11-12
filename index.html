@@ -13,15 +13,14 @@
         text-align: right;
       }
       #word-result{
-        background-color: #0dcaf0;
-        border: solid 1px #0d6efd;
+        background-color: #e9ecef;
+        border: solid 1px #ffcd39;
         text-transform: capitalize;
         font-weight: bold;
-        color: #ffffff;
       }
     </style>
   </head>
-  <body>
+  <body class="bg-dark">
     <div class="container">
         <div class="row justify-content-center mt-5">
             <div class="col-md-3">
@@ -39,7 +38,7 @@
                     id="result"
                     disabled
                   />
-                  <div id="word-result" class="px-3 py-2 mb-3"></div>
+                  <div id="word-result" class="px-3 py-2 mb-3 rounded"></div>
                   <div class="row">
                     <div class="col-md-3">
                         <input class="btn btn-light btn-block" type="button" value="(" onclick="bracketToResult('(')" />
