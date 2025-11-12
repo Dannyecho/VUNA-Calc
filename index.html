@@ -17,6 +17,35 @@
         border: solid 1px #ffcd39;
         text-transform: capitalize;
         font-weight: bold;
+        min-height: 45px;
+      }
+      #word-text {
+      flex-grow: 1; /*  Text takes up available space */
+      }
+      /*  Smooth animations for the speak button */
+      #speak-btn {
+        transition: all 0.3s ease;
+      }
+
+      #speak-btn:hover:not(:disabled) {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+
+      #speak-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /*  Pulsing animation when speaking */
+      #speak-btn.speaking {
+        animation: pulse 1.5s infinite;
+        background-color: #dc3545 !important;
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
       }
     </style>
   </head>
@@ -38,7 +67,18 @@
                     id="result"
                     disabled
                   />
-                  <div id="word-result" class="px-3 py-2 mb-3 rounded"></div>
+                <div id="word-result" class="px-3 py-2 mb-3 rounded d-flex justify-content-between align-items-center">
+                  <!--  The number in words will appear here -->
+                  <span id="word-text"></span>
+                  <!--  Play button lives right next to the text -->
+                  <button id="speak-btn" class="btn btn-success btn-sm ms-2" onclick="speakResult()" disabled style="flex-shrink: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/>
+                      <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z"/>
+                      <path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/>
+                    </svg>
+                  </button>
+                </div>
                   <div class="row">
                     <div class="col-md-3">
                         <input class="btn btn-light btn-block" type="button" value="(" onclick="bracketToResult('(')" />
