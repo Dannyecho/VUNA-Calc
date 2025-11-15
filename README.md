@@ -41,3 +41,24 @@ Clear separation between calculation logic and language conversion
 Extensible architecture for adding new operations or language features
 
 This calculator transforms the traditional cold numerical interface into a warm, conversational experience that speaks your language.
+# VUNA-Calc
+A simple calculator that displays computational results in english language. 
+
+
+---
+
+##  Features
+- Basic arithmetic operations (+, −, ×, ÷)
+- Displays results in both numbers and English words
+- Responsive layout (works on mobile and desktop)
+- Simple and clean Bootstrap UI
+
+---
+
+##  Tech Stack
+- **HTML5**
+- **CSS3** (Bootstrap 5)
+- **JavaScript (Vanilla)**
+
+---
+
