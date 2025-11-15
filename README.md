@@ -1,3 +1,46 @@
+Enhanced English Language Calculator
+A user-friendly calculator application that not only performs mathematical computations but also expresses the results in natural English language. This tool bridges the gap between numerical output and linguistic comprehension.
+Key Features
+Natural Language Output
+
+Converts numerical results into complete English sentences
+Makes calculations more accessible and easier to understand
+Useful for learning, accessibility, and clarity
+
+Core Mathematical Operations
+
+Addition, subtraction, multiplication, and division
+Support for decimal numbers and negative values
+Handles standard order of operations
+
+User Experience
+
+Clean, intuitive interface with clearly labeled buttons
+Real-time display showing both the calculation and English description
+Visual feedback for button interactions
+Error handling with helpful English explanations
+
+Practical Applications
+
+Educational tool for students learning math concepts
+Accessibility aid for users who prefer verbal descriptions
+Professional use in documentation and reporting
+Language learning support for understanding numerical expressions
+
+Example Outputs
+
+"5 + 3" displays: "Five plus three equals eight"
+"12 ÷ 4" displays: "Twelve divided by four equals three"
+"7 × 6" displays: "Seven multiplied by six equals forty-two"
+
+Technical Highlights
+
+Responsive design works on desktop and mobile devices
+Lightweight implementation with no external dependencies
+Clear separation between calculation logic and language conversion
+Extensible architecture for adding new operations or language features
+
+This calculator transforms the traditional cold numerical interface into a warm, conversational experience that speaks your language.
 # VUNA-Calc
 
 A sophisticated web-based calculator that performs mathematical computations and displays results in plain English language. Perfect for users who want to see their calculations explained in natural language format.
@@ -88,22 +131,6 @@ After calculation, the result is converted to English words using a sophisticate
 - Scales (thousand, million, billion, trillion)
 - Decimal numbers (displayed with "point" between whole and decimal parts)
 
-## 🤝 Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
-
-## 📄 License
-
-This project is licensed under the GNU v2.0 License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 Credits
-
-Created by **GROUP 2** as a collaborative project to demonstrate calculator functionality with natural language output.
-
-## 📞 Support
-
-For bug reports and feature requests, please open an issue on the [GitHub repository](https://github.com/Olivia-Anigbogu/VUNA-Calc/issues).
-
 ## 🚀 Future Enhancements
 
 Potential features for future versions:
@@ -113,3 +140,23 @@ Potential features for future versions:
 - Calculation history
 - Dark/Light theme toggle
 - Mobile app version
+A simple calculator that displays computational results in english language. 
+
+
+---
+
+##  Features
+- Basic arithmetic operations (+, −, ×, ÷)
+- Displays results in both numbers and English words
+- Responsive layout (works on mobile and desktop)
+- Simple and clean Bootstrap UI
+
+---
+
+##  Tech Stack
+- **HTML5**
+- **CSS3** (Bootstrap 5)
+- **JavaScript (Vanilla)**
+
+---
+
