@@ -30,15 +30,86 @@ function clearResult() {
     enableSpeakButton();
 }
 
-function updateResult() {
-	@@ -187,47 +186,6 @@ function numberToWords(numVal) {
-        words = '';
+function numberToWords(value) {
+    value = value.toString();
+
+    // Split into whole + decimal parts
+    let parts = value.split('.');
+    let whole = parts[0];
+    let decimal = parts[1] || '';
+
+    let words = [];
+
+    // Convert whole number
+    words.push(convertWholeNumber(whole));
+
+    // Convert decimal part (digit by digit)
+    if (decimal.length > 0) {
+        let decimalWords = decimal.split('').map(d => smallNumbers[d]);
+        return [words.join(' '), "point " + decimalWords.join(' ')];
+
     }
 
-    document.getElementById('word-text').innerHTML = wordArr.join(' point ');
-    enableSpeakButton();
-    // return ;
+    return [words.join(' ')];
 }
+
+// Word maps
+const smallNumbers = [
+    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+    "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
+    "seventeen", "eighteen", "nineteen"
+];
+
+const tens = [
+    "", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"
+];
+
+
+function convertWholeNumber(numStr) {
+    let num = parseInt(numStr);
+    if (isNaN(num)) return "";
+
+    if (num < 20) return smallNumbers[num];
+
+    if (num < 100) {
+        return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? " " + smallNumbers[num % 10] : "");
+    }
+
+    if (num < 1000) {
+        return smallNumbers[Math.floor(num / 100)] + " hundred" +
+            (num % 100 !== 0 ? " and " + convertWholeNumber(num % 100) : "");
+    }
+
+    if (num < 1000000) {
+        return convertWholeNumber(Math.floor(num / 1000)) + " thousand" +
+            (num % 1000 !== 0 ? " " + convertWholeNumber(num % 1000) : "");
+    }
+
+    if (num < 1000000000) {
+        return convertWholeNumber(Math.floor(num / 1000000)) + " million" +
+            (num % 1000000 !== 0 ? " " + convertWholeNumber(num % 1000000) : "");
+    }
+
+    return "number too large";
+}
+
+function updateResult() {
+
+    const fullNumber = left + (operator ? operator : '') + right;
+
+
+    const wordArr = numberToWords(fullNumber);
+
+    // Show the words
+    document.getElementById('word-text').innerHTML = wordArr.join(' point ');
+
+    // Enable speech button
+    enableSpeakButton();
+}
+
+
+
+
 
 // Text-to-Speech Magic - Makes numbers talk!
 function speakResult() {
@@ -59,12 +130,12 @@ function speakResult() {
     utterance.volume = 1;
 
     // When speech starts
-    utterance.onstart = function() {
+    utterance.onstart = function () {
         speakBtn.classList.add('speaking');
     };
 
     // When speech ends
-    utterance.onend = function() {
+    utterance.onend = function () {
         speakBtn.classList.remove('speaking');
     };
 
