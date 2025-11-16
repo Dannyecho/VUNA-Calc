@@ -2,6 +2,25 @@ var left = '';
 var operator = '';
 var right = '';
 let wordPlaceholder = document.getElementById('word-result');
+
+// Keyboard support for calculator
+document.addEventListener('keydown', function(event) {
+    const key = event.key;
+    if (key >= '0' && key <= '9') {
+        appendToResult(key);
+    } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+        operatorToResult(key);
+    } else if (key === 'Enter' || key === '=') {
+        calculateResult();
+    } else if (key === 'Backspace') {
+        backspace();
+    } else if (key === 'Escape') {
+        clearResult();
+    } else if (key === '.') {
+        appendToResult('.');
+    }
+});
+
 function appendToResult(value) {
     if (operator.length == 0) {
         left += value;
