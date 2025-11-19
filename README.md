@@ -1,62 +1,62 @@
-Enhanced English Language Calculator
-A user-friendly calculator application that not only performs mathematical computations but also expresses the results in natural English language. This tool bridges the gap between numerical output and linguistic comprehension.
-Key Features
-Natural Language Output
+# Enhanced English Language Calculator
 
-Converts numerical results into complete English sentences
-Makes calculations more accessible and easier to understand
-Useful for learning, accessibility, and clarity
+## Overview
+The **Enhanced English Language Calculator** is a sophisticated and user-friendly application designed to perform a variety of mathematical computations while articulating the results in natural English language. This innovative tool effectively bridges the gap between numerical output and linguistic comprehension, making it an invaluable resource for individuals seeking clarity in mathematical expressions.
 
-Core Mathematical Operations
+## Key Features
 
-Addition, subtraction, multiplication, and division
-Support for decimal numbers and negative values
-Handles standard order of operations
+### Natural Language Output
+- **Articulate Results**: Transforms numerical results into comprehensive English sentences.
+- **Accessibility**: Enhances understanding for users of all ages and backgrounds, facilitating learning and comprehension.
+- **Clarity**: Provides clear explanations that make mathematical concepts more approachable.
 
-User Experience
+### Core Mathematical Operations
+- **Comprehensive Operations**: Supports addition, subtraction, multiplication, and division.
+- **Advanced Handling**: Accommodates decimal numbers and negative values, ensuring versatility in calculations.
+- **Order of Operations**: Adheres to standard mathematical conventions, allowing for complex expressions.
 
-Clean, intuitive interface with clearly labeled buttons
-Real-time display showing both the calculation and English description
-Visual feedback for button interactions
-Error handling with helpful English explanations
+## User Experience
+- **Intuitive Interface**: Features a clean and intuitive design with clearly labeled buttons for ease of use.
+- **Real-Time Feedback**: Displays both the ongoing calculation and its corresponding English description simultaneously.
+- **Interactive Design**: Offers visual feedback for button interactions, enhancing user engagement.
+- **Error Handling**: Implements robust error management with user-friendly English explanations for any miscalculations.
 
-Practical Applications
+## Practical Applications
+- **Educational Tool**: Serves as an effective resource for students learning mathematical concepts and operations.
+- **Accessibility Aid**: Assists users who prefer verbal descriptions, ensuring inclusivity in mathematical education.
+- **Professional Utility**: Beneficial for documentation and reporting, where clarity in numerical expressions is paramount.
+- **Language Learning**: Supports users in understanding numerical expressions in English, aiding in language acquisition.
 
-Educational tool for students learning math concepts
-Accessibility aid for users who prefer verbal descriptions
-Professional use in documentation and reporting
-Language learning support for understanding numerical expressions
+## Example Outputs
+- Input: `"5 + 3"` → Output: `"Five plus three equals eight."`
+- Input: `"12 ÷ 4"` → Output: `"Twelve divided by four equals three."`
+- Input: `"7 × 6"` → Output: `"Seven multiplied by six equals forty-two."`
 
-Example Outputs
+## Technical Highlights
+- **Responsive Design**: Optimized for both desktop and mobile devices, ensuring accessibility across platforms.
+- **Lightweight Implementation**: Built with no external dependencies, enhancing performance and load times.
+- **Separation of Concerns**: Maintains a clear distinction between calculation logic and language conversion for easier maintenance.
+- **Extensible Architecture**: Designed to allow for the addition of new operations or language features in future updates.
 
-"5 + 3" displays: "Five plus three equals eight"
-"12 ÷ 4" displays: "Twelve divided by four equals three"
-"7 × 6" displays: "Seven multiplied by six equals forty-two"
+This calculator transforms the traditionally cold numerical interface into a warm, conversational experience that speaks your language.
 
-Technical Highlights
+---
 
-Responsive design works on desktop and mobile devices
-Lightweight implementation with no external dependencies
-Clear separation between calculation logic and language conversion
-Extensible architecture for adding new operations or language features
-
-This calculator transforms the traditional cold numerical interface into a warm, conversational experience that speaks your language.
 # VUNA-Calc
 
-A sophisticated web-based calculator that performs mathematical computations and displays results in plain English language. Perfect for users who want to see their calculations explained in natural language format.
+## Description
+**VUNA-Calc** is a sophisticated web-based calculator that performs mathematical computations and presents results in plain English language. It is ideal for users who desire to see their calculations elucidated in a natural language format.
 
 ## ✨ Features
-
-- **Mathematical Operations**: Supports addition (+), subtraction (-), multiplication (\*), and division (/)
-- **English Language Output**: All calculation results are displayed in readable English text
-- **Parentheses Support**: Perform complex calculations with proper bracket usage
-- **User-Friendly Interface**: Clean, intuitive design built with Bootstrap
-- **Decimal Support**: Handle calculations with decimal numbers
-- **Backspace Function**: Easily correct input errors with the backspace button
-- **Real-Time Display**: See your input and results instantly
+- **Mathematical Operations**: Supports addition (+), subtraction (-), multiplication (*), and division (/).
+- **English Language Output**: All calculation results are articulated in readable English text.
+- **Parentheses Support**: Enables complex calculations with proper bracket usage.
+- **User-Friendly Interface**: Built with Bootstrap for a clean, intuitive design.
+- **Decimal Support**: Effectively handles calculations involving decimal numbers.
+- **Backspace Functionality**: Allows users to easily correct input errors with the backspace button.
+- **Real-Time Display**: Users can instantly see their input and results.
 
 ## 🛠️ Technologies Used
-
 - **Frontend**: HTML5, CSS3, JavaScript
 - **Framework**: Bootstrap 5 (for responsive UI)
 - **Calculation Engine**: JavaScript-based number-to-words conversion
@@ -64,44 +64,35 @@ A sophisticated web-based calculator that performs mathematical computations and
 ## 📋 Getting Started
 
 ### Prerequisites
-
 - Any modern web browser (Chrome, Firefox, Safari, Edge, etc.)
 - No installation required!
 
 ### Installation
-
 1. Clone the repository:
-
-```bash
-git clone https://github.com/Olivia-Anigbogu/VUNA-Calc.git
-```
-
+   ```bash
+   git clone https://github.com/Olivia-Anigbogu/VUNA-Calc.git
+   ```
 2. Navigate to the project directory:
-
-```bash
-cd VUNA-Calc
-```
-
-3. Open `index.html` in your web browser
+   ```bash
+   cd VUNA-Calc
+   ```
+3. Open `index.html` in your web browser.
 
 ## 🎮 How to Use
+1. Enter numbers by clicking the number buttons (0-9).
+2. Select an operation by clicking +, -, *, or /.
+3. Use parentheses for complex calculations.
+4. Press the = button to calculate the result.
+5. View the result in both numeric and English word formats.
+6. Use ← (backspace) to delete the last character.
+7. Press AC to clear all entries and start over.
 
-1. **Enter numbers** by clicking the number buttons (0-9)
-2. **Select an operation** by clicking +, -, \*, or /
-3. **Use parentheses** for complex calculations
-4. **Press the = button** to calculate the result
-5. **View the result** in both numeric and English word formats
-6. **Use ← (backspace)** to delete the last character
-7. **Press AC** to clear all entries and start over
-
-### Example Calculations
-
-- `5 + 3 = 8` → "eight"
-- `100 * 2 = 200` → "two hundred"
-- `1000 + 500 = 1500` → "one thousand five hundred"
+## Example Calculations
+- `5 + 3` = `8` → `"eight"`
+- `100 * 2` = `200` → `"two hundred"`
+- `1000 + 500` = `1500` → `"one thousand five hundred"`
 
 ## 📁 Project Structure
-
 ```
 VUNA-Calc/
 ├── index.html              # Main calculator interface
@@ -117,46 +108,23 @@ VUNA-Calc/
 ```
 
 ## 🔄 How It Works
-
-The calculator uses a simple three-variable system to track calculations:
-
+The calculator employs a straightforward three-variable system to track calculations:
 - **left**: The first number
-- **operator**: The operation to perform
+- **operator**: The operation to be performed
 - **right**: The second number
 
-After calculation, the result is converted to English words using a sophisticated algorithm that handles:
-
-- Units (one through nineteen)
-- Tens (twenty, thirty, etc.)
-- Scales (thousand, million, billion, trillion)
-- Decimal numbers (displayed with "point" between whole and decimal parts)
+Upon completion of the calculation, the result is converted to English words using a sophisticated algorithm that encompasses:
+- **Units**: One through nineteen
+- **Tens**: Twenty, thirty, etc.
+- **Scales**: Thousand, million, billion, trillion
+- **Decimal Numbers**: Displayed with "point" between whole and decimal parts
 
 ## 🚀 Future Enhancements
+Potential features for future versions include:
+- Additional mathematical operations (e.g., square root, exponents).
+- Support for multiple languages.
+- Calculation history feature.
+- Dark/Light theme toggle.
+- A mobile app version.
 
-Potential features for future versions:
-
-- Additional mathematical operations (square root, exponents, etc.)
-- Support for more languages
-- Calculation history
-- Dark/Light theme toggle
-- Mobile app version
-A simple calculator that displays computational results in english language. 
-
-
----
-
-##  Features
-- Basic arithmetic operations (+, −, ×, ÷)
-- Displays results in both numbers and English words
-- Responsive layout (works on mobile and desktop)
-- Simple and clean Bootstrap UI
-
----
-
-##  Tech Stack
-- **HTML5**
-- **CSS3** (Bootstrap 5)
-- **JavaScript (Vanilla)**
-
----
-
+This calculator is not just a tool; it is an engaging educational experience that brings mathematics to life through language.
