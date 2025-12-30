@@ -39,6 +39,7 @@ Responsive design works on desktop and mobile devices
 Lightweight implementation with no external dependencies
 Clear separation between calculation logic and language conversion
 Extensible architecture for adding new operations or language features
+Keyboard interaction was implemented to enhance usability and accessibility, allowing users to perform calculations efficiently without relying solely on mouse input.
 
 This calculator transforms the traditional cold numerical interface into a warm, conversational experience that speaks your language.
 # VUNA-Calc
