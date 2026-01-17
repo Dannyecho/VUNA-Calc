@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calculator</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />    
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
     <style>
       .calculator {
         border-radius: 10px;
@@ -19,9 +19,42 @@
         font-weight: bold;
         color: #ffffff;
       }
+      /* Dark theme styles */
+      body.dark-mode {
+        background-color: #181a1b !important;
+        color: #f1f1f1 !important;
+      }
+      .dark-mode .card {
+        background-color: #23272b;
+        color: #f1f1f1;
+      }
+      .dark-mode .btn-light {
+        background-color: #343a40;
+        color: #f1f1f1;
+        border-color: #444;
+      }
+      .dark-mode .btn-secondary {
+        background-color: #495057;
+        color: #f1f1f1;
+        border-color: #444;
+      }
+      .dark-mode #word-result {
+        background-color: #343a40;
+        color: #0dcaf0;
+        border: solid 1px #0dcaf0;
+      }
+      .theme-toggle-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 100;
+      }
     </style>
   </head>
   <body>
+    <button class="btn btn-outline-secondary theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
+      🌙
+    </button>
     <div class="container">
         <div class="row justify-content-center mt-5">
             <div class="col-md-3">
@@ -149,5 +182,37 @@
     </div>
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/script.js"></script>
+    <script>
+      // Theme toggle logic
+      function toggleTheme() {
+        const body = document.body;
+        const btn = document.getElementById('theme-toggle');
+        body.classList.toggle('dark-mode');
+        // Change icon
+        if (body.classList.contains('dark-mode')) {
+          btn.innerHTML = '☀️';
+          btn.title = 'Switch to light mode';
+          localStorage.setItem('theme', 'dark');
+        } else {
+          btn.innerHTML = '🌙';
+          btn.title = 'Switch to dark mode';
+          localStorage.setItem('theme', 'light');
+        }
+      }
+      // On load, set theme from localStorage
+      window.addEventListener('DOMContentLoaded', function() {
+        const theme = localStorage.getItem('theme');
+        const body = document.body;
+        const btn = document.getElementById('theme-toggle');
+        if (theme === 'dark') {
+          body.classList.add('dark-mode');
+          btn.innerHTML = '☀️';
+          btn.title = 'Switch to light mode';
+        } else {
+          btn.innerHTML = '🌙';
+          btn.title = 'Switch to dark mode';
+        }
+      });
+    </script>
   </body>
 </html>
