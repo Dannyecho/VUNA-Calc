@@ -1,18 +1,22 @@
 var left = '';
 var operator = '';
 var right = '';
+
 let wordPlaceholder = document.getElementById('word-result');
+
 function appendToResult(value) {
-    if (operator.length == 0) {
+    if (operator.length === 0) {
         left += value;
     } else {
         right += value;
     }
     updateResult();
 }
+
 function bracketToResult(value) {
     document.getElementById('result').value += value;
 }
+
 function operatorToResult(value) {
     if (right.length) {
         calculateResult();
@@ -20,61 +24,91 @@ function operatorToResult(value) {
     operator = value;
     updateResult();
 }
+
+function backspace() {
+    if (right.length > 0) {
+        right = right.slice(0, -1);
+    } else if (operator.length > 0) {
+        operator = '';
+    } else {
+        left = left.slice(0, -1);
+    }
+    updateResult();
+}
+
 function clearResult() {
     left = '';
     right = '';
     operator = '';
-
-    document.getElementById('word-text').innerHTML = '';
-    updateResult();
-    enableSpeakButton();
+    document.getElementById('result').value = '';
+    wordPlaceholder.innerHTML = '';
 }
 
 function updateResult() {
-	@@ -187,47 +186,6 @@ function numberToWords(numVal) {
-        words = '';
-    }
-
-    document.getElementById('word-text').innerHTML = wordArr.join(' point ');
-    enableSpeakButton();
-    // return ;
+    document.getElementById('result').value = left + operator + right;
 }
 
-// Text-to-Speech Magic - Makes numbers talk!
-function speakResult() {
-    const speakBtn = document.getElementById('speak-btn');
-    const textToSpeak = document.getElementById('word-text').innerHTML;
+function calculateResult() {
+    if (!left || !operator || !right) return;
 
-    // Stop any ongoing speech
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-        speakBtn.classList.remove('speaking');
+    let expression = left + operator + right;
+
+    try {
+        let result = eval(expression);
+        document.getElementById('result').value = result;
+        left = result.toString();
+        operator = '';
+        right = '';
+    } catch (e) {
+        document.getElementById('result').value = 'Error';
+    }
+}
+
+/* ================================
+   KEYBOARD INTERACTION SUPPORT
+   ================================ */
+document.addEventListener('keydown', function (event) {
+    const key = event.key;
+
+    // Numbers
+    if (!isNaN(key)) {
+        appendToResult(key);
         return;
     }
 
-    // Create and configure speech
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.rate = 0.9;  // Slightly slower for clarity
-    utterance.pitch = 1;
-    utterance.volume = 1;
+    // Operators
+    if (['+', '-', '*', '/'].includes(key)) {
+        operatorToResult(key);
+        return;
+    }
 
-    // When speech starts
-    utterance.onstart = function() {
-        speakBtn.classList.add('speaking');
-    };
+    // Decimal point
+    if (key === '.') {
+        appendToResult('.');
+        return;
+    }
 
-    // When speech ends
-    utterance.onend = function() {
-        speakBtn.classList.remove('speaking');
-    };
+    // Brackets
+    if (key === '(' || key === ')') {
+        bracketToResult(key);
+        return;
+    }
 
-    // Launch the speech!
-    window.speechSynthesis.speak(utterance);
-}
+    // Calculate
+    if (key === 'Enter' || key === '=') {
+        event.preventDefault();
+        calculateResult();
+        return;
+    }
 
-// Enable speak button when result is ready
-function enableSpeakButton() {
-    const speakBtn = document.getElementById('speak-btn');
-    const hasContent = document.getElementById('word-text').innerHTML.trim().length > 0;
-    speakBtn.disabled = !hasContent;
-}
+    // Backspace
+    if (key === 'Backspace') {
+        backspace();
+        return;
+    }
+
+    // Clear (AC)
+    if (key === 'Escape') {
+        clearResult();
+    }
+});
