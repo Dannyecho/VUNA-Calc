@@ -1,3 +1,36 @@
+// Theme toggle logic
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('theme-toggle');
+    body.classList.toggle('dark-mode');
+    // Change icon
+    if (body.classList.contains('dark-mode')) {
+        btn.innerHTML = '☀️';
+        btn.title = 'Switch to light mode';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        btn.innerHTML = '🌙';
+        btn.title = 'Switch to dark mode';
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+// On load, set theme from localStorage
+window.addEventListener('DOMContentLoaded', function() {
+    const theme = localStorage.getItem('theme');
+    const body = document.body;
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+        if (theme === 'dark') {
+            body.classList.add('dark-mode');
+            btn.innerHTML = '☀️';
+            btn.title = 'Switch to light mode';
+        } else {
+            btn.innerHTML = '🌙';
+            btn.title = 'Switch to dark mode';
+        }
+    }
+});
 var left = '';
 var operator = '';
 var right = '';
@@ -31,14 +64,15 @@ function clearResult() {
 }
 
 function updateResult() {
-	@@ -187,47 +186,6 @@ function numberToWords(numVal) {
-        words = '';
-    }
-
-    document.getElementById('word-text').innerHTML = wordArr.join(' point ');
-    enableSpeakButton();
-    // return ;
+    // ...existing code...
+    // This function should update the calculator display
+    // If you need to call numberToWords, do so here
 }
+
+// If numberToWords is needed, define it properly here
+// function numberToWords(numVal) {
+//   // ...existing code...
+// }
 
 // Text-to-Speech Magic - Makes numbers talk!
 function speakResult() {

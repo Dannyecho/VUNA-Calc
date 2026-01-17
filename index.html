@@ -182,37 +182,5 @@
     </div>
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/script.js"></script>
-    <script>
-      // Theme toggle logic
-      function toggleTheme() {
-        const body = document.body;
-        const btn = document.getElementById('theme-toggle');
-        body.classList.toggle('dark-mode');
-        // Change icon
-        if (body.classList.contains('dark-mode')) {
-          btn.innerHTML = '☀️';
-          btn.title = 'Switch to light mode';
-          localStorage.setItem('theme', 'dark');
-        } else {
-          btn.innerHTML = '🌙';
-          btn.title = 'Switch to dark mode';
-          localStorage.setItem('theme', 'light');
-        }
-      }
-      // On load, set theme from localStorage
-      window.addEventListener('DOMContentLoaded', function() {
-        const theme = localStorage.getItem('theme');
-        const body = document.body;
-        const btn = document.getElementById('theme-toggle');
-        if (theme === 'dark') {
-          body.classList.add('dark-mode');
-          btn.innerHTML = '☀️';
-          btn.title = 'Switch to light mode';
-        } else {
-          btn.innerHTML = '🌙';
-          btn.title = 'Switch to dark mode';
-        }
-      });
-    </script>
   </body>
 </html>
