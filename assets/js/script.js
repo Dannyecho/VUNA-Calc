@@ -2,6 +2,7 @@ var left = '';
 var operator = '';
 var right = '';
 let wordPlaceholder = document.getElementById('word-result');
+let hisory = [];
 function appendToResult(value) {
     if (operator.length == 0) {
         left += value;
@@ -39,6 +40,28 @@ function updateResult() {
     enableSpeakButton();
     // return ;
 }
+function addToHistory(expression, result) {
+    history.unshift(`${expression} = ${result}`);
+
+    // Keep only last 5 entries
+    if (history.length > 5) {
+        history.pop();
+    }
+
+    renderHistory();
+}
+function renderHistory() {
+    const historyList = document.getElementById('history-list');
+    historyList.innerHTML = '';
+
+    history.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.textContent = item;
+        historyList.appendChild(li);
+    });
+}
+
 
 // Text-to-Speech Magic - Makes numbers talk!
 function speakResult() {
