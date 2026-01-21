@@ -5,6 +5,12 @@ var right = '';
 var memory = 0;
 var history = [];
 
+// Timer variables
+var timerInterval = null;
+var timerSeconds = 0;
+var timerRunning = false;
+var calculationCount = 0;
+
 // Keyboard support
 document.addEventListener('keydown', function(event) {
   const key = event.key;
@@ -107,6 +113,15 @@ function calculateResult() {
     // Round to avoid floating point errors
     result = Math.round(result * 100000000) / 100000000;
     
+    // Increment calculation count
+    calculationCount++;
+    updateCalculationCount();
+    
+    // Auto-start timer on first calculation
+    if (!timerRunning && calculationCount === 1) {
+      startTimer();
+    }
+    
     // Add to history
     addToHistory(left + ' ' + operator + ' ' + right + ' = ' + result);
     
@@ -207,6 +222,57 @@ function copyResult() {
   }).catch(() => {
     alert('Failed to copy');
   });
+}
+
+// Timer functions
+function startTimer() {
+  if (timerRunning) return;
+  
+  timerRunning = true;
+  document.getElementById('start-btn').disabled = true;
+  document.getElementById('pause-btn').disabled = false;
+  document.getElementById('timer-display').classList.add('timer-running');
+  
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function pauseTimer() {
+  if (!timerRunning) return;
+  
+  timerRunning = false;
+  clearInterval(timerInterval);
+  document.getElementById('start-btn').disabled = false;
+  document.getElementById('pause-btn').disabled = true;
+  document.getElementById('timer-display').classList.remove('timer-running');
+}
+
+function resetTimer() {
+  pauseTimer();
+  timerSeconds = 0;
+  calculationCount = 0;
+  updateTimerDisplay();
+  updateCalculationCount();
+  document.getElementById('start-btn').disabled = false;
+}
+
+function updateTimerDisplay() {
+  const hours = Math.floor(timerSeconds / 3600);
+  const minutes = Math.floor((timerSeconds % 3600) / 60);
+  const seconds = timerSeconds % 60;
+  
+  const timeString = 
+    String(hours).padStart(2, '0') + ':' +
+    String(minutes).padStart(2, '0') + ':' +
+    String(seconds).padStart(2, '0');
+  
+  document.getElementById('timer-display').textContent = timeString;
+}
+
+function updateCalculationCount() {
+  document.getElementById('calc-count').textContent = calculationCount;
 }
 
 // Theme toggle
