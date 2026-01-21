@@ -3,14 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calculator</title>
+    <title>Calculator - Enhanced</title>
     <link rel="stylesheet" href="assets/css/bootstrap.min.css" />    
     <style>
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px 0;
+      }
       .calculator {
         border-radius: 10px;
       }
       #result {
         text-align: right;
+        font-size: 1.5rem;
+        font-weight: bold;
       }
       #word-result{
         background-color: #0dcaf0;
@@ -18,14 +25,88 @@
         text-transform: capitalize;
         font-weight: bold;
         color: #ffffff;
+        min-height: 50px;
+      }
+      /* History styles */
+      #history-panel {
+        max-height: 300px;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+      }
+      .history-item {
+        padding: 8px 12px;
+        border-bottom: 1px solid #dee2e6;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .history-item:hover {
+        background-color: #e9ecef;
+      }
+      .history-item:last-child {
+        border-bottom: none;
+      }
+      /* Theme toggle */
+      .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+      /* Dark theme */
+      body.dark-theme {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      }
+      body.dark-theme .card {
+        background-color: #343a40;
+        color: #ffffff;
+      }
+      body.dark-theme #history-panel {
+        background-color: #495057;
+        color: #ffffff;
+      }
+      body.dark-theme .history-item {
+        border-bottom-color: #6c757d;
+      }
+      body.dark-theme .history-item:hover {
+        background-color: #6c757d;
+      }
+      body.dark-theme h4 {
+        color: #ffffff !important;
+      }
+      /* Memory indicator */
+      .memory-indicator {
+        background-color: #ffc107;
+        color: #000;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+      }
+      /* Button animations */
+      .btn:active {
+        transform: scale(0.95);
+      }
+      /* Copy button */
+      .copy-btn {
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .copy-btn:hover {
+        transform: scale(1.1);
       }
     </style>
   </head>
   <body>
+    <!-- Theme Toggle Button -->
+    <button class="btn btn-light theme-toggle" onclick="toggleTheme()" id="theme-btn">
+      🌙 Dark
+    </button>
+
     <div class="container">
         <div class="row justify-content-center mt-5">
             <div class="col-md-3">
-                <h4 class="text-white text-center">GROUP 2</h4>
+                <h4 class="text-white text-center">GROUP 2 - Enhanced</h4>
             </div>
         </div>
       <div class="row justify-content-center mt-3">
@@ -33,6 +114,10 @@
             <div class="card">
               <div class="card-body">
                 <div class="calculator">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="memory-indicator" id="memory-indicator" style="display: none;">M</span>
+                    <span class="copy-btn" onclick="copyResult()" title="Copy result">📋</span>
+                  </div>
                   <input
                     type="text"
                     class="form-control mb-2"
@@ -40,6 +125,23 @@
                     disabled
                   />
                   <div id="word-result" class="px-3 py-2 mb-3"></div>
+                  
+                  <div class="row">
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="MC" onclick="memoryClear()" title="Memory Clear" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="MR" onclick="memoryRecall()" title="Memory Recall" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="M+" onclick="memoryAdd()" title="Memory Add" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="M-" onclick="memorySubtract()" title="Memory Subtract" />
+                    </div>
+                  </div>
+                  <br />
+                  
                   <div class="row">
                     <div class="col-md-3">
                         <input class="btn btn-light btn-block" type="button" value="(" onclick="bracketToResult('(')" />
@@ -48,17 +150,13 @@
                         <input class="btn btn-light btn-block" type="button" value=")" onclick="bracketToResult(')')" />
                     </div>
                     <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="←" onclick="backspace()" />
+                        <input class="btn btn-info btn-block" type="button" value="%" onclick="percentage()" title="Percentage" />
                     </div>
                     <div class="col-md-3">
-                        <input class="btn btn-warning btn-block"
-                          type="button"
-                          value="AC"
-                          onclick="clearResult()"
-                        />
+                        <input class="btn btn-warning btn-block" type="button" value="AC" onclick="clearResult()" />
                     </div>
                   </div>            
-                  <br /><br />
+                  <br />
                   <div class="row">
                     <div class="col-md-3">
                         <input class="btn btn-light btn-block" type="button" value="7" onclick="appendToResult(7)" />
@@ -70,15 +168,10 @@
                         <input class="btn btn-light btn-block" type="button" value="9" onclick="appendToResult(9)" />
                     </div>
                     <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="/"
-                          onclick="operatorToResult('/')"
-                        />
+                        <input class="btn btn-secondary btn-block px-3" type="button" value="/" onclick="operatorToResult('/')" />
                     </div>
                   </div>
-                  <br /><br />
+                  <br />
                   <div class="row">
                     <div class="col-md-3">
                         <input class="btn btn-light btn-block" type="button" value="4" onclick="appendToResult(4)" />
@@ -90,15 +183,10 @@
                         <input class="btn btn-light btn-block" type="button" value="6" onclick="appendToResult(6)" />
                     </div>
                     <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="*"
-                          onclick="operatorToResult('*')"
-                          />
+                        <input class="btn btn-secondary btn-block px-3" type="button" value="*" onclick="operatorToResult('*')" />
                     </div>
                   </div>
-                  <br /><br />
+                  <br />
                   
                   <div class="row">
                     <div class="col-md-3">
@@ -111,15 +199,10 @@
                         <input class="btn btn-light btn-block" type="button" value="3" onclick="appendToResult(3)" />
                     </div>
                     <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="+"
-                          onclick="operatorToResult('+')"
-                          />
+                        <input class="btn btn-secondary btn-block px-3" type="button" value="+" onclick="operatorToResult('+')" />
                     </div>
                   </div>
-                  <br /><br />
+                  <br />
                   
                   <div class="row">
                     <div class="col-md-3">
@@ -129,24 +212,41 @@
                         <input class="btn btn-light btn-block" type="button" value="0" onclick="appendToResult(0)" />
                     </div>
                     <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="-" onclick="operatorToResult('-')" />
+                        <input class="btn btn-danger btn-block" type="button" value="⌫" onclick="backspace()" title="Backspace" />
                     </div>
                     <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="submit"
-                          value="="
-                          onclick="calculateResult()"
-                        />
+                        <input class="btn btn-secondary btn-block px-3" type="button" value="-" onclick="operatorToResult('-')" />
                     </div>
                 </div>
-                  <br /><br />
+                  <br />
+                  <div class="row">
+                    <div class="col-md-12">
+                        <input class="btn btn-success btn-block w-100" type="submit" value="=" onclick="calculateResult()" />
+                    </div>
+                  </div>
+                  <br />
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- History Panel -->
+          <div class="col-md-3 mt-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="mb-0">History</h6>
+                  <button class="btn btn-sm btn-danger" onclick="clearHistory()">Clear</button>
+                </div>
+                <div id="history-panel">
+                  <p class="text-center text-muted py-3">No history yet</p>
                 </div>
               </div>
             </div>
           </div>
       </div>
     </div>
+    
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/script.js"></script>
   </body>
