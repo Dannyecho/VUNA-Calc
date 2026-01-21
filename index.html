@@ -214,6 +214,15 @@
         text-transform: uppercase;
         font-size: 1.2rem;
       }
+      .scientific-btn {
+        display: none !important;
+      }
+      .scientific-btn.show {
+        display: inline-block !important;
+      }
+      #science-toggle {
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
@@ -288,6 +297,22 @@
                       <path d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/>
                     </svg>
                   </button>
+                </div>
+
+                <!-- Scientific Mode Button -->
+                <button class="btn btn-outline-primary w-100" id="science-toggle" onclick="toggleScientific()">
+                  🧮 Scientific Mode
+                </button>
+
+                <!-- Scientific Functions Grid -->
+                <div class="btn-grid" style="margin-top: 12px;">
+                  <button class="btn btn-operator scientific-btn" onclick="squareRoot()" title="Square Root">√</button>
+                  <button class="btn btn-operator scientific-btn" onclick="calculatePercentage()" title="Percentage">%</button>
+                  <button class="btn btn-operator scientific-btn" onclick="sine()" title="Sine">sin</button>
+                  <button class="btn btn-operator scientific-btn" onclick="cosine()" title="Cosine">cos</button>
+                  <button class="btn btn-operator scientific-btn" onclick="tangent()" title="Tangent">tan</button>
+                  <button class="btn btn-operator scientific-btn" onclick="factorial()" title="Factorial">n!</button>
+                  <button class="btn btn-operator scientific-btn" onclick="logarithm()" title="Logarithm">log</button>
                 </div>
               </div>
             </div>

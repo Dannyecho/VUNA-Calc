@@ -1,6 +1,93 @@
 var left = '';
 var operator = '';
 var right = '';
+let scientificMode = false;
+
+// Toggle Scientific Mode
+function toggleScientific() {
+    scientificMode = !scientificMode;
+    const scientificBtns = document.querySelectorAll('.scientific-btn');
+    const toggle = document.getElementById('science-toggle');
+    
+    scientificBtns.forEach(btn => {
+        btn.classList.toggle('show');
+    });
+    
+    toggle.textContent = scientificMode ? '🧮 Scientific Mode: ON' : '🧮 Scientific Mode';
+    toggle.classList.toggle('active', scientificMode);
+}
+
+// Scientific Functions
+function squareRoot() {
+    if (left && !operator) {
+        left = Math.sqrt(parseFloat(left)).toString();
+    } else if (operator && right) {
+        right = Math.sqrt(parseFloat(right)).toString();
+    }
+    updateResult();
+}
+
+function calculatePercentage() {
+    if (left && operator && right) {
+        right = (parseFloat(left) * parseFloat(right) / 100).toString();
+    } else if (left) {
+        left = (parseFloat(left) / 100).toString();
+    }
+    updateResult();
+}
+
+function sine() {
+    if (left && !operator) {
+        left = Math.sin(parseFloat(left) * Math.PI / 180).toFixed(6).toString();
+    } else if (operator && right) {
+        right = Math.sin(parseFloat(right) * Math.PI / 180).toFixed(6).toString();
+    }
+    updateResult();
+}
+
+function cosine() {
+    if (left && !operator) {
+        left = Math.cos(parseFloat(left) * Math.PI / 180).toFixed(6).toString();
+    } else if (operator && right) {
+        right = Math.cos(parseFloat(right) * Math.PI / 180).toFixed(6).toString();
+    }
+    updateResult();
+}
+
+function tangent() {
+    if (left && !operator) {
+        left = Math.tan(parseFloat(left) * Math.PI / 180).toFixed(6).toString();
+    } else if (operator && right) {
+        right = Math.tan(parseFloat(right) * Math.PI / 180).toFixed(6).toString();
+    }
+    updateResult();
+}
+
+function factorial() {
+    const factorial = (n) => {
+        if (n < 0) return NaN;
+        if (n === 0 || n === 1) return 1;
+        let result = 1;
+        for (let i = 2; i <= n; i++) result *= i;
+        return result;
+    };
+    
+    if (left && !operator) {
+        left = factorial(parseInt(left)).toString();
+    } else if (operator && right) {
+        right = factorial(parseInt(right)).toString();
+    }
+    updateResult();
+}
+
+function logarithm() {
+    if (left && !operator) {
+        left = Math.log10(parseFloat(left)).toFixed(6).toString();
+    } else if (operator && right) {
+        right = Math.log10(parseFloat(right)).toFixed(6).toString();
+    }
+    updateResult();
+}
 
 function appendToResult(value) {
     if (operator.length === 0) {
