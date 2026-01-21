@@ -179,3 +179,44 @@ function enableSpeakButton() {
     const hasContent = document.getElementById('word-result').innerHTML.trim().length > 0;
     speakBtn.disabled = !hasContent;
 }
+
+function squareResult() {
+    if (left.length === 0) return;
+    const num = parseFloat(left);
+    left = (num * num).toString();
+    operator = '';
+    right = '';
+    updateResult();
+}
+
+function sqrtResult() {
+    if (left.length === 0) return;
+    const num = parseFloat(left);
+    if (num < 0) {
+        left = 'Error';
+    } else {
+        left = Math.sqrt(num).toString();
+    }
+    operator = '';
+    right = '';
+    updateResult();
+}
+
+function cubeResult() {
+    if (left.length === 0) return;
+    const num = parseFloat(left);
+    left = (num * num * num).toString();
+    operator = '';
+    right = '';
+    updateResult();
+}
+
+function cubeRootResult() {
+    if (left.length === 0) return;
+    const num = parseFloat(left);
+    const cbrt = num < 0 ? -Math.pow(Math.abs(num), 1/3) : Math.pow(num, 1/3);
+    left = cbrt.toString();
+    operator = '';
+    right = '';
+    updateResult();
+}

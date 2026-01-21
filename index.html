@@ -220,7 +220,6 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-lg-4 col-md-6 col-sm-8">
-          <h4 class="text-center group-header">Group 2 Calculator</h4>
           <div class="card calculator-card">
             <div class="card-body p-4">
               <div class="calculator">
@@ -246,29 +245,33 @@
                   </button>
                 </div>
                 
-                <div class="btn-grid">
+                <div class="btn-grid" style="grid-template-columns: repeat(5, 1fr);">
                   <!-- Row 1 -->
                   <button class="btn btn-light" onclick="bracketToResult('(')">(</button>
                   <button class="btn btn-light" onclick="bracketToResult(')')">)</button>
                   <button class="btn btn-light" onclick="backspace()">←</button>
+                  <button class="btn btn-operator" onclick="squareResult()">x²</button>
                   <button class="btn btn-action" onclick="clearResult()">AC</button>
 
                   <!-- Row 2 -->
                   <button class="btn btn-light" onclick="appendToResult(7)">7</button>
                   <button class="btn btn-light" onclick="appendToResult(8)">8</button>
                   <button class="btn btn-light" onclick="appendToResult(9)">9</button>
+                  <button class="btn btn-operator" onclick="sqrtResult()">√x</button>
                   <button class="btn btn-operator" onclick="operatorToResult('/')">÷</button>
 
                   <!-- Row 3 -->
                   <button class="btn btn-light" onclick="appendToResult(4)">4</button>
                   <button class="btn btn-light" onclick="appendToResult(5)">5</button>
                   <button class="btn btn-light" onclick="appendToResult(6)">6</button>
+                  <button class="btn btn-operator" onclick="cubeResult()">x³</button>
                   <button class="btn btn-operator" onclick="operatorToResult('*')">×</button>
 
                   <!-- Row 4 -->
                   <button class="btn btn-light" onclick="appendToResult(1)">1</button>
                   <button class="btn btn-light" onclick="appendToResult(2)">2</button>
                   <button class="btn btn-light" onclick="appendToResult(3)">3</button>
+                  <button class="btn btn-operator" onclick="cubeRootResult()">∛x</button>
                   <button class="btn btn-operator" onclick="operatorToResult('+')">+</button>
 
                   <!-- Row 5 -->
