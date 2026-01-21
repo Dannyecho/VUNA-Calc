@@ -78,3 +78,44 @@ function enableSpeakButton() {
     const hasContent = document.getElementById('word-text').innerHTML.trim().length > 0;
     speakBtn.disabled = !hasContent;
 }
+
+//Function to find square roots
+function squareRoot() {
+    const current = resultInput.value.trim();
+    
+    if (!current) return;
+    
+    try {
+        // We use the already-calculated number if it looks like a result
+        // or we try to evaluate the current expression first
+        let num;
+        
+        if (/^[+-]?\d*\.?\d+$/.test(current)) {
+            // already looks like a number
+            num = parseFloat(current);
+        } else {
+            // try to evaluate the expression first (like 16+9 → 25 → √25)
+            num = eval(current.replace(/×/g, "*").replace(/÷/g, "/"));
+        }
+        
+        if (isNaN(num) || !isFinite(num)) {
+            resultInput.value = "Error";
+            wordResult.textContent = "error";
+            return;
+        }
+        
+        if (num < 0) {
+            resultInput.value = "Error";
+            wordResult.textContent = "cannot take square root of negative number";
+            return;
+        }
+        
+        const root = Math.sqrt(num);
+        resultInput.value = Number(root.toFixed(8)); // clean display
+        updateWordResult(); // updates the word version if needed
+        
+    } catch (err) {
+        resultInput.value = "Error";
+        wordResult.textContent = "invalid expression";
+    }
+}
