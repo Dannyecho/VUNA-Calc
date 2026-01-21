@@ -52,6 +52,10 @@ function clearResult() {
 function calculateResult() {
     if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
+
+function calculateResult() {
+    if (left.length === 0 || operator.length === 0 || right.length === 0) return;
+
     let result;
     const l = parseFloat(left);
     const r = parseFloat(right);
@@ -87,6 +91,66 @@ function CalculateTan(){
     right = '';
     updateResult();
 }
+function numberToWords(num) {
+    if (num === 'Error') return 'Error';
+    if (num === '') return '';
+
+    const n = parseFloat(num);
+    if (isNaN(n)) return '';
+    if (n === 0) return 'Zero';
+
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const scales = ['', 'Thousand', 'Million', 'Billion', 'Trillion'];
+
+    function convertGroup(val) {
+        let res = '';
+        if (val >= 100) {
+            res += ones[Math.floor(val / 100)] + ' Hundred ';
+            val %= 100;
+        }
+        if (val >= 10 && val <= 19) {
+            res += teens[val - 10] + ' ';
+        } else if (val >= 20) {
+            res += tens[Math.floor(val / 10)] + (val % 10 !== 0 ? '-' + ones[val % 10] : '') + ' ';
+        } else if (val > 0) {
+            res += ones[val] + ' ';
+        }
+        return res.trim();
+    }
+
+    let sign = n < 0 ? 'Negative ' : '';
+    let absN = Math.abs(n);
+    let parts = absN.toString().split('.');
+    let integerPart = parseInt(parts[0]);
+    let decimalPart = parts[1];
+
+    let wordArr = [];
+    if (integerPart === 0) {
+        wordArr.push('Zero');
+    } else {
+        let scaleIdx = 0;
+        while (integerPart > 0) {
+            let chunk = integerPart % 1000;
+            if (chunk > 0) {
+                let chunkWords = convertGroup(chunk);
+                wordArr.unshift(chunkWords + (scales[scaleIdx] ? ' ' + scales[scaleIdx] : ''));
+            }
+            integerPart = Math.floor(integerPart / 1000);
+            scaleIdx++;
+        }
+    }
+
+    let result = sign + wordArr.join(', ').trim();
+
+    if (decimalPart) {
+        result += ' Point';
+        for (let digit of decimalPart) {
+            result += ' ' + (digit === '0' ? 'Zero' : ones[parseInt(digit)]);
+        }
+    }
+
 function numberToWords(num) {
     if (num === 'Error') return 'Error';
     if (num === '') return '';
