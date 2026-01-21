@@ -1,6 +1,7 @@
 var left = '';
 var operator = '';
 var right = '';
+var angleMode = 'degrees'; // 'degrees' or 'radians'
 
 function appendToResult(value) {
     if (operator.length === 0) {
@@ -53,14 +54,15 @@ function calculateResult() {
     if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
     let result;
-    const l = parseFloat(left);
-    const r = parseFloat(right);
+    const l = parseFloat(left.replace('π', Math.PI));
+    const r = parseFloat(right.replace('π', Math.PI));
 
     switch (operator) {
         case '+': result = l + r; break;
         case '-': result = l - r; break;
         case '*': result = l * r; break;
         case '/': result = r !== 0 ? l / r : 'Error'; break;
+        case '**': result = Math.pow(l, r); break;
         default: return;
     }
 
@@ -68,6 +70,49 @@ function calculateResult() {
     operator = '';
     right = '';
     updateResult();
+}
+
+function scientificFunction(func) {
+    if (left.length === 0) return;
+    
+    let value = parseFloat(left.replace('π', Math.PI));
+    let result;
+    
+    switch(func) {
+        case 'sin':
+            let sinInput = angleMode === 'degrees' ? (value * Math.PI / 180) : value;
+            result = Math.sin(sinInput);
+            break;
+        case 'cos':
+            let cosInput = angleMode === 'degrees' ? (value * Math.PI / 180) : value;
+            result = Math.cos(cosInput);
+            break;
+        case 'tan':
+            let tanInput = angleMode === 'degrees' ? (value * Math.PI / 180) : value;
+            result = Math.tan(tanInput);
+            break;
+        default:
+            return;
+    }
+    
+    left = result.toString();
+    operator = '';
+    right = '';
+    updateResult();
+}
+
+function setAngleMode(mode) {
+    angleMode = mode;
+    const degBtn = document.getElementById('deg-btn');
+    const radBtn = document.getElementById('rad-btn');
+    
+    if (mode === 'degrees') {
+        degBtn.classList.add('active');
+        radBtn.classList.remove('active');
+    } else {
+        radBtn.classList.add('active');
+        degBtn.classList.remove('active');
+    }
 }
 
 function numberToWords(num) {
