@@ -47,7 +47,7 @@
       </div>
     </div>
     <div class="row justify-content-center mt-3">
-      <div class="col-md-3">
+      <div class="col-md-6">
         <div class="card">
           <div class="card-body">
             <div class="calculator">
@@ -69,70 +69,81 @@
               </div>
               <br /><br />
               <div class="row">
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="7" onclick="appendToResult(7)" />
+                <div class="col-md-3 d-flex flex-column">
+                  <input class="btn btn-info btn-block mb-2" type="button" value="sin" onclick="applyFunction('sin')" />
+                  <input class="btn btn-info btn-block mb-2" type="button" value="cos" onclick="applyFunction('cos')" />
+                  <input class="btn btn-info btn-block mb-2" type="button" value="tan" onclick="applyFunction('tan')" />
+                  <input class="btn btn-info btn-block mb-2" type="button" value="sqrt"
+                    onclick="applyFunction('sqrt')" />
                 </div>
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="8" onclick="appendToResult(8)" />
-                </div>
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="9" onclick="appendToResult(9)" />
-                </div>
-                <div class="col-md-3">
-                  <input class="btn btn-secondary btn-block px-3" type="button" value="/"
-                    onclick="operatorToResult('/')" />
+                <div class="col-md-9">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="7" onclick="appendToResult(7)" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="8" onclick="appendToResult(8)" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="9" onclick="appendToResult(9)" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-secondary btn-block px-3" type="button" value="/"
+                        onclick="operatorToResult('/')" />
+                    </div>
+                  </div>
+                  <br /><br />
+                  <div class="row">
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="4" onclick="appendToResult(4)" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="5" onclick="appendToResult(5)" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="6" onclick="appendToResult(6)" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-secondary btn-block px-3" type="button" value="*"
+                        onclick="operatorToResult('*')" />
+                    </div>
+                  </div>
+                  <br /><br />
+                  <div class="row">
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="1" onclick="appendToResult(1)" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="2" onclick="appendToResult(2)" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="3" onclick="appendToResult(3)" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-secondary btn-block px-3" type="button" value="+"
+                        onclick="operatorToResult('+')" />
+                    </div>
+                  </div>
+                  <br /><br />
+                  <div class="row">
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="." onclick="appendToResult('.')" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="0" onclick="appendToResult(0)" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-light btn-block" type="button" value="-" onclick="operatorToResult('-')" />
+                    </div>
+                    <div class="col-md-3">
+                      <input class="btn btn-secondary btn-block px-3" type="submit" value="="
+                        onclick="calculateResult()" />
+                    </div>
+                  </div>
+                  <br /><br />
                 </div>
               </div>
-              <br /><br />
-              <div class="row">
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="4" onclick="appendToResult(4)" />
-                </div>
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="5" onclick="appendToResult(5)" />
-                </div>
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="6" onclick="appendToResult(6)" />
-                </div>
-                <div class="col-md-3">
-                  <input class="btn btn-secondary btn-block px-3" type="button" value="*"
-                    onclick="operatorToResult('*')" />
-                </div>
-              </div>
-              <br /><br />
 
-              <div class="row">
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="1" onclick="appendToResult(1)" />
-                </div>
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="2" onclick="appendToResult(2)" />
-                </div>
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="3" onclick="appendToResult(3)" />
-                </div>
-                <div class="col-md-3">
-                  <input class="btn btn-secondary btn-block px-3" type="button" value="+"
-                    onclick="operatorToResult('+')" />
-                </div>
-              </div>
-              <br /><br />
-
-              <div class="row">
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="." onclick="appendToResult('.')" />
-                </div>
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="0" onclick="appendToResult(0)" />
-                </div>
-                <div class="col-md-3">
-                  <input class="btn btn-light btn-block" type="button" value="-" onclick="operatorToResult('-')" />
-                </div>
-                <div class="col-md-3">
-                  <input class="btn btn-secondary btn-block px-3" type="submit" value="=" onclick="calculateResult()" />
-                </div>
-              </div>
-              <br /><br />
             </div>
           </div>
         </div>

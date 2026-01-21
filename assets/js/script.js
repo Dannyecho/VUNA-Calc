@@ -139,6 +139,44 @@ function calculateResult() {
     }
 }
 
+function applyFunction(func) {
+    let value = parseFloat(left);
+    if (isNaN(value)) {
+        document.getElementById('result').value = 'Error';
+        return;
+    }
+
+    let result;
+    try {
+        switch (func) {
+            case 'sin':
+                result = Math.sin(value * Math.PI / 180); // Assuming degrees
+                break;
+            case 'cos':
+                result = Math.cos(value * Math.PI / 180);
+                break;
+            case 'tan':
+                result = Math.tan(value * Math.PI / 180);
+                break;
+            case 'sqrt':
+                if (value < 0) throw new Error('Invalid input');
+                result = Math.sqrt(value);
+                break;
+            default:
+                throw new Error('Unknown function');
+        }
+
+        left = result.toString();
+        right = '';
+        operator = '';
+        updateResult();
+        numberToWords(result.toString());
+    } catch (error) {
+        document.getElementById('result').value = 'Error';
+        wordPlaceholder.innerHTML = '';
+    }
+}
+
 function numberToWords(numVal) {
     const unitsMap = [
         "", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
