@@ -1,0 +1,237 @@
+:root {
+  --primary-color: #0d6efd;
+  --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --btn-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --btn-hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  background: var(--bg-gradient);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.calculator-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.calculator-card:hover {
+  transform: translateY(-5px);
+}
+
+.display-container {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.steps-container {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+#result {
+  text-align: right;
+  font-size: 38px;
+  font-weight: 600;
+  height: auto;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #212529;
+  box-shadow: none;
+  width: 100%;
+}
+
+.word-display-area {
+  margin-top: 15px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  padding: 12px 18px;
+  border: 1px dashed rgba(13, 110, 253, 0.2);
+  display: none; /* Hidden by default */
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#word-result {
+  font-size: 14px;
+  color: #495057;
+  font-weight: 400;
+  line-height: 1.4;
+  word-wrap: break-word;
+  flex-grow: 1;
+}
+
+#word-result strong {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.small-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #adb5bd;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 2px;
+}
+
+#speak-btn {
+  background: var(--primary-color);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+}
+
+#speak-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  background: #0b5ed7;
+}
+
+#speak-btn:disabled {
+  background: #e9ecef;
+  color: #adb5bd;
+  box-shadow: none;
+}
+
+#speak-btn.speaking {
+  background: #fa5252;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(250, 82, 82, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(250, 82, 82, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(250, 82, 82, 0);
+  }
+}
+
+.btn-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.calculator .btn {
+  height: 60px;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border: none;
+  box-shadow: var(--btn-shadow);
+}
+
+.calculator .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--btn-hover-shadow);
+}
+
+.calculator .btn:active {
+  transform: translateY(0);
+}
+
+.btn-light {
+  background: #ffffff;
+  color: #495057;
+}
+
+.btn-light:hover {
+  background: #f1f3f5;
+}
+
+.btn-operator {
+  background: #e7f1ff;
+  color: var(--primary-color);
+}
+
+.btn-operator:hover {
+  background: #cfe2ff;
+}
+
+.btn-action {
+  background: #fff5f5;
+  color: #fa5252;
+}
+
+.btn-action:hover {
+  background: #ffe3e3;
+}
+
+.btn-equals {
+  background: var(--primary-color);
+  color: white;
+  grid-column: span 1;
+}
+
+.btn-equals:hover {
+  background: #0b5ed7;
+  color: white;
+}
+
+.group-header {
+  color: #495057;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  font-size: 1.2rem;
+}
+
+#steps {
+  min-height: 50px;
+  white-space: pre-line;
+}
