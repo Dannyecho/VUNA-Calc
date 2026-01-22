@@ -17,43 +17,6 @@ function toggleScientific() {
     toggle.classList.toggle('active', scientificMode);
 }
 
-// Scientific Functions
-function squareRoot() {
-    if (left && !operator) {
-        left = Math.sqrt(parseFloat(left)).toString();
-    } else if (operator && right) {
-        right = Math.sqrt(parseFloat(right)).toString();
-    }
-    updateResult();
-}
-
-function calculatePercentage() {
-    if (left && operator && right) {
-        right = (parseFloat(left) * parseFloat(right) / 100).toString();
-    } else if (left) {
-        left = (parseFloat(left) / 100).toString();
-    }
-    updateResult();
-}
-
-function sine() {
-    if (left && !operator) {
-        left = Math.sin(parseFloat(left) * Math.PI / 180).toFixed(6).toString();
-    } else if (operator && right) {
-        right = Math.sin(parseFloat(right) * Math.PI / 180).toFixed(6).toString();
-    }
-    updateResult();
-}
-
-function cosine() {
-    if (left && !operator) {
-        left = Math.cos(parseFloat(left) * Math.PI / 180).toFixed(6).toString();
-    } else if (operator && right) {
-        right = Math.cos(parseFloat(right) * Math.PI / 180).toFixed(6).toString();
-    }
-    updateResult();
-}
-
 function tangent() {
     if (left && !operator) {
         left = Math.tan(parseFloat(left) * Math.PI / 180).toFixed(6).toString();
