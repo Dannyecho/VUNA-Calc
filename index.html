@@ -1,186 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calculator</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
-    <style>
-      .calculator {
-        border-radius: 10px;
-      }
-      #result {
-        text-align: right;
-      }
-      #word-result{
-        background-color: #0dcaf0;
-        border: solid 1px #0d6efd;
-        text-transform: capitalize;
-        font-weight: bold;
-        color: #ffffff;
-      }
-      /* Dark theme styles */
-      body.dark-mode {
-        background-color: #181a1b !important;
-        color: #f1f1f1 !important;
-      }
-      .dark-mode .card {
-        background-color: #23272b;
-        color: #f1f1f1;
-      }
-      .dark-mode .btn-light {
-        background-color: #343a40;
-        color: #f1f1f1;
-        border-color: #444;
-      }
-      .dark-mode .btn-secondary {
-        background-color: #495057;
-        color: #f1f1f1;
-        border-color: #444;
-      }
-      .dark-mode #word-result {
-        background-color: #343a40;
-        color: #0dcaf0;
-        border: solid 1px #0dcaf0;
-      }
-      .theme-toggle-btn {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        z-index: 100;
-      }
-    </style>
-  </head>
-  <body>
-    <button class="btn btn-outline-secondary theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
-      🌙
-    </button>
-    <div class="container">
-        <div class="row justify-content-center mt-5">
-            <div class="col-md-3">
-                <h4 class="text-white text-center">GROUP 2</h4>
-            </div>
-        </div>
-      <div class="row justify-content-center mt-3">
-        <div class="col-md-3">
-            <div class="card">
-              <div class="card-body">
-                <div class="calculator">
-                  <input
-                    type="text"
-                    class="form-control mb-2"
-                    id="result"
-                    disabled
-                  />
-                  <div id="word-result" class="px-3 py-2 mb-3"></div>
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="(" onclick="bracketToResult('(')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value=")" onclick="bracketToResult(')')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="←" onclick="backspace()" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-warning btn-block"
-                          type="button"
-                          value="AC"
-                          onclick="clearResult()"
-                        />
-                    </div>
-                  </div>            
-                  <br /><br />
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="7" onclick="appendToResult(7)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="8" onclick="appendToResult(8)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="9" onclick="appendToResult(9)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="/"
-                          onclick="operatorToResult('/')"
-                        />
-                    </div>
-                  </div>
-                  <br /><br />
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="4" onclick="appendToResult(4)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="5" onclick="appendToResult(5)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="6" onclick="appendToResult(6)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="*"
-                          onclick="operatorToResult('*')"
-                          />
-                    </div>
-                  </div>
-                  <br /><br />
-                  
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="1" onclick="appendToResult(1)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="2" onclick="appendToResult(2)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="3" onclick="appendToResult(3)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="+"
-                          onclick="operatorToResult('+')"
-                          />
-                    </div>
-                  </div>
-                  <br /><br />
-                  
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="." onclick="appendToResult('.')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="0" onclick="appendToResult(0)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="-" onclick="operatorToResult('-')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="submit"
-                          value="="
-                          onclick="calculateResult()"
-                        />
-                    </div>
-                </div>
-                  <br /><br />
-                </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculator</title>
+  <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <!-- Theme Toggle Button -->
+  <button
+    class="btn btn-outline-secondary theme-toggle-btn"
+    id="theme-toggle"
+    onclick="toggleTheme()"
+    title="Toggle dark/light mode"
+  >
+    🌙
+  </button>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-4 col-md-6 col-sm-8">
+        <h4 class="text-center group-header">Group 2 Calculator</h4>
+        <div class="card calculator-card">
+          <div class="card-body p-4">
+            <div class="calculator">
+
+              <!-- Display -->
+              <div class="display-container">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="result"
+                  placeholder="0"
+                  disabled
+                />
               </div>
+
+              <!-- Steps -->
+              <div>
+                <h6>Steps</h6>
+                <div id="steps" class="steps-container"></div>
+              </div>
+
+              <!-- Number in Words & Speak Button -->
+              <div class="word-display-area" id="word-area">
+                <div id="word-result"></div>
+                <button
+                  id="speak-btn"
+                  onclick="speakResult()"
+                  disabled
+                  title="Speak Result"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z" />
+                    <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z" />
+                    <path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182l-.707.707A3.489 3.489 0 0 1 9.025 8a3.489 3.489 0 0 1-1.025 2.475l.707.707z" />
+                    <path d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Buttons -->
+              <div class="btn-grid mt-2">
+                <!-- Row 1 -->
+                <button class="btn btn-light" onclick="bracketToResult('(')">(</button>
+                <button class="btn btn-light" onclick="bracketToResult(')')">)</button>
+                <button class="btn btn-light" onclick="backspace()">←</button>
+                <button class="btn btn-action" onclick="clearResult()">AC</button>
+
+                <!-- Row 2 -->
+                <button class="btn btn-light" onclick="appendToResult(7)">7</button>
+                <button class="btn btn-light" onclick="appendToResult(8)">8</button>
+                <button class="btn btn-light" onclick="appendToResult(9)">9</button>
+                <button class="btn btn-operator" onclick="operatorToResult('/')">÷</button>
+
+                <!-- Row 3 -->
+                <button class="btn btn-light" onclick="appendToResult(4)">4</button>
+                <button class="btn btn-light" onclick="appendToResult(5)">5</button>
+                <button class="btn btn-light" onclick="appendToResult(6)">6</button>
+                <button class="btn btn-operator" onclick="operatorToResult('*')">×</button>
+
+                <!-- Row 4 -->
+                <button class="btn btn-light" onclick="appendToResult(1)">1</button>
+                <button class="btn btn-light" onclick="appendToResult(2)">2</button>
+                <button class="btn btn-light" onclick="appendToResult(3)">3</button>
+                <button class="btn btn-operator" onclick="operatorToResult('+')">+</button>
+
+                <!-- Row 5 -->
+                <button class="btn btn-light" onclick="appendToResult('.')">.</button>
+                <button class="btn btn-light" onclick="appendToResult(0)">0</button>
+                <button class="btn btn-operator" onclick="operatorToResult('-')">−</button>
+                <button class="btn btn-equals" onclick="calculateResult()">=</button>
+              </div>
+
             </div>
           </div>
+        </div>
       </div>
     </div>
-    <script src="assets/js/bootstrap.min.js"></script>
-    <script src="assets/js/script.js"></script>
-  </body>
+  </div>
+
+  <script src="assets/js/bootstrap.min.js"></script>
+  <script src="assets/js/script.js"></script>
+</body>
 </html>
