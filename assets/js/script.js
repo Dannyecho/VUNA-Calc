@@ -53,7 +53,7 @@ function operatorToResult(value) {
  */
 function clearResult() {
   currentExpression = "";
-  document.getElementById("word-result").innerHTML = "";
+  document.getElementById("word-result-text").textContent = "";
   document.getElementById("word-area").style.display = "none";
   updateResult();
 }
