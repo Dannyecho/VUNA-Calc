@@ -1,6 +1,185 @@
+// ==================== CORE CALCULATOR STATE ====================
 var left = '';
 var operator = '';
 var right = '';
+
+// ==================== SCIENTIFIC NOTATION & PRECISION ====================
+var scientificNotationEnabled = false;
+var decimalPlaces = 2;
+var currencyRates = {
+  'USD': 1,
+  'EUR': 0.92,
+  'GBP': 0.79,
+  'JPY': 149.50,
+  'CAD': 1.37,
+  'AUD': 1.52
+};
+
+// ==================== UNIT CONVERSION FUNCTIONS ====================
+
+// Unit conversion factors to base units
+const unitConversions = {
+  'length': {
+    'km': 1000,
+    'm': 1,
+    'mile': 1609.34,
+    'yard': 0.9144,
+    'ft': 0.3048,
+    'inch': 0.0254
+  },
+  'weight': {
+    'kg': 1,
+    'g': 0.001,
+    'lb': 0.453592,
+    'oz': 0.0283495
+  },
+  'temperature': {
+    'C': { offset: 0, scale: 1 },
+    'F': { offset: 32, scale: 5/9 },
+    'K': { offset: -273.15, scale: 1 }
+  }
+};
+
+function convertUnit(type) {
+  if (type === 'length') {
+    const value = parseFloat(document.getElementById('length-value').value) || 0;
+    const fromUnit = document.getElementById('from-length').value;
+    const toUnit = document.getElementById('to-length').value;
+    
+    if (value === 0) {
+      document.getElementById('length-result').textContent = '0';
+      return;
+    }
+    
+    // Convert to meters first
+    const meters = value * unitConversions['length'][fromUnit];
+    // Convert to target unit
+    const result = meters / unitConversions['length'][toUnit];
+    document.getElementById('length-result').textContent = formatResult(result);
+    updateExampleConversion(result);
+  } 
+  else if (type === 'weight') {
+    const value = parseFloat(document.getElementById('weight-value').value) || 0;
+    const fromUnit = document.getElementById('from-weight').value;
+    const toUnit = document.getElementById('to-weight').value;
+    
+    if (value === 0) {
+      document.getElementById('weight-result').textContent = '0';
+      return;
+    }
+    
+    // Convert to kg first
+    const kg = value * unitConversions['weight'][fromUnit];
+    // Convert to target unit
+    const result = kg / unitConversions['weight'][toUnit];
+    document.getElementById('weight-result').textContent = formatResult(result);
+  } 
+  else if (type === 'temperature') {
+    const value = parseFloat(document.getElementById('temp-value').value) || 0;
+    const fromUnit = document.getElementById('from-temp').value;
+    const toUnit = document.getElementById('to-temp').value;
+    
+    // Convert to Celsius first
+    let celsius;
+    if (fromUnit === 'C') {
+      celsius = value;
+    } else if (fromUnit === 'F') {
+      celsius = (value - 32) * 5/9;
+    } else if (fromUnit === 'K') {
+      celsius = value - 273.15;
+    }
+    
+    // Convert to target unit
+    let result;
+    if (toUnit === 'C') {
+      result = celsius;
+    } else if (toUnit === 'F') {
+      result = celsius * 9/5 + 32;
+    } else if (toUnit === 'K') {
+      result = celsius + 273.15;
+    }
+    
+    document.getElementById('temp-result').textContent = formatResult(result);
+  }
+  else if (type === 'currency') {
+    const value = parseFloat(document.getElementById('currency-value').value) || 0;
+    const fromCurrency = document.getElementById('from-currency').value;
+    const toCurrency = document.getElementById('to-currency').value;
+    
+    if (value === 0 || !currencyRates[fromCurrency] || !currencyRates[toCurrency]) {
+      document.getElementById('currency-result').textContent = '0';
+      return;
+    }
+    
+    // Convert to USD first, then to target currency
+    const usd = value / currencyRates[fromCurrency];
+    const result = usd * currencyRates[toCurrency];
+    document.getElementById('currency-result').textContent = formatResult(result);
+  }
+}
+
+function formatResult(value) {
+  if (scientificNotationEnabled && Math.abs(value) >= 1e6) {
+    return value.toExponential(decimalPlaces);
+  }
+  return parseFloat(value.toFixed(decimalPlaces));
+}
+
+function updateExampleConversion(value) {
+  document.getElementById('example-result').textContent = formatResult(value);
+  document.getElementById('example-add').textContent = formatResult(value + 10);
+}
+
+function fetchCurrencyRates() {
+  // Using a free currency API endpoint
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = '⏳ Loading...';
+  
+  // Using exchangerate-api.com free tier (no key needed for basic requests)
+  fetch('https://api.exchangerate-api.com/v4/latest/USD')
+    .then(response => response.json())
+    .then(data => {
+      if (data.rates) {
+        currencyRates['EUR'] = 1 / data.rates.EUR;
+        currencyRates['GBP'] = 1 / data.rates.GBP;
+        currencyRates['JPY'] = 1 / data.rates.JPY;
+        currencyRates['CAD'] = 1 / data.rates.CAD;
+        currencyRates['AUD'] = 1 / data.rates.AUD;
+        
+        const timestamp = new Date().toLocaleTimeString();
+        document.getElementById('currency-timestamp').textContent = `Last updated: ${timestamp}`;
+        
+        // Recalculate current conversion
+        convertUnit('currency');
+        btn.textContent = '🔄';
+        btn.disabled = false;
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching currency rates:', error);
+      document.getElementById('currency-timestamp').textContent = 'Unable to fetch live rates';
+      btn.textContent = '🔄';
+      btn.disabled = false;
+    });
+}
+
+// ==================== SCIENTIFIC NOTATION & PRECISION CONTROL ====================
+
+function toggleScientificNotation() {
+  scientificNotationEnabled = !scientificNotationEnabled;
+  const btn = document.getElementById('sci-notation-btn');
+  btn.textContent = scientificNotationEnabled ? 'Sci Notation: ON' : 'Sci Notation: OFF';
+  btn.classList.toggle('active');
+  updateResult();
+}
+
+function updateDecimalPlaces() {
+  decimalPlaces = parseInt(document.getElementById('decimal-places').value);
+  updateResult();
+}
+
+// ==================== ENHANCED CALCULATOR FUNCTIONS ====================
 
 function appendToResult(value) {
     if (operator.length === 0) {
@@ -62,6 +241,15 @@ function calculateResult() {
         case '*': result = l * r; break;
         case '/': result = r !== 0 ? l / r : 'Error'; break;
         default: return;
+    }
+
+    // Apply precision formatting
+    if (result !== 'Error') {
+        if (scientificNotationEnabled && Math.abs(result) >= 1e6) {
+            result = parseFloat(result.toExponential(decimalPlaces));
+        } else {
+            result = parseFloat(result.toFixed(decimalPlaces));
+        }
     }
 
     left = result.toString();
@@ -135,7 +323,19 @@ function numberToWords(num) {
 
 function updateResult() {
     const display = left + (operator ? ' ' + operator + ' ' : '') + right;
-    document.getElementById('result').value = display || '0';
+    
+    // Apply scientific notation if enabled
+    let displayValue = display;
+    if (left && !operator && !right) {
+        const num = parseFloat(left);
+        if (!isNaN(num) && scientificNotationEnabled && Math.abs(num) >= 1e6) {
+            displayValue = num.toExponential(decimalPlaces);
+        } else if (!isNaN(num)) {
+            displayValue = parseFloat(num.toFixed(decimalPlaces));
+        }
+    }
+    
+    document.getElementById('result').value = displayValue || '0';
 
     const wordResult = document.getElementById('word-result');
     const wordArea = document.getElementById('word-area');
