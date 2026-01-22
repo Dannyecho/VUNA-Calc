@@ -1,10 +1,7 @@
-// ==================== CORE CALCULATOR STATE ====================
 var left = '';
 var operator = '';
 var right = '';
 
-// ==================== SCIENTIFIC NOTATION & PRECISION ====================
-var scientificNotationEnabled = false;
 var currencyRates = {
   'USD': 1,
   'EUR': 0.92,
@@ -14,9 +11,6 @@ var currencyRates = {
   'AUD': 1.52
 };
 
-// ==================== UNIT CONVERSION FUNCTIONS ====================
-
-// Unit conversion factors to base units
 const unitConversions = {
   'length': {
     'km': 1000,
@@ -50,9 +44,7 @@ function convertUnit(type) {
       return;
     }
     
-    // Convert to meters first
     const meters = value * unitConversions['length'][fromUnit];
-    // Convert to target unit
     const result = meters / unitConversions['length'][toUnit];
     document.getElementById('length-result').textContent = formatResult(result);
     updateExampleConversion(result);
@@ -67,9 +59,7 @@ function convertUnit(type) {
       return;
     }
     
-    // Convert to kg first
     const kg = value * unitConversions['weight'][fromUnit];
-    // Convert to target unit
     const result = kg / unitConversions['weight'][toUnit];
     document.getElementById('weight-result').textContent = formatResult(result);
   } 
@@ -78,7 +68,6 @@ function convertUnit(type) {
     const fromUnit = document.getElementById('from-temp').value;
     const toUnit = document.getElementById('to-temp').value;
     
-    // Convert to Celsius first
     let celsius;
     if (fromUnit === 'C') {
       celsius = value;
@@ -88,7 +77,6 @@ function convertUnit(type) {
       celsius = value - 273.15;
     }
     
-    // Convert to target unit
     let result;
     if (toUnit === 'C') {
       result = celsius;
@@ -110,15 +98,26 @@ function convertUnit(type) {
       return;
     }
     
-    // Convert to USD first, then to target currency
     const usd = value / currencyRates[fromCurrency];
     const result = usd * currencyRates[toCurrency];
     document.getElementById('currency-result').textContent = formatResult(result);
   }
 }
 
+// Initialize converter displays on load
+window.addEventListener('DOMContentLoaded', function() {
+  try {
+    convertUnit('length');
+    convertUnit('weight');
+    convertUnit('temperature');
+    convertUnit('currency');
+  } catch (e) {
+    console.warn('Converter init error:', e);
+  }
+});
+
 function formatResult(value) {
-  return value;
+  return value.toFixed(4);
 }
 
 function updateExampleConversion(value) {
@@ -127,12 +126,12 @@ function updateExampleConversion(value) {
 }
 
 function fetchCurrencyRates() {
-  // Using a free currency API endpoint
-  const btn = event.target;
-  btn.disabled = true;
-  btn.textContent = '⏳ Loading...';
+  const btn = document.getElementById('currency-refresh-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳';
+  }
   
-  // Using exchangerate-api.com free tier (no key needed for basic requests)
   fetch('https://api.exchangerate-api.com/v4/latest/USD')
     .then(response => response.json())
     .then(data => {
@@ -146,22 +145,22 @@ function fetchCurrencyRates() {
         const timestamp = new Date().toLocaleTimeString();
         document.getElementById('currency-timestamp').textContent = `Last updated: ${timestamp}`;
         
-        // Recalculate current conversion
         convertUnit('currency');
-        btn.textContent = '🔄';
-        btn.disabled = false;
+        if (btn) {
+          btn.textContent = '🔄';
+          btn.disabled = false;
+        }
       }
     })
     .catch(error => {
       console.error('Error fetching currency rates:', error);
       document.getElementById('currency-timestamp').textContent = 'Unable to fetch live rates';
-      btn.textContent = '🔄';
-      btn.disabled = false;
+      if (btn) {
+        btn.textContent = '🔄';
+        btn.disabled = false;
+      }
     });
 }
-
-// ==================== SCIENTIFIC NOTATION & PRECISION CONTROL ====================
-
 
 function appendToResult(value) {
     if (operator.length === 0) {
@@ -315,8 +314,6 @@ function speakResult() {
     const speakBtn = document.getElementById('speak-btn');
     const wordResultEl = document.getElementById('word-result');
 
-    // Get text content only (strips the <span class="small-label"> part if needed)
-    // Actually we just want the number part
     const words = wordResultEl.querySelector('strong')?.innerText || '';
 
     if (!words) return;
@@ -341,41 +338,32 @@ function enableSpeakButton() {
     speakBtn.disabled = !hasContent;
 }
 
-      // Copy numeric result to clipboard
-      function copyResult() {
-        const text = document.getElementById('result').value;
-        if (!text) return;
+function copyResult() {
+    const text = document.getElementById('result').value;
+    if (!text) return;
 
-        navigator.clipboard.writeText(text)
-        .then(() => alert('Result copied!'))
-        .catch(() => alert('Failed to copy'));
-      }
+    navigator.clipboard.writeText(text)
+    .then(() => alert('Result copied!'))
+    .catch(() => alert('Failed to copy'));
+}
 
 function percentToResult() {
-  // Only proceed if left exists
   if (!left) return;
 
-  // If no operator, just divide left by 100
   if (!operator) {
     left = (parseFloat(left) / 100).toString();
     updateResult();
-    convertToWords(left);
     return;
   }
 
-  // If operator exists but right is empty, wait for user input
   if (!right) return;
-
-  // If both operator and right exist, calculate percentage of left
 
   let result = (parseFloat(right) / 100) * parseFloat(left);
 
-  // Move result to left, clear operator and right
   left = result.toString();
   operator = '';
   right = '';
 
   updateResult();
-  convertToWords(left);
 }
-
+  
