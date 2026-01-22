@@ -3,127 +3,165 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Veritas SEN Calculator</title>
-
+    <title>Calculator</title>
     <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
 
     <style>
-      body {
-        background-color: #212529;
+      :root {
+        --primary-color: #0d6efd;
+        --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        --card-bg: rgba(255, 255, 255, 0.9);
+        --btn-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        --btn-hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
       }
 
-      .calculator {
-        border-radius: 10px;
+      body {
+        background: var(--bg-gradient);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      .calculator-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .display-container {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
       }
 
       #result {
         text-align: right;
+        font-size: 38px;
+        font-weight: 600;
+        border: none;
+        background: transparent;
+        width: 100%;
       }
 
-      #word-result {
-        background-color: #0dcaf0;
-        border: solid 1px #0d6efd;
-        text-transform: capitalize;
-        font-weight: bold;
-        color: #ffffff;
+      .word-display-area {
+        margin-top: 15px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 16px;
+        padding: 12px 18px;
+        border: 1px dashed rgba(13, 110, 253, 0.2);
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+      }
+
+      .btn-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      .calculator .btn {
+        height: 60px;
+        border-radius: 14px;
+        font-size: 18px;
+        font-weight: 600;
+        border: none;
+        box-shadow: var(--btn-shadow);
+      }
+
+      .btn-light { background: #fff; }
+      .btn-operator { background: #e7f1ff; color: var(--primary-color); }
+      .btn-action { background: #fff5f5; color: #fa5252; }
+      .btn-equals { background: var(--primary-color); color: #fff; }
+
+      /* History */
+      #history-list li {
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      #history-list li:hover {
+        background-color: #f1f3f5;
       }
     </style>
   </head>
 
   <body>
     <div class="container">
+      <div class="row">
 
-      <!-- App Title -->
-      <div class="row justify-content-center mt-4">
-        <div class="col-md-6 text-center">
-          <h2 class="fw-bold text-info text-uppercase">
-            Veritas SEN Calc
-          </h2>
+        <!-- ================= HISTORY PANEL ================= -->
+        <div class="col-lg-3 d-none d-lg-block">
+          <div class="card shadow-sm position-sticky" style="top: 20px;">
+            <div class="card-header text-center fw-bold">
+              Calculation History
+            </div>
+            <ul class="list-group list-group-flush" id="history-list">
+              <!-- JS inserts history here -->
+            </ul>
+          </div>
         </div>
-      </div>
+        <!-- ================================================= -->
 
-      <!-- Group Name -->
-      <div class="row justify-content-center mt-3">
-        <div class="col-md-3">
-          <h4 class="text-white text-center">GROUP 2</h4>
-        </div>
-      </div>
-
-      <!-- Calculator -->
-      <div class="row justify-content-center mt-3">
-        <div class="col-md-3">
-          <div class="card">
-            <div class="card-body">
+        <!-- ================= CALCULATOR =================== -->
+        <div class="col-lg-4 col-md-6 col-sm-8 mx-auto">
+          <div class="card calculator-card">
+            <div class="card-body p-4">
               <div class="calculator">
 
-                <input
-                  type="text"
-                  class="form-control mb-2"
-                  id="result"
-                  disabled
-                />
-
-                <div id="word-result" class="px-3 py-2 mb-3"></div>
-
-                <!-- Top Controls -->
-                <div class="row">
-                  <div class="col-3">
-                    <input class="btn btn-light w-100" type="button" value="(" onclick="bracketToResult('(')" />
-                  </div>
-                  <div class="col-3">
-                    <input class="btn btn-light w-100" type="button" value=")" onclick="bracketToResult(')')" />
-                  </div>
-                  <div class="col-3">
-                    <input class="btn btn-light w-100" type="button" value="←" onclick="backspace()" />
-                  </div>
-                  <div class="col-3">
-                    <input class="btn btn-warning w-100" type="button" value="AC" onclick="clearResult()" />
-                  </div>
+                <div class="display-container">
+                  <input type="text" id="result" disabled placeholder="0" />
                 </div>
 
-                <br />
-
-                <!-- Numbers & Operators -->
-                <div class="row">
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="7" onclick="appendToResult(7)" /></div>
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="8" onclick="appendToResult(8)" /></div>
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="9" onclick="appendToResult(9)" /></div>
-                  <div class="col-3"><input class="btn btn-secondary w-100" type="button" value="/" onclick="operatorToResult('/')" /></div>
+                <div class="word-display-area" id="word-area">
+                  <div id="word-result"></div>
+                  <button id="speak-btn" onclick="speakResult()" disabled class="btn btn-primary">
+                    🔊
+                  </button>
                 </div>
 
-                <br />
+                <div class="btn-grid mt-3">
+                  <button class="btn btn-light" onclick="bracketToResult('(')">(</button>
+                  <button class="btn btn-light" onclick="bracketToResult(')')">)</button>
+                  <button class="btn btn-light" onclick="backspace()">←</button>
+                  <button class="btn btn-action" onclick="clearResult()">AC</button>
 
-                <div class="row">
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="4" onclick="appendToResult(4)" /></div>
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="5" onclick="appendToResult(5)" /></div>
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="6" onclick="appendToResult(6)" /></div>
-                  <div class="col-3"><input class="btn btn-secondary w-100" type="button" value="*" onclick="operatorToResult('*')" /></div>
-                </div>
+                  <button class="btn btn-light" onclick="appendToResult(7)">7</button>
+                  <button class="btn btn-light" onclick="appendToResult(8)">8</button>
+                  <button class="btn btn-light" onclick="appendToResult(9)">9</button>
+                  <button class="btn btn-operator" onclick="operatorToResult('/')">÷</button>
 
-                <br />
+                  <button class="btn btn-light" onclick="appendToResult(4)">4</button>
+                  <button class="btn btn-light" onclick="appendToResult(5)">5</button>
+                  <button class="btn btn-light" onclick="appendToResult(6)">6</button>
+                  <button class="btn btn-operator" onclick="operatorToResult('*')">×</button>
 
-                <div class="row">
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="1" onclick="appendToResult(1)" /></div>
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="2" onclick="appendToResult(2)" /></div>
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="3" onclick="appendToResult(3)" /></div>
-                  <div class="col-3"><input class="btn btn-secondary w-100" type="button" value="+" onclick="operatorToResult('+')" /></div>
-                </div>
+                  <button class="btn btn-light" onclick="appendToResult(1)">1</button>
+                  <button class="btn btn-light" onclick="appendToResult(2)">2</button>
+                  <button class="btn btn-light" onclick="appendToResult(3)">3</button>
+                  <button class="btn btn-operator" onclick="operatorToResult('+')">+</button>
 
-                <br />
-
-                <div class="row">
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="." onclick="appendToResult('.')" /></div>
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="0" onclick="appendToResult(0)" /></div>
-                  <div class="col-3"><input class="btn btn-light w-100" type="button" value="-" onclick="operatorToResult('-')" /></div>
-                  <div class="col-3"><input class="btn btn-secondary w-100" type="button" value="=" onclick="calculateResult()" /></div>
+                  <button class="btn btn-light" onclick="appendToResult('.')">.</button>
+                  <button class="btn btn-light" onclick="appendToResult(0)">0</button>
+                  <button class="btn btn-operator" onclick="operatorToResult('-')">−</button>
+                  <button class="btn btn-equals" onclick="calculateResult()">=</button>
                 </div>
 
               </div>
             </div>
           </div>
         </div>
-      </div>
+        <!-- ================================================= -->
 
+      </div>
     </div>
 
     <script src="assets/js/bootstrap.min.js"></script>
