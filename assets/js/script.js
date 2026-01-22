@@ -5,7 +5,6 @@ var right = '';
 
 // ==================== SCIENTIFIC NOTATION & PRECISION ====================
 var scientificNotationEnabled = false;
-var decimalPlaces = 2;
 var currencyRates = {
   'USD': 1,
   'EUR': 0.92,
@@ -119,10 +118,7 @@ function convertUnit(type) {
 }
 
 function formatResult(value) {
-  if (scientificNotationEnabled && Math.abs(value) >= 1e6) {
-    return value.toExponential(decimalPlaces);
-  }
-  return parseFloat(value.toFixed(decimalPlaces));
+  return value;
 }
 
 function updateExampleConversion(value) {
@@ -166,20 +162,6 @@ function fetchCurrencyRates() {
 
 // ==================== SCIENTIFIC NOTATION & PRECISION CONTROL ====================
 
-function toggleScientificNotation() {
-  scientificNotationEnabled = !scientificNotationEnabled;
-  const btn = document.getElementById('sci-notation-btn');
-  btn.textContent = scientificNotationEnabled ? 'Sci Notation: ON' : 'Sci Notation: OFF';
-  btn.classList.toggle('active');
-  updateResult();
-}
-
-function updateDecimalPlaces() {
-  decimalPlaces = parseInt(document.getElementById('decimal-places').value);
-  updateResult();
-}
-
-// ==================== ENHANCED CALCULATOR FUNCTIONS ====================
 
 function appendToResult(value) {
     if (operator.length === 0) {
@@ -241,15 +223,6 @@ function calculateResult() {
         case '*': result = l * r; break;
         case '/': result = r !== 0 ? l / r : 'Error'; break;
         default: return;
-    }
-
-    // Apply precision formatting
-    if (result !== 'Error') {
-        if (scientificNotationEnabled && Math.abs(result) >= 1e6) {
-            result = parseFloat(result.toExponential(decimalPlaces));
-        } else {
-            result = parseFloat(result.toFixed(decimalPlaces));
-        }
     }
 
     left = result.toString();
@@ -323,19 +296,7 @@ function numberToWords(num) {
 
 function updateResult() {
     const display = left + (operator ? ' ' + operator + ' ' : '') + right;
-    
-    // Apply scientific notation if enabled
-    let displayValue = display;
-    if (left && !operator && !right) {
-        const num = parseFloat(left);
-        if (!isNaN(num) && scientificNotationEnabled && Math.abs(num) >= 1e6) {
-            displayValue = num.toExponential(decimalPlaces);
-        } else if (!isNaN(num)) {
-            displayValue = parseFloat(num.toFixed(decimalPlaces));
-        }
-    }
-    
-    document.getElementById('result').value = displayValue || '0';
+    document.getElementById('result').value = display || '0';
 
     const wordResult = document.getElementById('word-result');
     const wordArea = document.getElementById('word-area');
