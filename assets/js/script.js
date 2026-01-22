@@ -272,3 +272,45 @@ function updateStepsDisplay() {
     if (!stepsDiv) return;
     stepsDiv.innerText = steps.join('\n');
 }
+
+
+// Factor Finder & Prime Checker
+// Get factors of a number
+function factors(num) {
+    let result = [];
+    for (let i = 1; i <= num; i++) {
+        if (num % i === 0) result.push(i);
+    }
+    return result;
+}
+// Check if a number is prime
+function isPrime(num) {
+    if (num <= 1) return false;
+    for (let i = 2; i <= Math.sqrt(num); i++) {
+        if (num % i === 0) return false;
+    }
+    return true;
+}
+
+// Main function to handle factor finding and prime checking
+function factorPrimeCheck() {
+    const numStr = left || right; // use current number or result
+    const num = parseInt(numStr);
+    
+    if (isNaN(num)) {
+        alert("Please enter a valid number first!");
+        return;
+    }
+
+    const factorList = factors(num);
+    const primeCheck = isPrime(num);
+// Prepare message
+    let message = `Factors of ${num}: ${factorList.join(', ')}\n`;
+    message += `Is ${num} prime? ${primeCheck ? 'Yes' : 'No'}`;
+
+    // Push to steps and keep max 6
+    steps.push(message);
+    if (steps.length > 6) steps.shift();
+
+    updateStepsDisplay();
+}
