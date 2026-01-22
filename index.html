@@ -214,6 +214,44 @@
         text-transform: uppercase;
         font-size: 1.2rem;
       }
+
+      #hausa-btn {
+  background: #198754;
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
+}
+
+#hausa-btn:hover:not(:disabled) {
+  background: #157347;
+  transform: scale(1.05);
+}
+
+#hausa-btn:disabled {
+  background: #e9ecef;
+  color: #adb5bd;
+  box-shadow: none;
+}
+#english-btn {
+  background: #0d6efd;
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
     </style>
   </head>
   <body>
@@ -241,6 +279,10 @@
 
                 <div class="word-display-area" id="word-area">
                   <div id="word-result"></div>
+                  <button id="hausa-btn" onclick="translateToHausa()">HA</button>
+                  <button id="english-btn" onclick="backToEnglish()">EN</button>
+
+
                   <button id="speak-btn" onclick="speakResult()" disabled title="Speak Result">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                       <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/>
