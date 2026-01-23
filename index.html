@@ -28,18 +28,17 @@
                 <h4 class="text-white text-center">GROUP 2</h4>
             </div>
         </div>
+
       <div class="row justify-content-center mt-3">
         <div class="col-md-3">
             <div class="card">
               <div class="card-body">
                 <div class="calculator">
-                  <input
-                    type="text"
-                    class="form-control mb-2"
-                    id="result"
-                    disabled
-                  />
+
+                  <input type="text" class="form-control mb-2" id="result" disabled />
                   <div id="word-result" class="px-3 py-2 mb-3"></div>
+
+                  <!-- Top Row -->
                   <div class="row">
                     <div class="col-md-3">
                         <input class="btn btn-light btn-block" type="button" value="(" onclick="bracketToResult('(')" />
@@ -51,14 +50,12 @@
                         <input class="btn btn-light btn-block" type="button" value="←" onclick="backspace()" />
                     </div>
                     <div class="col-md-3">
-                        <input class="btn btn-warning btn-block"
-                          type="button"
-                          value="AC"
-                          onclick="clearResult()"
-                        />
+                        <input class="btn btn-warning btn-block" type="button" value="AC" onclick="clearResult()" />
                     </div>
                   </div>            
                   <br /><br />
+
+                  <!-- 7 8 9 / -->
                   <div class="row">
                     <div class="col-md-3">
                         <input class="btn btn-light btn-block" type="button" value="7" onclick="appendToResult(7)" />
@@ -70,15 +67,12 @@
                         <input class="btn btn-light btn-block" type="button" value="9" onclick="appendToResult(9)" />
                     </div>
                     <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="/"
-                          onclick="operatorToResult('/')"
-                        />
+                        <input class="btn btn-secondary btn-block px-3" type="button" value="/" onclick="operatorToResult('/')" />
                     </div>
                   </div>
                   <br /><br />
+
+                  <!-- 4 5 6 * -->
                   <div class="row">
                     <div class="col-md-3">
                         <input class="btn btn-light btn-block" type="button" value="4" onclick="appendToResult(4)" />
@@ -90,16 +84,12 @@
                         <input class="btn btn-light btn-block" type="button" value="6" onclick="appendToResult(6)" />
                     </div>
                     <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="*"
-                          onclick="operatorToResult('*')"
-                          />
+                        <input class="btn btn-secondary btn-block px-3" type="button" value="*" onclick="operatorToResult('*')" />
                     </div>
                   </div>
                   <br /><br />
                   
+                  <!-- 1 2 3 - -->
                   <div class="row">
                     <div class="col-md-3">
                         <input class="btn btn-light btn-block" type="button" value="1" onclick="appendToResult(1)" />
@@ -111,16 +101,12 @@
                         <input class="btn btn-light btn-block" type="button" value="3" onclick="appendToResult(3)" />
                     </div>
                     <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="+"
-                          onclick="operatorToResult('+')"
-                          />
+                        <input class="btn btn-secondary btn-block px-3" type="button" value="-" onclick="operatorToResult('-')" />
                     </div>
                   </div>
                   <br /><br />
-                  
+
+                  <!-- . 0 % = --> <!-- by Agamah Lydia Agah 8148 -->
                   <div class="row">
                     <div class="col-md-3">
                         <input class="btn btn-light btn-block" type="button" value="." onclick="appendToResult('.')" />
@@ -129,24 +115,22 @@
                         <input class="btn btn-light btn-block" type="button" value="0" onclick="appendToResult(0)" />
                     </div>
                     <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="-" onclick="operatorToResult('-')" />
+                        <input class="btn btn-warning btn-block" type="button" value="%" onclick="percent()" />
                     </div>
                     <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="submit"
-                          value="="
-                          onclick="calculateResult()"
-                        />
+                        <input class="btn btn-secondary btn-block px-3" type="button" value="=" onclick="calculateResult()" />
                     </div>
-                </div>
+                  </div>
+
                   <br /><br />
+
                 </div>
               </div>
             </div>
           </div>
       </div>
     </div>
+
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/script.js"></script>
   </body>
