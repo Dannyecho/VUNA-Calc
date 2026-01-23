@@ -212,3 +212,86 @@ function updateStepsDisplay() {
 
   stepsDiv.innerText = steps.join("\n");
 }
+
+
+function startVoiceInput() {
+    clearResult()
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Speech recognition not supported in this browser.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+
+  recognition.onresult = (event) => {
+    const spokenText = event.results[0][0].transcript;
+    handleSpokenMath(spokenText);
+  };
+
+  recognition.start();
+}
+
+
+function handleSpokenMath(text) {
+  const tokens = normalizeSpeech(text);
+
+  tokens.forEach(token => {
+    if (["+","-","*","/"].includes(token)) {
+      operatorToResult(token);
+    } else if (token === "=") {
+      calculateResult();
+    } else {
+      appendToResult(token);
+    }
+  });
+}
+
+
+function normalizeSpeech(text) {
+  let normalized = text.toLowerCase();
+
+  const replacements = {
+    "plus": "+",
+    "add": "+",
+    "minus": "-",
+    "subtract": "-",
+    "times": "*",
+    "multiply": "*",
+    "multiplied by": "*",
+    "divide": "/",
+    "divided by": "/",
+    "equals": "=",
+    "equal": "="
+  };
+
+  for (let key in replacements) {
+    normalized = normalized.replaceAll(key, replacements[key]);
+  }
+
+  const numbers = {
+    "zero": "0",
+    "one": "1",
+    "two": "2",
+    "three": "3",
+    "four": "4",
+    "five": "5",
+    "six": "6",
+    "seven": "7",
+    "eight": "8",
+    "nine": "9"
+  };
+
+  for (let word in numbers) {
+    normalized = normalized.replaceAll(word, numbers[word]);
+  }
+
+  // Split into tokens
+  return normalized
+    .split(" ")
+    .filter(t => t.trim() !== "");
+}
