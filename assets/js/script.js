@@ -212,3 +212,23 @@ function updateStepsDisplay() {
 
   stepsDiv.innerText = steps.join("\n");
 }
+
+function logResult() {
+    // Only allow log when there's a single value (no operator)
+    if (!left || operator || right) return;
+  
+    const value = parseFloat(left);
+  
+    // log is undefined for <= 0
+    if (value <= 0) {
+      left = "Error";
+    } else {
+      left = Math.log10(value).toString();
+    }
+  
+    operator = "";
+    right = "";
+  
+    updateResult();
+  }
+  

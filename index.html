@@ -11,7 +11,6 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-lg-4 col-md-6 col-sm-8">
-          <h4 class="text-center group-header">Group 2 Calculator</h4>
           <div class="card calculator-card">
             <div class="card-body p-4">
               <div class="calculator">
@@ -24,14 +23,6 @@
                     disabled
                   />
                 </div>
-
-
-
-
-                <function>
-                  <h6>Steps</h6>
-                  <div id="steps" class="steps-container"></div>
-                </function>
 
 
 
@@ -76,6 +67,8 @@
                   <button class="btn btn-light" onclick="bracketToResult(')')">
                     )
                   </button>
+                  <button class="btn btn-light" onclick="logResult()">log</button>
+
                   <button class="btn btn-light" onclick="backspace()">←</button>
                   <button class="btn btn-action" onclick="clearResult()">
                     AC
@@ -145,9 +138,10 @@
                   >
                     −
                   </button>
-                  <button class="btn btn-equals" onclick="calculateResult()">
+                  <button class="btn btn-equals w-100" onclick="calculateResult()">
                     =
                   </button>
+                  
                 </div>
 
                 <div class="word-display-area" id="word-area">
