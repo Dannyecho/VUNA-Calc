@@ -78,3 +78,38 @@ function enableSpeakButton() {
     const hasContent = document.getElementById('word-text').innerHTML.trim().length > 0;
     speakBtn.disabled = !hasContent;
 }
+
+function percent() {
+    if (!left) return;
+
+    if (!operator) {
+        left = (parseFloat(left) / 100).toString();
+    }
+		
+    else if (right) {
+        const l = parseFloat(left);
+        const r = parseFloat(right);
+
+        let percentValue;
+
+        switch (operator) {
+            case "+":
+            case "-":
+				
+                percentValue = (l * r) / 100;
+                break;
+            case "*":
+                percentValue = r / 100;
+                break;
+            case "/":
+                percentValue = r / 100;
+                break;
+            default:
+                return;
+        }
+
+        right = percentValue.toString();
+    }
+
+    updateResult();
+}
