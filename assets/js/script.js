@@ -206,9 +206,63 @@ function enableSpeakButton() {
     speakBtn.disabled = !hasContent;
 }
 
+// Updated the updateStepsDisplay function to enable/disable the save button
 function updateStepsDisplay() {
   const stepsDiv = document.getElementById("steps");
+  const saveBtn = document.getElementById("save-steps-btn");
+  
   if (!stepsDiv) return;
-
+  
   stepsDiv.innerText = steps.join("\n");
+  
+  // Enable/disable save button based on steps
+  if (saveBtn) {
+    saveBtn.disabled = steps.length === 0;
+  }
 }
+
+
+function saveStepsAsImage() {
+  if (steps.length === 0) return;
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Set canvas size
+  canvas.width = 600;
+  const lineHeight = 40;
+  const padding = 40;
+  const headerHeight = 60;
+  canvas.height = headerHeight + (steps.length * lineHeight) + padding * 2;
+  
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Header
+  ctx.fillStyle = '#0d6efd';
+  ctx.font = 'bold 24px "Segoe UI", Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Calculation Steps', canvas.width / 2, padding + 30);
+  
+  // Steps
+  ctx.fillStyle = '#212529';
+  ctx.font = '18px "Segoe UI", Arial, sans-serif';
+  ctx.textAlign = 'left';
+  
+  steps.forEach((step, index) => {
+    const y = headerHeight + padding + (index * lineHeight) + 20;
+    ctx.fillText(step, padding, y);
+  });
+  
+  // Convert to blob and download
+  canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `calculation-steps-${Date.now()}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+}
+
