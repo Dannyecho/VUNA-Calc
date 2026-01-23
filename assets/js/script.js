@@ -212,3 +212,56 @@ function updateStepsDisplay() {
 
   stepsDiv.innerText = steps.join("\n");
 }
+
+
+function trigOperation(type) {
+    if (left.length === 0) return;
+
+    const degrees = parseFloat(left);
+    if (isNaN(degrees)) return;
+
+    // Convert degrees to radians
+    const radians = degrees * Math.PI / 180;
+    let result;
+
+    switch (type) {
+        case "sin":
+            result = Math.sin(radians);
+            break;
+
+        case "cos":
+            result = Math.cos(radians);
+            break;
+
+        case "tan":
+            // Prevent undefined tan(90), tan(270), etc.
+            if (Math.abs(Math.cos(radians)) < 1e-10) {
+                result = "Error";
+            } else {
+                result = Math.tan(radians);
+            }
+            break;
+
+        default:
+            return;
+    }
+
+    // Limit decimal places for clean output
+    if (typeof result === "number") {
+        result = parseFloat(result.toFixed(8));
+    }
+
+    if (steps.length < MAX_STEPS) {
+        steps.push(`Step ${steps.length + 1}: ${type}(${degrees}) = ${result}`);
+    }
+
+    left = result.toString();
+    operator = "";
+    right = "";
+
+    updateStepsDisplay();
+    updateResult();
+}
+
+
+
