@@ -212,3 +212,87 @@ function updateStepsDisplay() {
 
   stepsDiv.innerText = steps.join("\n");
 }
+
+
+document.addEventListener('keydown', function(event) {
+    console.log('Keydown event fired! Key:', event.key);
+    
+    const key = event.key;
+    
+    // Numbers 0-9
+    if (key >= '0' && key <= '9') {
+        console.log('Number detected:', key);
+        event.preventDefault();
+        appendToResult(parseInt(key));
+        console.log('After append - left:', left, 'right:', right);
+        return;
+    }
+    // Decimal point
+    if (key === '.') {
+        console.log('Decimal detected');
+        event.preventDefault();
+        appendToResult('.');
+        return;
+    }
+    // Operators
+    if (key === '+') {
+        console.log('Plus detected');
+        event.preventDefault();
+        operatorToResult('+');
+        return;
+    }
+    if (key === '-') {
+        console.log('Minus detected');
+        event.preventDefault();
+        operatorToResult('-');
+        return;
+    }
+    if (key === '*') {
+        console.log('Multiply detected');
+        event.preventDefault();
+        operatorToResult('*');
+        return;
+    }
+    if (key === '/') {
+        console.log('Divide detected');
+        event.preventDefault();
+        operatorToResult('/');
+        return;
+    }
+    // Enter or Equals
+    if (key === 'Enter' || key === '=') {
+        console.log('Enter/Equals detected');
+        event.preventDefault();
+        calculateResult();
+        return;
+    }
+    // Backspace
+    if (key === 'Backspace') {
+        console.log('Backspace detected');
+        event.preventDefault();
+        backspace();
+        return;
+    }
+    // Escape for clear
+    if (key === 'Escape') {
+        console.log('Escape detected');
+        event.preventDefault();
+        clearResult();
+        return;
+    }
+    // Parentheses
+    if (key === '(') {
+        console.log('Open paren detected');
+        event.preventDefault();
+        bracketToResult('(');
+        return;
+    }
+    if (key === ')') {
+        console.log('Close paren detected');
+        event.preventDefault();
+        bracketToResult(')');
+        return;
+    }
+});
+
+console.log('Keyboard event listener attached!');
