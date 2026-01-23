@@ -1,6 +1,9 @@
 var left = '';
 var operator = '';
 var right = '';
+var steps = [];
+var MAX_STEPS = 6;
+
 
 function appendToResult(value) {
     if (operator.length === 0) {
@@ -41,96 +44,57 @@ function operatorToResult(value) {
 }
 
 function clearResult() {
-    left = '';
-    right = '';
-    operator = '';
-    document.getElementById('word-result').innerHTML = '';
-    document.getElementById('word-area').style.display = 'none';
-    updateResult();
+  left = "";
+  right = "";
+  operator = "";
+  steps = [];
+
+  document.getElementById("word-result").innerHTML = "";
+  document.getElementById("word-area").style.display = "none";
+  document.getElementById("steps").innerText = "";
+
+  updateResult();
 }
+
+
 
 function calculateResult() {
-    if (left.length === 0 || operator.length === 0 || right.length === 0) return;
+  if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
-    let result;
-    const l = parseFloat(left);
-    const r = parseFloat(right);
+  const l = parseFloat(left);
+  const r = parseFloat(right);
+  let result;
 
-    switch (operator) {
-        case '+': result = l + r; break;
-        case '-': result = l - r; break;
-        case '*': result = l * r; break;
-        case '/': result = r !== 0 ? l / r : 'Error'; break;
-        default: return;
-    }
+  switch (operator) {
+    case "+":
+      result = l + r;
+      break;
+    case "-":
+      result = l - r;
+      break;
+    case "*":
+      result = l * r;
+      break;
+    case "/":
+      result = r !== 0 ? l / r : "Error";
+      break;
+    default:
+      return;
+  }
 
-    left = result.toString();
-    operator = '';
-    right = '';
-    updateResult();
+  if (steps.length < MAX_STEPS) {
+    steps.push(`Step ${steps.length + 1}: ${l} ${operator} ${r} = ${result}`);
+  }
+
+  left = result.toString();
+  operator = "";
+  right = "";
+
+  updateStepsDisplay();
+  updateResult();
 }
 
 
-function toggleSign() {
-    // Determine which value to toggle
-    let targetValue = '';
-    let isRight = false;
-    
-    if (right.length > 0) {
-        targetValue = right;
-        isRight = true;
-    } else if (left.length > 0) {
-        targetValue = left;
-        isRight = false;
-    } else {
-        return;
-    }
-    
-    // Check if the value is valid for sign toggle
-    if (targetValue === 'Error') return;
-    
-    targetValue = targetValue.replace(/[()]/g, '');
-    
-    // Parse the number
-    let num = parseFloat(targetValue);
-    if (isNaN(num)) return;
-    
-    // Toggle the sign
-    num = -num;
-    
-    // Format the result
-    let newValue = num.toString();
-    
-    // Update the appropriate variable
-    if (isRight) {
-        right = newValue;
-    } else {
-        left = newValue;
-    }
-    
-    updateResult();
-    
-    const wordResult = document.getElementById('word-result');
-    const wordArea = document.getElementById('word-area');
-    
-    wordResult.innerHTML = '<span class="small-label">Sign Changed</span><strong>' + 
-                          (num >= 0 ? 'Positive: ' : 'Negative: ') + 
-                          Math.abs(num) + '</strong>';
-    wordArea.style.display = 'flex';
-    
-    // Auto-hide after 2 seconds
-    setTimeout(() => {
-        if (left && !operator && !right) {
-            wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + numberToWords(left) + '</strong>';
-            wordArea.style.display = 'flex';
-        } else {
-            wordArea.style.display = 'none';
-        }
-        enableSpeakButton();
-    }, 2000);
-    
-    enableSpeakButton();
-}
 
 function numberToWords(num) {
     if (num === 'Error') return 'Error';
@@ -238,4 +202,11 @@ function enableSpeakButton() {
     if (!speakBtn) return;
     const hasContent = document.getElementById('word-result').innerHTML.trim().length > 0;
     speakBtn.disabled = !hasContent;
+}
+
+function updateStepsDisplay() {
+  const stepsDiv = document.getElementById("steps");
+  if (!stepsDiv) return;
+
+  stepsDiv.innerText = steps.join("\n");
 }
