@@ -19,6 +19,23 @@
         font-weight: bold;
         color: #ffffff;
       }
+      /* NEW FUNCTIONALITY 1: Number Base Converter Display Styling */
+      .converter-display {
+        font-size: 0.75rem;
+        padding: 5px;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+      }
+      /* NEW FUNCTIONALITY 4: Expression Validator Icon Styling */
+      .valid-icon {
+        color: #28a745;
+        font-weight: bold;
+      }
+      .invalid-icon {
+        color: #dc3545;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
@@ -33,13 +50,46 @@
             <div class="card">
               <div class="card-body">
                 <div class="calculator">
+                  
+                  <!-- NEW FUNCTIONALITY 2: Calculation Timer Display -->
+                  <!-- Shows elapsed time since last calculation -->
+                  <div id="calc-timer" class="text-center mb-1" style="font-size: 0.65rem; color: #6c757d;">
+                    Ready to calculate
+                  </div>
+                  
                   <input
                     type="text"
                     class="form-control mb-2"
                     id="result"
                     disabled
                   />
+                  
+                  <!-- NEW FUNCTIONALITY 4: Real-time Expression Validator -->
+                  <!-- Shows if the current expression is valid or incomplete -->
+                  <div class="text-center mb-1">
+                    <span id="expression-validator"></span>
+                  </div>
+                  
                   <div id="word-result" class="px-3 py-2 mb-3"></div>
+                  
+                  <!-- NEW FUNCTIONALITY 1: Number Base Converter Display -->
+                  <!-- Shows current number in Binary and Hexadecimal formats -->
+                  <div id="converter-display" class="converter-display">
+                    <small><strong>BIN:</strong> <span id="binary-display">-</span></small><br>
+                    <small><strong>HEX:</strong> <span id="hex-display">-</span></small>
+                  </div>
+                  
+                  <!-- NEW FUNCTIONALITY 3: Smart Random Number Generator Button -->
+                  <div class="row mb-2">
+                    <div class="col-md-12">
+                        <input class="btn btn-success btn-block btn-sm" 
+                               type="button" 
+                               value="Generate Random Number" 
+                               onclick="generateRandom()" 
+                               title="Generate random number" />
+                    </div>
+                  </div>
+                  
                   <div class="row">
                     <div class="col-md-3">
                         <input class="btn btn-light btn-block" type="button" value="(" onclick="bracketToResult('(')" />
