@@ -1,214 +1,106 @@
-var left = '';
-var operator = '';
-var right = '';
-var steps = [];
-var MAX_STEPS = 6;
+let expression = "";
+let speechEnabled = true;
+let language = "pt";
+let history = [];
+let showHistory = false;
 
-
-function appendToResult(value) {
-    if (operator.length === 0) {
-        left += value.toString();
-    } else {
-        right += value.toString();
-    }
-    updateResult();
+/* ===== SPEECH ===== */
+function speak(text) {
+  if (!speechEnabled) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = language === "pt" ? "pt-PT" : "en-US";
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
 }
 
-function bracketToResult(value) {
-    if (operator.length === 0) {
-        left += value;
-    } else {
-        right += value;
-    }
-    updateResult();
+/* ===== TOGGLES ===== */
+function toggleSpeech() {
+  speechEnabled = !speechEnabled;
+}
+
+function toggleLanguage() {
+  language = language === "pt" ? "en" : "pt";
+  speak(language === "pt" ? "português" : "english");
+}
+
+function toggleHistory() {
+  showHistory = !showHistory;
+  const area = document.getElementById("word-area");
+
+  if (showHistory) {
+    area.innerHTML = history.length
+      ? history.join("<br>")
+      : "No history";
+  } else {
+    area.innerHTML = "";
+  }
+}
+
+/* ===== INPUT ===== */
+function inputValue(val) {
+  expression += val;
+  document.getElementById("result").value = expression;
+  speak(val);
 }
 
 function backspace() {
-    if (right.length > 0) {
-        right = right.slice(0, -1);
-    } else if (operator.length > 0) {
-        operator = '';
-    } else if (left.length > 0) {
-        left = left.slice(0, -1);
-    }
-    updateResult();
+  expression = expression.slice(0, -1);
+  document.getElementById("result").value = expression;
 }
 
-function operatorToResult(value) {
-    if (left.length === 0) return;
-    if (right.length > 0) {
-        calculateResult();
-    }
-    operator = value;
-    updateResult();
+/* ===== CALCULATE ===== */
+function calculate() {
+  try {
+    const res = eval(expression);
+    history.unshift(expression + " = " + res);
+    document.getElementById("result").value = res;
+    expression = res.toString();
+    speak(language === "pt" ? "resultado " + res : "result " + res);
+  } catch {
+    speak(language === "pt" ? "erro" : "error");
+  }
 }
 
-function clearResult() {
-  left = "";
-  right = "";
-  operator = "";
-  steps = [];
+/* ===== INTEGRAL ===== */
+function integrate() {
+  const a = parseFloat(prompt("Lower limit (a):"));
+  const b = parseFloat(prompt("Upper limit (b):"));
+  if (isNaN(a) || isNaN(b)) return;
 
-  document.getElementById("word-result").innerHTML = "";
-  document.getElementById("word-area").style.display = "none";
-  document.getElementById("steps").innerText = "";
+  let expr = expression.replace(/dx/g, "").trim();
 
-  updateResult();
-}
-
-
-
-function calculateResult() {
-  if (left.length === 0 || operator.length === 0 || right.length === 0) return;
-
-  const l = parseFloat(left);
-  const r = parseFloat(right);
   let result;
 
-  switch (operator) {
-    case "+":
-      result = l + r;
-      break;
-    case "-":
-      result = l - r;
-      break;
-    case "*":
-      result = l * r;
-      break;
-    case "/":
-      result = r !== 0 ? l / r : "Error";
-      break;
-    default:
-      return;
+  if (expr === "") {
+    // ∫dx = b - a
+    result = (b - a).toFixed(4);
+  } else {
+    // Numerical integration using trapezoid rule
+    let n = 1000;
+    let h = (b - a) / n;
+    let sum = 0;
+
+    for (let i = 0; i <= n; i++) {
+      let x = a + i * h;
+      // Support powers like x^2
+      let fxExpression = expr.replace(/\^/g, "**");
+      let fx = eval(fxExpression.replace(/x/g, `(${x})`));
+      sum += fx;
+    }
+
+    result = (sum * h).toFixed(4);
   }
 
-  if (steps.length < MAX_STEPS) {
-    steps.push(`Step ${steps.length + 1}: ${l} ${operator} ${r} = ${result}`);
-  }
+  history.unshift(`∫(${expression}) = ${result}`);
+  document.getElementById("result").value = result;
+  expression = result.toString();
 
-  left = result.toString();
-  operator = "";
-  right = "";
-
-  updateStepsDisplay();
-  updateResult();
+  speak(language === "pt" ? "integral " + result : "integral result " + result);
 }
 
-
-
-function numberToWords(num) {
-    if (num === 'Error') return 'Error';
-    if (num === '') return '';
-
-    const n = parseFloat(num);
-    if (isNaN(n)) return '';
-    if (n === 0) return 'Zero';
-
-    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-    const scales = ['', 'Thousand', 'Million', 'Billion', 'Trillion'];
-
-    function convertGroup(val) {
-        let res = '';
-        if (val >= 100) {
-            res += ones[Math.floor(val / 100)] + ' Hundred ';
-            val %= 100;
-        }
-        if (val >= 10 && val <= 19) {
-            res += teens[val - 10] + ' ';
-        } else if (val >= 20) {
-            res += tens[Math.floor(val / 10)] + (val % 10 !== 0 ? '-' + ones[val % 10] : '') + ' ';
-        } else if (val > 0) {
-            res += ones[val] + ' ';
-        }
-        return res.trim();
-    }
-
-    let sign = n < 0 ? 'Negative ' : '';
-    let absN = Math.abs(n);
-    let parts = absN.toString().split('.');
-    let integerPart = parseInt(parts[0]);
-    let decimalPart = parts[1];
-
-    let wordArr = [];
-    if (integerPart === 0) {
-        wordArr.push('Zero');
-    } else {
-        let scaleIdx = 0;
-        while (integerPart > 0) {
-            let chunk = integerPart % 1000;
-            if (chunk > 0) {
-                let chunkWords = convertGroup(chunk);
-                wordArr.unshift(chunkWords + (scales[scaleIdx] ? ' ' + scales[scaleIdx] : ''));
-            }
-            integerPart = Math.floor(integerPart / 1000);
-            scaleIdx++;
-        }
-    }
-
-    let result = sign + wordArr.join(', ').trim();
-
-    if (decimalPart) {
-        result += ' Point';
-        for (let digit of decimalPart) {
-            result += ' ' + (digit === '0' ? 'Zero' : ones[parseInt(digit)]);
-        }
-    }
-
-    return result.trim();
-}
-
-function updateResult() {
-    const display = left + (operator ? ' ' + operator + ' ' : '') + right;
-    document.getElementById('result').value = display || '0';
-
-    const wordResult = document.getElementById('word-result');
-    const wordArea = document.getElementById('word-area');
-
-    if (left && !operator && !right) {
-        wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + numberToWords(left) + '</strong>';
-        wordArea.style.display = 'flex';
-    } else {
-        wordResult.innerHTML = '';
-        wordArea.style.display = 'none';
-    }
-    enableSpeakButton();
-}
-
-function speakResult() {
-    const speakBtn = document.getElementById('speak-btn');
-    const wordResultEl = document.getElementById('word-result');
-
-    // Get text content only (strips the <span class="small-label"> part if needed)
-    // Actually we just want the number part
-    const words = wordResultEl.querySelector('strong')?.innerText || '';
-
-    if (!words) return;
-
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-        speakBtn.classList.remove('speaking');
-        return;
-    }
-
-    const utterance = new SpeechSynthesisUtterance(words);
-    utterance.rate = 0.9;
-    utterance.onstart = () => speakBtn.classList.add('speaking');
-    utterance.onend = () => speakBtn.classList.remove('speaking');
-    window.speechSynthesis.speak(utterance);
-}
-
-function enableSpeakButton() {
-    const speakBtn = document.getElementById('speak-btn');
-    if (!speakBtn) return;
-    const hasContent = document.getElementById('word-result').innerHTML.trim().length > 0;
-    speakBtn.disabled = !hasContent;
-}
-
-function updateStepsDisplay() {
-  const stepsDiv = document.getElementById("steps");
-  if (!stepsDiv) return;
-
-  stepsDiv.innerText = steps.join("\n");
+/* ===== CLEAR ===== */
+function clearAll() {
+  expression = "";
+  document.getElementById("result").value = "";
+  speak(language === "pt" ? "limpo" : "cleared");
 }
