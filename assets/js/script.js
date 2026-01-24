@@ -1,6 +1,9 @@
 var left = '';
 var operator = '';
 var right = '';
+var steps = [];
+var MAX_STEPS = 6;
+
 
 var currencyRates = {
   'USD': 1,
@@ -206,34 +209,57 @@ function operatorToResult(value) {
 }
 
 function clearResult() {
-    left = '';
-    right = '';
-    operator = '';
-    document.getElementById('word-result').innerHTML = '';
-    document.getElementById('word-area').style.display = 'none';
-    updateResult();
+  left = "";
+  right = "";
+  operator = "";
+  steps = [];
+
+  document.getElementById("word-result").innerHTML = "";
+  document.getElementById("word-area").style.display = "none";
+  document.getElementById("steps").innerText = "";
+
+  updateResult();
 }
+
+
 
 function calculateResult() {
-    if (left.length === 0 || operator.length === 0 || right.length === 0) return;
+  if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
-    let result;
-    const l = parseFloat(left);
-    const r = parseFloat(right);
+  const l = parseFloat(left);
+  const r = parseFloat(right);
+  let result;
 
-    switch (operator) {
-        case '+': result = l + r; break;
-        case '-': result = l - r; break;
-        case '*': result = l * r; break;
-        case '/': result = r !== 0 ? l / r : 'Error'; break;
-        default: return;
-    }
+  switch (operator) {
+    case "+":
+      result = l + r;
+      break;
+    case "-":
+      result = l - r;
+      break;
+    case "*":
+      result = l * r;
+      break;
+    case "/":
+      result = r !== 0 ? l / r : "Error";
+      break;
+    default:
+      return;
+  }
 
-    left = result.toString();
-    operator = '';
-    right = '';
-    updateResult();
+  if (steps.length < MAX_STEPS) {
+    steps.push(`Step ${steps.length + 1}: ${l} ${operator} ${r} = ${result}`);
+  }
+
+  left = result.toString();
+  operator = "";
+  right = "";
+
+  updateStepsDisplay();
+  updateResult();
 }
+
+
 
 function numberToWords(num) {
     if (num === 'Error') return 'Error';
@@ -373,3 +399,9 @@ function percentToResult() {
 }
 
 fetchCurrencyRates()
+function updateStepsDisplay() {
+  const stepsDiv = document.getElementById("steps");
+  if (!stepsDiv) return;
+
+  stepsDiv.innerText = steps.join("\n");
+}
