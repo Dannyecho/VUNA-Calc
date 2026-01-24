@@ -8,7 +8,8 @@ var currencyRates = {
   'GBP': 0.79,
   'JPY': 149.50,
   'CAD': 1.37,
-  'AUD': 1.52
+  'AUD': 1.52,
+  'NGN': 1500.00
 };
 
 const unitConversions = {
@@ -136,15 +137,19 @@ function fetchCurrencyRates() {
     .then(response => response.json())
     .then(data => {
       if (data.rates) {
-        currencyRates['EUR'] = 1 / data.rates.EUR;
-        currencyRates['GBP'] = 1 / data.rates.GBP;
-        currencyRates['JPY'] = 1 / data.rates.JPY;
-        currencyRates['CAD'] = 1 / data.rates.CAD;
-        currencyRates['AUD'] = 1 / data.rates.AUD;
-        
+        alert('Currency rates fetched successfully.');
+        console.log('Fetched currency rates:', data);    
+        // API returns rates relative to USD (1 USD = data.rates[currency])
+        currencyRates['EUR'] = data.rates.EUR || currencyRates['EUR'];
+        currencyRates['GBP'] = data.rates.GBP || currencyRates['GBP'];
+        currencyRates['JPY'] = data.rates.JPY || currencyRates['JPY'];
+        currencyRates['CAD'] = data.rates.CAD || currencyRates['CAD'];
+        currencyRates['AUD'] = data.rates.AUD || currencyRates['AUD'];
+        currencyRates['NGN'] = data.rates.NGN || currencyRates['NGN'];
+
         const timestamp = new Date().toLocaleTimeString();
         document.getElementById('currency-timestamp').textContent = `Last updated: ${timestamp}`;
-        
+
         convertUnit('currency');
         if (btn) {
           btn.textContent = '🔄';
@@ -366,4 +371,5 @@ function percentToResult() {
 
   updateResult();
 }
-  
+
+fetchCurrencyRates()
