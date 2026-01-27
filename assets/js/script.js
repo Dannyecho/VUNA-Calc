@@ -94,6 +94,548 @@ function calculateResult() {
   updateResult();
 }
 
+function differentiateExpression() {
+  const input = document.getElementById("diff-input");
+  const output = document.getElementById("diff-output");
+  if (!input || !output) return;
+
+  const raw = input.value.trim();
+  if (!raw) {
+    output.innerText = "Enter an expression to differentiate.";
+    return;
+  }
+
+  try {
+    const normalized = normalizeInput(raw);
+    const expr = stripDerivativePrefix(normalized);
+    const tokens = tokenize(expr);
+    const parser = new Parser(tokens);
+    const ast = parser.parseExpression();
+    if (!parser.isAtEnd()) {
+      throw new Error("Unexpected token near the end of the expression.");
+    }
+    const derivative = simplify(differentiate(ast));
+    output.innerText = toString(derivative);
+  } catch (error) {
+    output.innerText = error.message || "Invalid expression.";
+  }
+}
+
+function normalizeInput(value) {
+  return value.replace(/−/g, "-").replace(/\s+/g, " ");
+}
+
+function stripDerivativePrefix(value) {
+  const trimmed = value.trim();
+  if (/^d\/dx/i.test(trimmed)) {
+    let rest = trimmed.replace(/^d\/dx/i, "").trim();
+    if (rest.startsWith("(") && rest.endsWith(")")) {
+      rest = rest.slice(1, -1).trim();
+    }
+    return rest;
+  }
+  return trimmed;
+}
+
+function tokenize(value) {
+  const tokens = [];
+  let i = 0;
+
+  while (i < value.length) {
+    const ch = value[i];
+
+    if (ch === " ") {
+      i += 1;
+      continue;
+    }
+
+    if ((ch >= "0" && ch <= "9") || ch === ".") {
+      let num = ch;
+      i += 1;
+      while (i < value.length && ((value[i] >= "0" && value[i] <= "9") || value[i] === ".")) {
+        num += value[i];
+        i += 1;
+      }
+      if (num === ".") throw new Error("Invalid number format.");
+      tokens.push({ type: "number", value: parseFloat(num) });
+      continue;
+    }
+
+    if ((ch >= "a" && ch <= "z") || (ch >= "A" && ch <= "Z")) {
+      let ident = ch;
+      i += 1;
+      while (i < value.length && /[a-zA-Z]/.test(value[i])) {
+        ident += value[i];
+        i += 1;
+      }
+      const lower = ident.toLowerCase();
+      if (lower === "x") {
+        tokens.push({ type: "variable", name: "x" });
+      } else if (["sin", "cos", "tan", "ln", "log", "exp"].includes(lower)) {
+        tokens.push({ type: "func", name: lower });
+      } else if (lower === "e") {
+        tokens.push({ type: "constant", name: "e", value: Math.E });
+      } else if (lower === "pi") {
+        tokens.push({ type: "constant", name: "pi", value: Math.PI });
+      } else {
+        throw new Error(`Unknown identifier: ${ident}`);
+      }
+      continue;
+    }
+
+    if ("+-*/^()".includes(ch)) {
+      if (ch === "(") tokens.push({ type: "lparen", value: ch });
+      else if (ch === ")") tokens.push({ type: "rparen", value: ch });
+      else tokens.push({ type: "operator", value: ch });
+      i += 1;
+      continue;
+    }
+
+    throw new Error(`Unsupported character: ${ch}`);
+  }
+
+  return insertImplicitMultiplication(tokens);
+}
+
+function insertImplicitMultiplication(tokens) {
+  const result = [];
+  const leftTypes = ["number", "variable", "constant", "rparen"];
+  const rightTypes = ["number", "variable", "constant", "func", "lparen"];
+
+  for (let i = 0; i < tokens.length; i += 1) {
+    const current = tokens[i];
+    const next = tokens[i + 1];
+    result.push(current);
+    if (!next) continue;
+    if (leftTypes.includes(current.type) && rightTypes.includes(next.type)) {
+      result.push({ type: "operator", value: "*" });
+    }
+  }
+
+  return result;
+}
+
+function Parser(tokens) {
+  this.tokens = tokens;
+  this.index = 0;
+}
+
+Parser.prototype.peek = function () {
+  return this.tokens[this.index];
+};
+
+Parser.prototype.advance = function () {
+  this.index += 1;
+  return this.tokens[this.index - 1];
+};
+
+Parser.prototype.isAtEnd = function () {
+  return this.index >= this.tokens.length;
+};
+
+Parser.prototype.matchOperator = function (op) {
+  const token = this.peek();
+  if (token && token.type === "operator" && token.value === op) {
+    this.advance();
+    return true;
+  }
+  return false;
+};
+
+Parser.prototype.parseExpression = function () {
+  let node = this.parseTerm();
+  while (true) {
+    if (this.matchOperator("+")) {
+      node = { type: "binary", op: "+", left: node, right: this.parseTerm() };
+      continue;
+    }
+    if (this.matchOperator("-")) {
+      node = { type: "binary", op: "-", left: node, right: this.parseTerm() };
+      continue;
+    }
+    break;
+  }
+  return node;
+};
+
+Parser.prototype.parseTerm = function () {
+  let node = this.parsePower();
+  while (true) {
+    if (this.matchOperator("*")) {
+      node = { type: "binary", op: "*", left: node, right: this.parsePower() };
+      continue;
+    }
+    if (this.matchOperator("/")) {
+      node = { type: "binary", op: "/", left: node, right: this.parsePower() };
+      continue;
+    }
+    break;
+  }
+  return node;
+};
+
+Parser.prototype.parsePower = function () {
+  let node = this.parseUnary();
+  if (this.matchOperator("^")) {
+    node = { type: "binary", op: "^", left: node, right: this.parsePower() };
+  }
+  return node;
+};
+
+Parser.prototype.parseUnary = function () {
+  if (this.matchOperator("-")) {
+    return { type: "unary", op: "-", value: this.parseUnary() };
+  }
+  return this.parsePrimary();
+};
+
+Parser.prototype.parsePrimary = function () {
+  const token = this.peek();
+  if (!token) throw new Error("Unexpected end of expression.");
+
+  if (token.type === "number") {
+    this.advance();
+    return { type: "number", value: token.value };
+  }
+
+  if (token.type === "variable") {
+    this.advance();
+    return { type: "variable", name: token.name };
+  }
+
+  if (token.type === "constant") {
+    this.advance();
+    return { type: "constant", name: token.name, value: token.value };
+  }
+
+  if (token.type === "func") {
+    const funcToken = this.advance();
+    const next = this.peek();
+    if (!next || next.type !== "lparen") {
+      throw new Error(`Expected '(' after ${funcToken.name}.`);
+    }
+    this.advance();
+    const arg = this.parseExpression();
+    if (!this.peek() || this.peek().type !== "rparen") {
+      throw new Error("Missing closing parenthesis for function.");
+    }
+    this.advance();
+    return { type: "func", name: funcToken.name, arg };
+  }
+
+  if (token.type === "lparen") {
+    this.advance();
+    const node = this.parseExpression();
+    if (!this.peek() || this.peek().type !== "rparen") {
+      throw new Error("Missing closing parenthesis.");
+    }
+    this.advance();
+    return node;
+  }
+
+  throw new Error("Invalid token in expression.");
+};
+
+function differentiate(node) {
+  switch (node.type) {
+    case "number":
+      return { type: "number", value: 0 };
+    case "constant":
+      return { type: "number", value: 0 };
+    case "variable":
+      return { type: "number", value: 1 };
+    case "unary":
+      return { type: "unary", op: "-", value: differentiate(node.value) };
+    case "binary":
+      return differentiateBinary(node);
+    case "func":
+      return differentiateFunction(node);
+    default:
+      throw new Error("Unsupported expression.");
+  }
+}
+
+function differentiateBinary(node) {
+  const left = node.left;
+  const right = node.right;
+  const dLeft = differentiate(left);
+  const dRight = differentiate(right);
+
+  switch (node.op) {
+    case "+":
+      return { type: "binary", op: "+", left: dLeft, right: dRight };
+    case "-":
+      return { type: "binary", op: "-", left: dLeft, right: dRight };
+    case "*":
+      return {
+        type: "binary",
+        op: "+",
+        left: { type: "binary", op: "*", left: dLeft, right: right },
+        right: { type: "binary", op: "*", left: left, right: dRight },
+      };
+    case "/":
+      return {
+        type: "binary",
+        op: "/",
+        left: {
+          type: "binary",
+          op: "-",
+          left: { type: "binary", op: "*", left: dLeft, right: right },
+          right: { type: "binary", op: "*", left: left, right: dRight },
+        },
+        right: { type: "binary", op: "^", left: right, right: { type: "number", value: 2 } },
+      };
+    case "^":
+      return differentiatePower(left, right);
+    default:
+      throw new Error("Unsupported operator.");
+  }
+}
+
+function differentiatePower(base, exponent) {
+  if (exponent.type === "number") {
+    return {
+      type: "binary",
+      op: "*",
+      left: {
+        type: "binary",
+        op: "*",
+        left: { type: "number", value: exponent.value },
+        right: { type: "binary", op: "^", left: base, right: { type: "number", value: exponent.value - 1 } },
+      },
+      right: differentiate(base),
+    };
+  }
+
+  if (base.type === "constant" || base.type === "number") {
+    return {
+      type: "binary",
+      op: "*",
+      left: { type: "binary", op: "^", left: base, right: exponent },
+      right: { type: "binary", op: "*", left: { type: "func", name: "ln", arg: base }, right: differentiate(exponent) },
+    };
+  }
+
+  throw new Error("Unsupported exponent form for differentiation.");
+}
+
+function differentiateFunction(node) {
+  const arg = node.arg;
+  const dArg = differentiate(arg);
+
+  switch (node.name) {
+    case "sin":
+      return { type: "binary", op: "*", left: { type: "func", name: "cos", arg }, right: dArg };
+    case "cos":
+      return {
+        type: "binary",
+        op: "*",
+        left: { type: "unary", op: "-", value: { type: "func", name: "sin", arg } },
+        right: dArg,
+      };
+    case "tan":
+      return {
+        type: "binary",
+        op: "*",
+        left: {
+          type: "binary",
+          op: "/",
+          left: { type: "number", value: 1 },
+          right: {
+            type: "binary",
+            op: "^",
+            left: { type: "func", name: "cos", arg },
+            right: { type: "number", value: 2 },
+          },
+        },
+        right: dArg,
+      };
+    case "ln":
+      return { type: "binary", op: "*", left: { type: "binary", op: "/", left: { type: "number", value: 1 }, right: arg }, right: dArg };
+    case "log":
+      return {
+        type: "binary",
+        op: "*",
+        left: {
+          type: "binary",
+          op: "/",
+          left: { type: "number", value: 1 },
+          right: {
+            type: "binary",
+            op: "*",
+            left: arg,
+            right: { type: "func", name: "ln", arg: { type: "number", value: 10 } },
+          },
+        },
+        right: dArg,
+      };
+    case "exp":
+      return { type: "binary", op: "*", left: { type: "func", name: "exp", arg }, right: dArg };
+    default:
+      throw new Error(`Unsupported function: ${node.name}`);
+  }
+}
+
+function simplify(node) {
+  if (!node) return node;
+
+  if (node.type === "unary") {
+    const value = simplify(node.value);
+    if (value.type === "number") {
+      return { type: "number", value: -value.value };
+    }
+    return { type: "unary", op: node.op, value };
+  }
+
+  if (node.type === "binary") {
+    const left = simplify(node.left);
+    const right = simplify(node.right);
+
+    if (left.type === "number" && right.type === "number") {
+      return { type: "number", value: evaluateBinary(node.op, left.value, right.value) };
+    }
+
+    switch (node.op) {
+      case "+":
+        if (isZero(left)) return right;
+        if (isZero(right)) return left;
+        break;
+      case "-":
+        if (isZero(right)) return left;
+        if (isZero(left)) return { type: "unary", op: "-", value: right };
+        break;
+      case "*":
+        if (isZero(left) || isZero(right)) return { type: "number", value: 0 };
+        if (isOne(left)) return right;
+        if (isOne(right)) return left;
+        break;
+      case "/":
+        if (isZero(left)) return { type: "number", value: 0 };
+        if (isOne(right)) return left;
+        break;
+      case "^":
+        if (isZero(right)) return { type: "number", value: 1 };
+        if (isOne(right)) return left;
+        if (isZero(left)) return { type: "number", value: 0 };
+        if (isOne(left)) return { type: "number", value: 1 };
+        break;
+    }
+
+    return { type: "binary", op: node.op, left, right };
+  }
+
+  if (node.type === "func") {
+    return { type: "func", name: node.name, arg: simplify(node.arg) };
+  }
+
+  return node;
+}
+
+function evaluateBinary(op, left, right) {
+  switch (op) {
+    case "+":
+      return left + right;
+    case "-":
+      return left - right;
+    case "*":
+      return left * right;
+    case "/":
+      return left / right;
+    case "^":
+      return Math.pow(left, right);
+    default:
+      return NaN;
+  }
+}
+
+function isZero(node) {
+  return node.type === "number" && Math.abs(node.value) < 1e-12;
+}
+
+function isOne(node) {
+  return node.type === "number" && Math.abs(node.value - 1) < 1e-12;
+}
+
+function toString(node, parentPrecedence) {
+  const precedence = getPrecedence(node);
+  const needsParens = parentPrecedence && precedence < parentPrecedence;
+
+  let result;
+  switch (node.type) {
+    case "number":
+      result = formatNumber(node.value);
+      break;
+    case "variable":
+      result = node.name;
+      break;
+    case "constant":
+      result = node.name;
+      break;
+    case "unary":
+      result = "-" + toString(node.value, precedence);
+      break;
+    case "func":
+      result = `${node.name}(${toString(node.arg, 0)})`;
+      break;
+    case "binary":
+      result = formatBinary(node, precedence);
+      break;
+    default:
+      result = "";
+  }
+
+  return needsParens ? `(${result})` : result;
+}
+
+function formatBinary(node, precedence) {
+  if (node.op === "*") {
+    const left = toString(node.left, precedence);
+    const right = toString(node.right, precedence);
+    if (shouldOmitMultiply(node.left, node.right)) {
+      return `${left}${right}`;
+    }
+    return `${left} * ${right}`;
+  }
+
+  const left = toString(node.left, precedence);
+  const right = toString(node.right, precedence + (node.op === "^" ? 1 : 0));
+  return `${left} ${node.op} ${right}`;
+}
+
+function shouldOmitMultiply(left, right) {
+  if (left.type !== "number") return false;
+  if (right.type === "variable" || right.type === "func") return true;
+  if (right.type === "binary" && right.op === "^" && right.left.type === "variable") return true;
+  return false;
+}
+
+function formatNumber(value) {
+  if (!isFinite(value)) return "Error";
+  if (Math.abs(value - Math.round(value)) < 1e-10) {
+    return `${Math.round(value)}`;
+  }
+  return `${parseFloat(value.toFixed(6))}`;
+}
+
+function getPrecedence(node) {
+  if (!node) return 0;
+  if (node.type === "binary") {
+    switch (node.op) {
+      case "+":
+      case "-":
+        return 1;
+      case "*":
+      case "/":
+        return 2;
+      case "^":
+        return 3;
+      default:
+        return 0;
+    }
+  }
+  if (node.type === "unary") return 4;
+  return 5;
+}
 
 
 function numberToWords(num) {

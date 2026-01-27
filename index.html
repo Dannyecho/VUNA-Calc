@@ -33,10 +33,25 @@
                   <div id="steps" class="steps-container"></div>
                 </function>
 
+                <div class="diff-panel">
+                  <h6>Differentiate</h6>
+                  <div class="diff-controls">
+                    <input
+                      type="text"
+                      class="form-control diff-input"
+                      id="diff-input"
+                      placeholder="e.g., x^3 + 4x or sin(x)"
+                    />
+                    <button
+                      class="btn btn-operator diff-btn"
+                      onclick="differentiateExpression()"
+                    >
+                      d/dx
+                    </button>
+                  </div>
+                  <div id="diff-output" class="diff-output"></div>
+                </div>
 
-
-
-                
                 <div class="word-display-area" id="word-area">
                   <div id="word-result"></div>
                   <button
