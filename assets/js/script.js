@@ -1,6 +1,9 @@
-// ============================================
-// CALCULATOR STATE & CORE LOGIC
-// ============================================
+var left = '';
+var operator = '';
+var right = '';
+var steps = [];
+var MAX_STEPS = 6;
+
 
 // Using expression-based approach instead of left/operator/right
 var currentExpression = "";
@@ -52,234 +55,58 @@ function operatorToResult(value) {
  * Clear all - reset calculator
  */
 function clearResult() {
-  currentExpression = "";
-  document.getElementById("word-result-text").textContent = "";
+  left = "";
+  right = "";
+  operator = "";
+  steps = [];
+
+  document.getElementById("word-result").innerHTML = "";
   document.getElementById("word-area").style.display = "none";
+  document.getElementById("steps").innerText = "";
+
   updateResult();
 }
 
-/**
- * Evaluate the expression using advanced math engine
- * Supports PEMDAS, parentheses, and chained operations
- */
+
+
 function calculateResult() {
-  if (currentExpression.length === 0) return;
+  if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
-  try {
-    // Evaluate the expression using safe eval with Function constructor
-    // This properly handles parentheses and order of operations
-    const result = evaluateExpression(currentExpression);
+  const l = parseFloat(left);
+  const r = parseFloat(right);
+  let result;
 
-    if (result === "Error" || isNaN(result) || !isFinite(result)) {
-      currentExpression = "Error";
-    } else {
-      // Save to history before updating
-      saveToHistory(currentExpression, result);
-
-      // Update current expression with result
-      currentExpression = result.toString();
-    }
-  } catch (error) {
-    currentExpression = "Error";
+  switch (operator) {
+    case "+":
+      result = l + r;
+      break;
+    case "-":
+      result = l - r;
+      break;
+    case "*":
+      result = l * r;
+      break;
+    case "/":
+      result = r !== 0 ? l / r : "Error";
+      break;
+    default:
+      return;
   }
 
+  if (steps.length < MAX_STEPS) {
+    steps.push(`Step ${steps.length + 1}: ${l} ${operator} ${r} = ${result}`);
+  }
+
+  left = result.toString();
+  operator = "";
+  right = "";
+
+  updateStepsDisplay();
   updateResult();
 }
 
-/**
- * Safe expression evaluator with PEMDAS support
- * Uses Function constructor for safe evaluation
- */
-function evaluateExpression(expr) {
-  // Replace division by zero check
-  if (expr.includes("/0")) {
-    return "Error";
-  }
 
-  // Clean the expression
-  const cleanExpr = expr.replace(/[^0-9+\-*/.()]/g, "");
 
-  // Use Function constructor for safe evaluation (supports PEMDAS)
-  try {
-    const result = new Function("return " + cleanExpr)();
-    return parseFloat(result.toFixed(10)); // Round to avoid floating point errors
-  } catch (e) {
-    return "Error";
-  }
-}
-
-// ============================================
-// HISTORY MANAGEMENT
-// ============================================
-
-/**
- * Save calculation to history
- */
-function saveToHistory(expression, result) {
-  const historyItem = {
-    expression: expression,
-    result: result,
-    expressionWords: expressionToWords(expression, result),
-    timestamp: new Date().toISOString(),
-  };
-
-  calculationHistory.unshift(historyItem); // Add to beginning
-
-  // Keep only last 50 items
-  if (calculationHistory.length > 50) {
-    calculationHistory.pop();
-  }
-
-  saveHistoryToStorage();
-  renderHistory();
-}
-
-/**
- * Convert expression to English words
- * This preserves the unique number-to-words feature!
- */
-function expressionToWords(expression, result) {
-  // Parse the expression to extract operands and operators
-  let words = expression
-    .replace(/\*/g, " times ")
-    .replace(/\//g, " divided by ")
-    .replace(/\+/g, " plus ")
-    .replace(/\-/g, " minus ")
-    .replace(/\(/g, "open bracket ")
-    .replace(/\)/g, " close bracket");
-
-  // Replace numbers with words (simplified version for history)
-  words = words.replace(/(\d+\.?\d*)/g, (match) => {
-    const num = parseFloat(match);
-    return numberToWords(num);
-  });
-
-  words += " equals " + numberToWords(result);
-
-  return words.trim();
-}
-
-/**
- * Clear all history
- */
-function clearHistory() {
-  if (calculationHistory.length === 0) return;
-
-  if (confirm("Clear all calculation history?")) {
-    calculationHistory = [];
-    saveHistoryToStorage();
-    renderHistory();
-  }
-}
-
-/**
- * Render history items to the DOM
- */
-function renderHistory() {
-  const historyList = document.getElementById("history-list");
-  const clearBtn = document.getElementById("clear-history-btn");
-
-  historyList.innerHTML = "";
-
-  if (calculationHistory.length === 0) {
-    const template = document.getElementById("history-empty-template");
-    const clone = template.content.cloneNode(true);
-    historyList.appendChild(clone);
-    clearBtn.disabled = true;
-    return;
-  }
-
-  clearBtn.disabled = false;
-  const template = document.getElementById("history-item-template");
-
-  calculationHistory.forEach((item, index) => {
-    const clone = template.content.cloneNode(true);
-    const time = formatTimestamp(item.timestamp);
-    const displayExpr = item.expression.replace(/\*/g, "×").replace(/\//g, "÷");
-
-    const historyItem = clone.querySelector(".history-item");
-    historyItem.onclick = () => loadFromHistory(index);
-
-    clone.querySelector(".history-item-expression").textContent =
-      `${displayExpr} = ${item.result}`;
-    clone.querySelector(".history-item-words").textContent =
-      item.expressionWords;
-    clone.querySelector(".history-item-time").textContent = time;
-
-    historyList.appendChild(clone);
-  });
-}
-
-/**
- * Load a calculation from history
- */
-function loadFromHistory(index) {
-  const item = calculationHistory[index];
-  if (item) {
-    currentExpression = item.result.toString();
-    updateResult();
-  }
-}
-
-/**
- * Format timestamp for display
- */
-function formatTimestamp(isoString) {
-  const date = new Date(isoString);
-  const now = new Date();
-  const diffMs = now - date;
-  const diffMins = Math.floor(diffMs / 60000);
-
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
-
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-
-  return date.toLocaleDateString() + " " + date.toLocaleTimeString();
-}
-
-/**
- * Save history to localStorage
- */
-function saveHistoryToStorage() {
-  try {
-    localStorage.setItem(
-      "vuna_calc_history",
-      JSON.stringify(calculationHistory),
-    );
-  } catch (e) {
-    console.error("Failed to save history:", e);
-  }
-}
-
-/**
- * Load history from localStorage
- */
-function loadHistoryFromStorage() {
-  try {
-    const stored = localStorage.getItem("vuna_calc_history");
-    if (stored) {
-      calculationHistory = JSON.parse(stored);
-    }
-  } catch (e) {
-    console.error("Failed to load history:", e);
-    calculationHistory = [];
-  }
-}
-
-// ============================================
-// NUMBER TO WORDS CONVERTER
-// ============================================
-
-// ============================================
-// NUMBER TO WORDS CONVERTER
-// ============================================
-
-/**
- * Convert a number to English words
- * Handles integers, decimals, and negative numbers
- */
 function numberToWords(num) {
   if (num === "Error") return "Error";
   if (num === "") return "";
@@ -466,4 +293,11 @@ function toggleHistory() {
     btn.textContent = "Show History";
     btn.classList.replace("btn-outline-primary", "btn-primary");
   }
+}
+
+function updateStepsDisplay() {
+  const stepsDiv = document.getElementById("steps");
+  if (!stepsDiv) return;
+
+  stepsDiv.innerText = steps.join("\n");
 }
