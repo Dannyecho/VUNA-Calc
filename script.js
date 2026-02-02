@@ -1,9 +1,6 @@
 var left = '';
 var operator = '';
 var right = '';
-var steps = [];
-var MAX_STEPS = 6;
-
 
 function appendToResult(value) {
     if (operator.length === 0) {
@@ -44,56 +41,53 @@ function operatorToResult(value) {
 }
 
 function clearResult() {
-  left = "";
-  right = "";
-  operator = "";
-  steps = [];
-
-  document.getElementById("word-result").innerHTML = "";
-  document.getElementById("word-area").style.display = "none";
-  document.getElementById("steps").innerText = "";
-
-  updateResult();
+    left = '';
+    right = '';
+    operator = '';
+    document.getElementById('word-result').innerHTML = '';
+    document.getElementById('word-area').style.display = 'none';
+    updateResult();
 }
-
-
 
 function calculateResult() {
-  if (left.length === 0 || operator.length === 0 || right.length === 0) return;
+    if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
-  const l = parseFloat(left);
-  const r = parseFloat(right);
-  let result;
+    let result;
+    const l = parseFloat(left);
+    const r = parseFloat(right);
 
-  switch (operator) {
-    case "+":
-      result = l + r;
-      break;
-    case "-":
-      result = l - r;
-      break;
-    case "*":
-      result = l * r;
-      break;
-    case "/":
-      result = r !== 0 ? l / r : "Error";
-      break;
-    default:
-      return;
-  }
+    switch (operator) {
+        case '+': result = l + r; break;
+        case '-': result = l - r; break;
+        case '*': result = l * r; break;
+        case '/': result = r !== 0 ? l / r : 'Error'; break;
+        default: return;
+    }
 
-  if (steps.length < MAX_STEPS) {
-    steps.push(`Step ${steps.length + 1}: ${l} ${operator} ${r} = ${result}`);
-  }
-
-  left = result.toString();
-  operator = "";
-  right = "";
-
-  updateStepsDisplay();
-  updateResult();
+    left = result.toString();
+    operator = '';
+    right = '';
+    updateResult();
 }
+function CalculateCubeRoot() {
+    if (left.length === 0) return;
 
+    // If there is a pending operation, solve it first
+    if (operator && right) {
+        calculateResult();
+    }
+
+    let value = parseFloat(left);
+    if (isNaN(value)) return;
+
+    // Cube root (supports negative numbers)
+    let result = Math.cbrt(value);
+
+    left = result.toFixed(6).toString();
+    operator = '';
+    right = '';
+    updateResult();
+}
 
 
 function numberToWords(num) {
@@ -204,11 +198,4 @@ function enableSpeakButton() {
     if (!speakBtn) return;
     const hasContent = document.getElementById('word-result').innerHTML.trim().length > 0;
     speakBtn.disabled = !hasContent;
-}
-
-function updateStepsDisplay() {
-  const stepsDiv = document.getElementById("steps");
-  if (!stepsDiv) return;
-
-  stepsDiv.innerText = steps.join("\n");
 }
