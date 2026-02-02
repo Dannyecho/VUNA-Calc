@@ -95,15 +95,6 @@ function calculateResult() {
 
   updateStepsDisplay();
   updateResult();
-
-  // Explicitly show the result in words after calculation
-  const wordResult = document.getElementById('word-result');
-  const wordArea = document.getElementById('word-area');
-  const language = languageSelect ? languageSelect.value : 'english';
-  const words = language === 'hausa' ? numberToWordsHausa(left) : numberToWords(left);
-  wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + words + '</strong>';
-  wordArea.style.display = 'flex';
-  enableSpeakButton();
 }
 
 function numberToWords(num) {
@@ -232,6 +223,213 @@ function numberToWordsHausa(num) {
     return result.trim();
 }
 
+function numberToWordsFrench(num) {
+    if (num === 'Error') return 'Erreur';
+    if (num === '') return '';
+
+    const n = parseFloat(num);
+    if (isNaN(n)) return '';
+    if (n === 0) return 'Zéro';
+
+    const ones = ['', 'Un', 'Deux', 'Trois', 'Quatre', 'Cinq', 'Six', 'Sept', 'Huit', 'Neuf'];
+    const tens = ['', 'Dix', 'Vingt', 'Trente', 'Quarante', 'Cinquante', 'Soixante', 'Soixante', 'Quatre-vingt', 'Quatre-vingt'];
+    const teens = ['Dix', 'Onze', 'Douze', 'Treize', 'Quatorze', 'Quinze', 'Seize', 'Dix-sept', 'Dix-huit', 'Dix-neuf'];
+    const scales = ['', 'Mille', 'Million', 'Milliard', 'Billion'];
+
+    function convertGroup(val) {
+        let res = '';
+        
+        if (val >= 100) {
+            const hundreds = Math.floor(val / 100);
+            if (hundreds === 1) {
+                res += 'Cent ';
+            } else {
+                res += ones[hundreds] + ' Cent';
+                if (val % 100 === 0) res += 's';
+                res += ' ';
+            }
+            val %= 100;
+        }
+        
+        if (val >= 10 && val <= 19) {
+            res += teens[val - 10] + ' ';
+        } else if (val >= 20) {
+            const tensDigit = Math.floor(val / 10);
+            const onesDigit = val % 10;
+            
+            if (tensDigit === 7 || tensDigit === 9) {
+                // 70-79 = soixante-dix, 90-99 = quatre-vingt-dix
+                res += tens[tensDigit] + '-';
+                if (onesDigit === 0) {
+                    res += 'Dix ';
+                } else {
+                    res += teens[onesDigit] + ' ';
+                }
+            } else if (tensDigit === 8) {
+                // 80-89 = quatre-vingt
+                res += tens[tensDigit];
+                if (onesDigit === 0) {
+                    res += 's ';
+                } else {
+                    res += '-' + ones[onesDigit] + ' ';
+                }
+            } else {
+                res += tens[tensDigit];
+                if (onesDigit === 1 && tensDigit !== 1) {
+                    res += ' et Un ';
+                } else if (onesDigit > 0) {
+                    res += '-' + ones[onesDigit] + ' ';
+                } else {
+                    res += ' ';
+                }
+            }
+        } else if (val > 0) {
+            res += ones[val] + ' ';
+        }
+        
+        return res.trim();
+    }
+
+    let sign = n < 0 ? 'Négatif ' : '';
+    let absN = Math.abs(n);
+    let parts = absN.toString().split('.');
+    let integerPart = parseInt(parts[0]);
+    let decimalPart = parts[1];
+
+    let wordArr = [];
+    if (integerPart === 0) {
+        wordArr.push('Zéro');
+    } else {
+        let scaleIdx = 0;
+        while (integerPart > 0) {
+            let chunk = integerPart % 1000;
+            if (chunk > 0) {
+                let chunkWords = convertGroup(chunk);
+                if (scaleIdx === 0) {
+                    wordArr.unshift(chunkWords);
+                } else if (scaleIdx === 1) {
+                    // Mille doesn't pluralize
+                    wordArr.unshift(chunkWords + ' ' + scales[scaleIdx]);
+                } else {
+                    wordArr.unshift(chunkWords + ' ' + scales[scaleIdx] + (chunk > 1 ? 's' : ''));
+                }
+            }
+            integerPart = Math.floor(integerPart / 1000);
+            scaleIdx++;
+        }
+    }
+
+    let result = sign + wordArr.join(' ').trim();
+
+    if (decimalPart) {
+        result += ' Virgule';
+        for (let digit of decimalPart) {
+            result += ' ' + (digit === '0' ? 'Zéro' : ones[parseInt(digit)]);
+        }
+    }
+
+    return result.trim();
+}
+
+function numberToWordsSpanish(num) {
+    if (num === 'Error') return 'Error';
+    if (num === '') return '';
+
+    const n = parseFloat(num);
+    if (isNaN(n)) return '';
+    if (n === 0) return 'Cero';
+
+    const ones = ['', 'Uno', 'Dos', 'Tres', 'Cuatro', 'Cinco', 'Seis', 'Siete', 'Ocho', 'Nueve'];
+    const tens = ['', 'Diez', 'Veinte', 'Treinta', 'Cuarenta', 'Cincuenta', 'Sesenta', 'Setenta', 'Ochenta', 'Noventa'];
+    const teens = ['Diez', 'Once', 'Doce', 'Trece', 'Catorce', 'Quince', 'Dieciséis', 'Diecisiete', 'Dieciocho', 'Diecinueve'];
+    const twenties = ['Veinte', 'Veintiuno', 'Veintidós', 'Veintitrés', 'Veinticuatro', 'Veinticinco', 'Veintiséis', 'Veintisiete', 'Veintiocho', 'Veintinueve'];
+    const hundreds = ['', 'Ciento', 'Doscientos', 'Trescientos', 'Cuatrocientos', 'Quinientos', 'Seiscientos', 'Setecientos', 'Ochocientos', 'Novecientos'];
+    const scales = ['', 'Mil', 'Millón', 'Mil Millones', 'Billón'];
+
+    function convertGroup(val) {
+        let res = '';
+        
+        if (val >= 100) {
+            const hundredsDigit = Math.floor(val / 100);
+            if (val === 100) {
+                res += 'Cien ';
+            } else {
+                res += hundreds[hundredsDigit] + ' ';
+            }
+            val %= 100;
+        }
+        
+        if (val >= 10 && val <= 19) {
+            res += teens[val - 10] + ' ';
+        } else if (val >= 20 && val <= 29) {
+            res += twenties[val - 20] + ' ';
+        } else if (val >= 30) {
+            const tensDigit = Math.floor(val / 10);
+            const onesDigit = val % 10;
+            res += tens[tensDigit];
+            if (onesDigit > 0) {
+                res += ' y ' + ones[onesDigit];
+            }
+            res += ' ';
+        } else if (val > 0) {
+            res += ones[val] + ' ';
+        }
+        
+        return res.trim();
+    }
+
+    let sign = n < 0 ? 'Negativo ' : '';
+    let absN = Math.abs(n);
+    let parts = absN.toString().split('.');
+    let integerPart = parseInt(parts[0]);
+    let decimalPart = parts[1];
+
+    let wordArr = [];
+    if (integerPart === 0) {
+        wordArr.push('Cero');
+    } else {
+        let scaleIdx = 0;
+        while (integerPart > 0) {
+            let chunk = integerPart % 1000;
+            if (chunk > 0) {
+                let chunkWords = convertGroup(chunk);
+                if (scaleIdx === 0) {
+                    wordArr.unshift(chunkWords);
+                } else if (scaleIdx === 1) {
+                    // Mil doesn't need "uno"
+                    if (chunk === 1) {
+                        wordArr.unshift(scales[scaleIdx]);
+                    } else {
+                        wordArr.unshift(chunkWords + ' ' + scales[scaleIdx]);
+                    }
+                } else if (scaleIdx === 2) {
+                    // Million/Millones
+                    if (chunk === 1) {
+                        wordArr.unshift('Un ' + scales[scaleIdx]);
+                    } else {
+                        wordArr.unshift(chunkWords + ' Millones');
+                    }
+                } else {
+                    wordArr.unshift(chunkWords + ' ' + scales[scaleIdx]);
+                }
+            }
+            integerPart = Math.floor(integerPart / 1000);
+            scaleIdx++;
+        }
+    }
+
+    let result = sign + wordArr.join(' ').trim();
+
+    if (decimalPart) {
+        result += ' Punto';
+        for (let digit of decimalPart) {
+            result += ' ' + (digit === '0' ? 'Cero' : ones[parseInt(digit)]);
+        }
+    }
+
+    return result.trim();
+}
+
 function updateResult() {
     const display = left + (operator ? ' ' + operator + ' ' : '') + right;
     document.getElementById('result').value = display || '0';
@@ -239,10 +437,25 @@ function updateResult() {
     const wordResult = document.getElementById('word-result');
     const wordArea = document.getElementById('word-area');
 
-    // Show words when we have a complete number (left is set and no operator/right in progress)
+    // Show words when we have a complete number
     if (left && !operator && !right) {
         const language = languageSelect ? languageSelect.value : 'english';
-        const words = language === 'hausa' ? numberToWordsHausa(left) : numberToWords(left);
+        let words = '';
+        
+        switch(language) {
+            case 'french':
+                words = numberToWordsFrench(left);
+                break;
+            case 'spanish':
+                words = numberToWordsSpanish(left);
+                break;
+            case 'hausa':
+                words = numberToWordsHausa(left);
+                break;
+            default:
+                words = numberToWords(left);
+        }
+        
         wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + words + '</strong>';
         wordArea.style.display = 'flex';
     } else {
@@ -256,7 +469,6 @@ function speakResult() {
     const speakBtn = document.getElementById('speak-btn');
     const wordResultEl = document.getElementById('word-result');
 
-    // Get text content only (strips the <span class="small-label"> part if needed)
     const words = wordResultEl.querySelector('strong')?.innerText || '';
 
     if (!words) return;
@@ -268,6 +480,23 @@ function speakResult() {
     }
 
     const utterance = new SpeechSynthesisUtterance(words);
+    
+    // Set language for speech synthesis
+    const language = languageSelect ? languageSelect.value : 'english';
+    switch(language) {
+        case 'french':
+            utterance.lang = 'fr-FR';
+            break;
+        case 'spanish':
+            utterance.lang = 'es-ES';
+            break;
+        case 'hausa':
+            utterance.lang = 'ha-NG';
+            break;
+        default:
+            utterance.lang = 'en-US';
+    }
+    
     utterance.rate = 0.9;
     utterance.onstart = () => speakBtn.classList.add('speaking');
     utterance.onend = () => speakBtn.classList.remove('speaking');
@@ -284,6 +513,5 @@ function enableSpeakButton() {
 function updateStepsDisplay() {
   const stepsDiv = document.getElementById("steps");
   if (!stepsDiv) return;
-
   stepsDiv.innerText = steps.join("\n");
 }
