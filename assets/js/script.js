@@ -55,7 +55,32 @@ function clearResult() {
 
   updateResult();
 }
+function setPercentage() {
+  if (left.length === 0 || operator.length !== 0) return;
 
+  operator = "%";
+  updateResult();
+}
+
+function appendPercentage() {
+  const resultField = document.getElementById("result");
+
+  if (!resultField.value.includes("%")) {
+    resultField.value += "%";
+  }
+}
+function calculatePercentage(expression) {
+  const parts = expression.split("%");
+
+  if (parts.length !== 2) return null;
+
+  const percent = parseFloat(parts[0]);
+  const number = parseFloat(parts[1]);
+
+  if (isNaN(percent) || isNaN(number)) return null;
+
+  return (percent / 100) * number;
+}
 
 
 function calculateResult() {
@@ -78,12 +103,17 @@ function calculateResult() {
     case "/":
       result = r !== 0 ? l / r : "Error";
       break;
+    case "%":
+      result = (l / 100) * r;
+      break;
     default:
       return;
   }
 
   if (steps.length < MAX_STEPS) {
-    steps.push(`Step ${steps.length + 1}: ${l} ${operator} ${r} = ${result}`);
+    steps.push(
+      `Step ${steps.length + 1}: ${l} ${operator === "%" ? "% of" : operator} ${r} = ${result}`
+    );
   }
 
   left = result.toString();
@@ -93,8 +123,6 @@ function calculateResult() {
   updateStepsDisplay();
   updateResult();
 }
-
-
 
 function numberToWords(num) {
     if (num === 'Error') return 'Error';
