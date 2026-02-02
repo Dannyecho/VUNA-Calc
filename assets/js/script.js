@@ -1,6 +1,9 @@
 var left = '';
 var operator = '';
 var right = '';
+var steps = [];
+var MAX_STEPS = 6;
+
 
 function appendToResult(value) {
     if (operator.length === 0) {
@@ -41,37 +44,58 @@ function operatorToResult(value) {
 }
 
 function clearResult() {
-    left = '';
-    right = '';
-    operator = '';
-    document.getElementById('word-result').innerHTML = '';
-    document.getElementById('word-chinese').innerHTML = '';
-    document.getElementById('word-area').style.display = 'none';
-    updateResult();
+  left = "";
+  right = "";
+  operator = "";
+  steps = [];
+
+  document.getElementById("word-result").innerHTML = "";
+  document.getElementById("word-area").style.display = "none";
+  document.getElementById("steps").innerText = "";
+
+  updateResult();
 }
+
+
 
 function calculateResult() {
-    if (left.length === 0 || operator.length === 0 || right.length === 0) return;
+  if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
-    let result;
-    const l = parseFloat(left);
-    const r = parseFloat(right);
+  const l = parseFloat(left);
+  const r = parseFloat(right);
+  let result;
 
-    switch (operator) {
-        case '+': result = l + r; break;
-        case '-': result = l - r; break;
-        case '*': result = l * r; break;
-        case '/': result = r !== 0 ? l / r : 'Error'; break;
-        default: return;
-    }
+  switch (operator) {
+    case "+":
+      result = l + r;
+      break;
+    case "-":
+      result = l - r;
+      break;
+    case "*":
+      result = l * r;
+      break;
+    case "/":
+      result = r !== 0 ? l / r : "Error";
+      break;
+    default:
+      return;
+  }
 
-    left = result.toString();
-    operator = '';
-    right = '';
-    updateResult();
+  if (steps.length < MAX_STEPS) {
+    steps.push(`Step ${steps.length + 1}: ${l} ${operator} ${r} = ${result}`);
+  }
+
+  left = result.toString();
+  operator = "";
+  right = "";
+
+  updateStepsDisplay();
+  updateResult();
 }
 
-// English number converter (existing)
+
+
 function numberToWords(num) {
     if (num === 'Error') return 'Error';
     if (num === '') return '';
@@ -135,100 +159,32 @@ function numberToWords(num) {
     return result.trim();
 }
 
-// New: Chinese number converter
-function numberToChinese(num) {
-    if (num === 'Error') return '错误';
-    if (num === '') return '';
-
-    const chNums = ['零','一','二','三','四','五','六','七','八','九'];
-    const chUnits = ['', '十', '百', '千'];
-    const chSections = ['', '万', '亿', '兆'];
-
-    let n = parseFloat(num);
-    if (isNaN(n)) return '';
-    let sign = n < 0 ? '负' : '';
-    n = Math.abs(n);
-    let parts = n.toString().split('.');
-    let integerPart = parts[0];
-    let decimalPart = parts[1] || '';
-
-    // Convert integer part
-    function intToChinese(str) {
-        let result = '';
-        let len = str.length;
-        let zeroFlag = false;
-        let sectionCount = 0;
-        while (len > 0) {
-            let section = str.slice(Math.max(0, len-4), len);
-            let sectionStr = '';
-            for (let i=0; i<section.length; i++) {
-                let digit = parseInt(section[i]);
-                let pos = section.length - i -1;
-                if (digit === 0) {
-                    zeroFlag = true;
-                } else {
-                    if (zeroFlag) {
-                        sectionStr += '零';
-                        zeroFlag = false;
-                    }
-                    sectionStr += chNums[digit] + chUnits[pos];
-                }
-            }
-            if (sectionStr !== '') {
-                sectionStr += chSections[sectionCount];
-            }
-            result = sectionStr + result;
-            sectionCount++;
-            len -= 4;
-        }
-        return result || '零';
-    }
-
-    // Convert decimal part
-    let decimalStr = '';
-    if (decimalPart) {
-        decimalStr = '点';
-        for (let d of decimalPart) {
-            decimalStr += chNums[parseInt(d)];
-        }
-    }
-
-    return sign + intToChinese(integerPart) + decimalStr;
-}
-
 function updateResult() {
     const display = left + (operator ? ' ' + operator + ' ' : '') + right;
     document.getElementById('result').value = display || '0';
 
     const wordResult = document.getElementById('word-result');
-    const wordChinese = document.getElementById('word-chinese');
     const wordArea = document.getElementById('word-area');
 
     if (left && !operator && !right) {
         wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + numberToWords(left) + '</strong>';
-        wordChinese.innerHTML = '<span class="small-label">结果 (中文)</span><strong>' + numberToChinese(left) + '</strong>';
         wordArea.style.display = 'flex';
     } else {
         wordResult.innerHTML = '';
-        wordChinese.innerHTML = '';
         wordArea.style.display = 'none';
     }
     enableSpeakButton();
-    enableSpeakButtonChinese();
 }
 
-function speakResult(lang='en') {
-    let text = '';
-    let speakBtn;
-    if(lang === 'zh-CN'){
-        text = document.getElementById('word-chinese').querySelector('strong')?.innerText || '';
-        speakBtn = document.getElementById('speak-btn-zh');
-    } else {
-        text = document.getElementById('word-result').querySelector('strong')?.innerText || '';
-        speakBtn = document.getElementById('speak-btn');
-    }
+function speakResult() {
+    const speakBtn = document.getElementById('speak-btn');
+    const wordResultEl = document.getElementById('word-result');
 
-    if (!text) return;
+    // Get text content only (strips the <span class="small-label"> part if needed)
+    // Actually we just want the number part
+    const words = wordResultEl.querySelector('strong')?.innerText || '';
+
+    if (!words) return;
 
     if (window.speechSynthesis.speaking) {
         window.speechSynthesis.cancel();
@@ -236,8 +192,7 @@ function speakResult(lang='en') {
         return;
     }
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
+    const utterance = new SpeechSynthesisUtterance(words);
     utterance.rate = 0.9;
     utterance.onstart = () => speakBtn.classList.add('speaking');
     utterance.onend = () => speakBtn.classList.remove('speaking');
@@ -251,9 +206,52 @@ function enableSpeakButton() {
     speakBtn.disabled = !hasContent;
 }
 
-function enableSpeakButtonChinese() {
-    const speakBtn = document.getElementById('speak-btn-zh');
-    if (!speakBtn) return;
-    const hasContent = document.getElementById('word-chinese').innerHTML.trim().length > 0;
-    speakBtn.disabled = !hasContent;
+function updateStepsDisplay() {
+  const stepsDiv = document.getElementById("steps");
+  if (!stepsDiv) return;
+
+  stepsDiv.innerText = steps.join("\n");
+}
+
+
+// --- NEW PHANTOM PREVIEW FUNCTION ---
+
+function updatePreview() {
+    const previewEl = document.getElementById("preview-result");
+    
+    // 1. If the element is missing, stop.
+    if (!previewEl) return;
+
+    // 2. If we don't have a complete equation (Left + Operator + Right), hide preview.
+    if (left.length === 0 || operator.length === 0 || right.length === 0) {
+        previewEl.innerText = "";
+        return;
     }
+
+    // 3. Convert strings to numbers
+    const l = parseFloat(left);
+    const r = parseFloat(right);
+    let result = 0;
+
+    // 4. Calculate based on operator
+    switch (operator) {
+        case "+": result = l + r; break;
+        case "-": result = l - r; break;
+        case "*": result = l * r; break;
+        case "/": 
+            if (r === 0) { previewEl.innerText = ""; return; }
+            result = l / r; 
+            break;
+        default: return;
+    }
+
+    // 5. Update the text (Show nothing if result is NaN or infinite)
+    if (isFinite(result)) {
+        previewEl.innerText = result;
+    } else {
+        previewEl.innerText = "";
+    }
+}
+
+// AUTOMATIC TRIGGER: Runs this function every 100ms to check for changes
+setInterval(updatePreview, 100);
