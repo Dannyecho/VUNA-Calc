@@ -241,10 +241,9 @@ function handleSpokenMath(text) {
   const tokens = normalizeSpeech(text);
 
   tokens.forEach(token => {
-    if (["+","-","*","/"].includes(token)) {
+    if (["+","-","*","x","/"].includes(token)) {
       operatorToResult(token);
-    } else if (token === "=") {
-      calculateResult();
+    
     } else {
       appendToResult(token);
     }
@@ -256,18 +255,17 @@ function normalizeSpeech(text) {
   let normalized = text.toLowerCase();
 
   const replacements = {
-    "plus": "+",
-    "add": "+",
-    "minus": "-",
-    "subtract": "-",
-    "times": "*",
-    "multiply": "*",
-    "multiplied by": "*",
-    "divide": "/",
-    "divided by": "/",
-    "equals": "=",
-    "equal": "="
-  };
+  "multiplied by": "*",
+  "divided by": "/",
+  "times": "*",
+  "x": "*",
+  "multiply": "*",
+  "plus": "+",
+  "add": "+",
+  "minus": "-",
+  "subtract": "-"
+};
+
 
   for (let key in replacements) {
     normalized = normalized.replaceAll(key, replacements[key]);
@@ -289,6 +287,8 @@ function normalizeSpeech(text) {
   for (let word in numbers) {
     normalized = normalized.replaceAll(word, numbers[word]);
   }
+
+  normalized = normalized.replace(/([\+\-\*\/])/g, ' $1 ');
 
   // Split into tokens
   return normalized
