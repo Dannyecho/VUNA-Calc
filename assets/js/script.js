@@ -1,103 +1,235 @@
 var left = '';
 var operator = '';
 var right = '';
-let wordPlaceholder = document.getElementById('word-result');
-let hisory = [];
+
 function appendToResult(value) {
-    if (operator.length == 0) {
+    if (operator.length === 0) {
+        left += value.toString();
+    } else {
+        right += value.toString();
+    }
+    updateResult();
+}
+
+function bracketToResult(value) {
+    if (operator.length === 0) {
         left += value;
     } else {
         right += value;
     }
     updateResult();
 }
-function bracketToResult(value) {
-    document.getElementById('result').value += value;
+
+function backspace() {
+    if (right.length > 0) {
+        right = right.slice(0, -1);
+    } else if (operator.length > 0) {
+        operator = '';
+    } else if (left.length > 0) {
+        left = left.slice(0, -1);
+    }
+    updateResult();
 }
+
 function operatorToResult(value) {
-    if (right.length) {
+    if (left.length === 0) return;
+    if (right.length > 0) {
         calculateResult();
     }
     operator = value;
     updateResult();
 }
+
 function clearResult() {
     left = '';
     right = '';
     operator = '';
-
-    document.getElementById('word-text').innerHTML = '';
+    document.getElementById('word-result').innerHTML = '';
+    document.getElementById('word-area').style.display = 'none';
     updateResult();
-    enableSpeakButton();
+}
+
+function calculateResult() {
+    if (left.length === 0 || operator.length === 0 || right.length === 0) return;
+
+    let result;
+    const l = parseFloat(left);
+    const r = parseFloat(right);
+
+    switch (operator) {
+        case '+': result = l + r; break;
+        case '-': result = l - r; break;
+        case '*': result = l * r; break;
+        case '/': result = r !== 0 ? l / r : 'Error'; break;
+        default: return;
+    }
+
+    left = result.toString();
+    operator = '';
+    right = '';
+    updateResult();
+}
+function CalculateCubeRoot() {
+    if (left.length === 0) return;
+
+    // If there is a pending operation, solve it first
+    if (operator && right) {
+        calculateResult();
+    }
+
+    let value = parseFloat(left);
+    if (isNaN(value)) return;
+
+    // Cube root (supports negative numbers)
+    let result = Math.cbrt(value);
+
+    left = result.toFixed(6).toString();
+    operator = '';
+    right = '';
+    updateResult();
+}
+
+
+function numberToWords(num) {
+    if (num === 'Error') return 'Error';
+    if (num === '') return '';
+
+    const n = parseFloat(num);
+    if (isNaN(n)) return '';
+    if (n === 0) return 'Zero';
+
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const scales = ['', 'Thousand', 'Million', 'Billion', 'Trillion'];
+
+    function convertGroup(val) {
+        let res = '';
+        if (val >= 100) {
+            res += ones[Math.floor(val / 100)] + ' Hundred ';
+            val %= 100;
+        }
+        if (val >= 10 && val <= 19) {
+            res += teens[val - 10] + ' ';
+        } else if (val >= 20) {
+            res += tens[Math.floor(val / 10)] + (val % 10 !== 0 ? '-' + ones[val % 10] : '') + ' ';
+        } else if (val > 0) {
+            res += ones[val] + ' ';
+        }
+        return res.trim();
+    }
+
+    let sign = n < 0 ? 'Negative ' : '';
+    let absN = Math.abs(n);
+    let parts = absN.toString().split('.');
+    let integerPart = parseInt(parts[0]);
+    let decimalPart = parts[1];
+
+    let wordArr = [];
+    if (integerPart === 0) {
+        wordArr.push('Zero');
+    } else {
+        let scaleIdx = 0;
+        while (integerPart > 0) {
+            let chunk = integerPart % 1000;
+            if (chunk > 0) {
+                let chunkWords = convertGroup(chunk);
+                wordArr.unshift(chunkWords + (scales[scaleIdx] ? ' ' + scales[scaleIdx] : ''));
+            }
+            integerPart = Math.floor(integerPart / 1000);
+            scaleIdx++;
+        }
+    }
+
+    let result = sign + wordArr.join(', ').trim();
+
+    if (decimalPart) {
+        result += ' Point';
+        for (let digit of decimalPart) {
+            result += ' ' + (digit === '0' ? 'Zero' : ones[parseInt(digit)]);
+        }
+    }
+
+    return result.trim();
 }
 
 function updateResult() {
-	@@ -187,47 +186,6 @@ function numberToWords(numVal) {
-        words = '';
-    }
+    const display = left + (operator ? ' ' + operator + ' ' : '') + right;
+    document.getElementById('result').value = display || '0';
 
-    document.getElementById('word-text').innerHTML = wordArr.join(' point ');
+    const wordResult = document.getElementById('word-result');
+    const wordArea = document.getElementById('word-area');
+
+    if (left && !operator && !right) {
+        wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + numberToWords(left) + '</strong>';
+        wordArea.style.display = 'flex';
+    } else {
+        wordResult.innerHTML = '';
+        wordArea.style.display = 'none';
+    }
     enableSpeakButton();
-    // return ;
-}
-function addToHistory(expression, result) {
-    history.unshift(`${expression} = ${result}`);
-
-    // Keep only last 5 entries
-    if (history.length > 5) {
-        history.pop();
-    }
-
-    renderHistory();
-}
-function renderHistory() {
-    const historyList = document.getElementById('history-list');
-    historyList.innerHTML = '';
-
-    history.forEach(item => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item';
-        li.textContent = item;
-        historyList.appendChild(li);
-    });
 }
 
-
-// Text-to-Speech Magic - Makes numbers talk!
 function speakResult() {
     const speakBtn = document.getElementById('speak-btn');
-    const textToSpeak = document.getElementById('word-text').innerHTML;
+    const wordResultEl = document.getElementById('word-result');
 
-    // Stop any ongoing speech
+    // Get text content only (strips the <span class="small-label"> part if needed)
+    // Actually we just want the number part
+    const words = wordResultEl.querySelector('strong')?.innerText || '';
+
+    if (!words) return;
+
     if (window.speechSynthesis.speaking) {
         window.speechSynthesis.cancel();
         speakBtn.classList.remove('speaking');
         return;
     }
 
-    // Create and configure speech
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.rate = 0.9;  // Slightly slower for clarity
-    utterance.pitch = 1;
-    utterance.volume = 1;
-
-    // When speech starts
-    utterance.onstart = function() {
-        speakBtn.classList.add('speaking');
-    };
-
-    // When speech ends
-    utterance.onend = function() {
-        speakBtn.classList.remove('speaking');
-    };
-
-    // Launch the speech!
+    const utterance = new SpeechSynthesisUtterance(words);
+    utterance.rate = 0.9;
+    utterance.onstart = () => speakBtn.classList.add('speaking');
+    utterance.onend = () => speakBtn.classList.remove('speaking');
     window.speechSynthesis.speak(utterance);
 }
 
-// Enable speak button when result is ready
 function enableSpeakButton() {
     const speakBtn = document.getElementById('speak-btn');
-    const hasContent = document.getElementById('word-text').innerHTML.trim().length > 0;
+    if (!speakBtn) return;
+    const hasContent = document.getElementById('word-result').innerHTML.trim().length > 0;
     speakBtn.disabled = !hasContent;
+}
+function openGeometry() {
+    document.getElementById("geometryModal").style.display = "flex";
+}
+
+function closeGeometry() {
+    document.getElementById("geometryModal").style.display = "none";
+}
+
+function calculateGeometry() {
+    let shape = document.getElementById("shapeSelect").value;
+    let v1 = parseFloat(document.getElementById("input1").value);
+    let v2 = parseFloat(document.getElementById("input2").value);
+    let result;
+
+    if (shape === "rectangle") {
+        result = v1 * v2;
+    }
+    else if (shape === "triangle") {
+        result = 0.5 * v1 * v2;
+    }
+    else if (shape === "circle") {
+        result = Math.PI * v1 * v1;
+    }
+    else {
+        alert("Select a shape");
+        return;
+    }
+
+    left = result.toFixed(4).toString();
+    operator = "";
+    right = "";
+    updateResult();
+    closeGeometry();
 }
