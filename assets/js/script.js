@@ -1,11 +1,21 @@
 var left = '';
 var operator = '';
 var right = '';
-var steps = [];
-var MAX_STEPS = 6;
+
+// Variables to store last calculation for redo
+let lastCalculation = {
+    left: '',
+    operator: '',
+    right: '',
+    result: '',
+    wordResult: ''
+};
 
 
 function appendToResult(value) {
+    // Disable redo when user starts typing new calculation
+    disableRedo();
+
     if (operator.length === 0) {
         left += value.toString();
     } else {
@@ -15,6 +25,9 @@ function appendToResult(value) {
 }
 
 function bracketToResult(value) {
+    // Disable redo when user starts typing new calculation
+    disableRedo();
+
     if (operator.length === 0) {
         left += value;
     } else {
@@ -24,6 +37,8 @@ function bracketToResult(value) {
 }
 
 function backspace() {
+    disableRedo();
+
     if (right.length > 0) {
         right = right.slice(0, -1);
     } else if (operator.length > 0) {
@@ -36,7 +51,7 @@ function backspace() {
 
 function operatorToResult(value) {
     if (left.length === 0) return;
-    if (right.length > 0) {
+    if (right.length > 0) { 
         calculateResult();
     }
     operator = value;
@@ -44,56 +59,74 @@ function operatorToResult(value) {
 }
 
 function clearResult() {
-  left = "";
-  right = "";
-  operator = "";
-  steps = [];
+    if (left !== '' && lastCalculation.result !== '') {
+        // The last calculation is already saved in calculateResult
+        // Just enable the redo button
+        enableRedo();
+    }
 
-  document.getElementById("word-result").innerHTML = "";
-  document.getElementById("word-area").style.display = "none";
-  document.getElementById("steps").innerText = "";
-
-  updateResult();
+    left = '';
+    right = '';
+    operator = '';
+    document.getElementById('word-result').innerHTML = '';
+    document.getElementById('word-area').style.display = 'none';
+    updateResult();
 }
-
-
 
 function calculateResult() {
-  if (left.length === 0 || operator.length === 0 || right.length === 0) return;
+    if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
-  const l = parseFloat(left);
-  const r = parseFloat(right);
-  let result;
+    let result;
+    const l = parseFloat(left);
+    const r = parseFloat(right);
 
-  switch (operator) {
-    case "+":
-      result = l + r;
-      break;
-    case "-":
-      result = l - r;
-      break;
-    case "*":
-      result = l * r;
-      break;
-    case "/":
-      result = r !== 0 ? l / r : "Error";
-      break;
-    default:
-      return;
-  }
+    switch (operator) {
+        case '+': result = l + r; break;
+        case '-': result = l - r; break;
+        case '*': result = l * r; break;
+        case '/': result = r !== 0 ? l / r : 'Error'; break;
+        default: return;
+    }
 
-  if (steps.length < MAX_STEPS) {
-    steps.push(`Step ${steps.length + 1}: ${l} ${operator} ${r} = ${result}`);
-  }
-
-  left = result.toString();
-  operator = "";
-  right = "";
-
-  updateStepsDisplay();
-  updateResult();
+    if (!isNaN(result)) {
+            // Save the calculation BEFORE updating for redo feature
+            lastCalculation = {
+                left: left,
+                operator: operator,
+                right: right,
+                result: result.toString(),
+                wordResult: '' // Will be filled by numberToWords
+            };
+            
+            left = result.toString();
+            right = '';
+            operator = '';
+            updateResult();
+            numberToWords(result.toString());
+            
+            // Save the word result too
+            lastCalculation.wordResult = wordPlaceholder.innerHTML;
+        }
 }
+function CalculateCubeRoot() {
+    if (left.length === 0) return;
 
+    // If there is a pending operation, solve it first
+    if (operator && right) {
+        calculateResult();
+    }
+
+    let value = parseFloat(left);
+    if (isNaN(value)) return;
+
+    // Cube root (supports negative numbers)
+    let result = Math.cbrt(value);
+
+    left = result.toFixed(6).toString();
+    operator = '';
+    right = '';
+    updateResult();
+}
 
 
 function numberToWords(num) {
@@ -206,9 +239,36 @@ function enableSpeakButton() {
     speakBtn.disabled = !hasContent;
 }
 
-function updateStepsDisplay() {
-  const stepsDiv = document.getElementById("steps");
-  if (!stepsDiv) return;
+function redoCalculation() {
+    if (lastCalculation.result !== '') {
+        // Restore the entire calculation with result
+        left = lastCalculation.left;
+        operator = lastCalculation.operator;
+        right = lastCalculation.right;
+        
+        // Show the full expression first
+        document.getElementById('result').value = left + operator + right + '=' + lastCalculation.result;
+        
+        // Then restore to just the result
+        setTimeout(() => {
+            left = lastCalculation.result;
+            operator = '';
+            right = '';
+            updateResult();
+            wordPlaceholder.innerHTML = lastCalculation.wordResult;
+        }, 1000);
+        
+        // Disable redo button after use
+        disableRedo();
+    }
+}
 
-  stepsDiv.innerText = steps.join("\n");
+function enableRedo() {
+    const redoBtn = document.getElementById('redoBtn');
+    redoBtn.disabled = false;
+}
+
+function disableRedo() {
+    const redoBtn = document.getElementById('redoBtn');
+    redoBtn.disabled = true;
 }

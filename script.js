@@ -2,7 +2,20 @@ var left = '';
 var operator = '';
 var right = '';
 
+// Variables to store last calculation for redo
+let lastCalculation = {
+    left: '',
+    operator: '',
+    right: '',
+    result: '',
+    wordResult: ''
+};
+
+
 function appendToResult(value) {
+    // Disable redo when user starts typing new calculation
+    disableRedo();
+
     if (operator.length === 0) {
         left += value.toString();
     } else {
@@ -12,6 +25,9 @@ function appendToResult(value) {
 }
 
 function bracketToResult(value) {
+    // Disable redo when user starts typing new calculation
+    disableRedo();
+
     if (operator.length === 0) {
         left += value;
     } else {
@@ -21,6 +37,8 @@ function bracketToResult(value) {
 }
 
 function backspace() {
+    disableRedo();
+
     if (right.length > 0) {
         right = right.slice(0, -1);
     } else if (operator.length > 0) {
@@ -33,7 +51,7 @@ function backspace() {
 
 function operatorToResult(value) {
     if (left.length === 0) return;
-    if (right.length > 0) {
+    if (right.length > 0) { 
         calculateResult();
     }
     operator = value;
@@ -41,6 +59,12 @@ function operatorToResult(value) {
 }
 
 function clearResult() {
+    if (left !== '' && lastCalculation.result !== '') {
+        // The last calculation is already saved in calculateResult
+        // Just enable the redo button
+        enableRedo();
+    }
+
     left = '';
     right = '';
     operator = '';
@@ -64,10 +88,25 @@ function calculateResult() {
         default: return;
     }
 
-    left = result.toString();
-    operator = '';
-    right = '';
-    updateResult();
+    if (!isNaN(result)) {
+            // Save the calculation BEFORE updating for redo feature
+            lastCalculation = {
+                left: left,
+                operator: operator,
+                right: right,
+                result: result.toString(),
+                wordResult: '' // Will be filled by numberToWords
+            };
+            
+            left = result.toString();
+            right = '';
+            operator = '';
+            updateResult();
+            numberToWords(result.toString());
+            
+            // Save the word result too
+            lastCalculation.wordResult = wordPlaceholder.innerHTML;
+        }
 }
 function CalculateCubeRoot() {
     if (left.length === 0) return;
@@ -198,4 +237,38 @@ function enableSpeakButton() {
     if (!speakBtn) return;
     const hasContent = document.getElementById('word-result').innerHTML.trim().length > 0;
     speakBtn.disabled = !hasContent;
+}
+
+function redoCalculation() {
+    if (lastCalculation.result !== '') {
+        // Restore the entire calculation with result
+        left = lastCalculation.left;
+        operator = lastCalculation.operator;
+        right = lastCalculation.right;
+        
+        // Show the full expression first
+        document.getElementById('result').value = left + operator + right + '=' + lastCalculation.result;
+        
+        // Then restore to just the result
+        setTimeout(() => {
+            left = lastCalculation.result;
+            operator = '';
+            right = '';
+            updateResult();
+            wordPlaceholder.innerHTML = lastCalculation.wordResult;
+        }, 1000);
+        
+        // Disable redo button after use
+        disableRedo();
+    }
+}
+
+function enableRedo() {
+    const redoBtn = document.getElementById('redoBtn');
+    redoBtn.disabled = false;
+}
+
+function disableRedo() {
+    const redoBtn = document.getElementById('redoBtn');
+    redoBtn.disabled = true;
 }
