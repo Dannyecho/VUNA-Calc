@@ -4,31 +4,11 @@ var right = '';
 var steps = [];
 var MAX_STEPS = 6;
 
-
-// Theme toggle functionality
-const themeToggle = document.getElementById('theme-toggle');
-const htmlElement = document.documentElement;
-
-// Load saved theme
-const savedTheme = localStorage.getItem('theme') || 'light';
-if (savedTheme === 'dark') {
-    htmlElement.setAttribute('data-bs-theme', 'dark');
-    themeToggle.checked = true;
-} else {
-    htmlElement.setAttribute('data-bs-theme', 'light');
-    themeToggle.checked = false;
+// Language select functionality
+const languageSelect = document.getElementById('language-select');
+if (languageSelect) {
+    languageSelect.addEventListener('change', updateResult);
 }
-
-// Toggle theme on change
-themeToggle.addEventListener('change', () => {
-    if (themeToggle.checked) {
-        htmlElement.setAttribute('data-bs-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
-    } else {
-        htmlElement.setAttribute('data-bs-theme', 'light');
-        localStorage.setItem('theme', 'light');
-    }
-});
 
 function appendToResult(value) {
     if (operator.length === 0) {
@@ -81,8 +61,6 @@ function clearResult() {
   updateResult();
 }
 
-
-
 function calculateResult() {
   if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
@@ -117,9 +95,16 @@ function calculateResult() {
 
   updateStepsDisplay();
   updateResult();
+
+  // Explicitly show the result in words after calculation
+  const wordResult = document.getElementById('word-result');
+  const wordArea = document.getElementById('word-area');
+  const language = languageSelect ? languageSelect.value : 'english';
+  const words = language === 'hausa' ? numberToWordsHausa(left) : numberToWords(left);
+  wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + words + '</strong>';
+  wordArea.style.display = 'flex';
+  enableSpeakButton();
 }
-
-
 
 function numberToWords(num) {
     if (num === 'Error') return 'Error';
@@ -184,6 +169,69 @@ function numberToWords(num) {
     return result.trim();
 }
 
+function numberToWordsHausa(num) {
+    if (num === 'Error') return 'Error';
+    if (num === '') return '';
+
+    const n = parseFloat(num);
+    if (isNaN(n)) return '';
+    if (n === 0) return 'Sifili';
+
+    const ones = ['', 'Daya', 'Biyu', 'Uku', 'Huɗu', 'Biyar', 'Shida', 'Bakwai', 'Takwas', 'Tara'];
+    const tens = ['', '', 'Ashirin', 'Talatin', 'Arba\'in', 'Hamsin', 'Sittin', 'Sab\'in', 'Tamanin', 'Tisa\'in'];
+    const teens = ['Goma', 'Goma sha daya', 'Goma sha biyu', 'Goma sha uku', 'Goma sha huɗu', 'Goma sha biyar', 'Goma sha shida', 'Goma sha bakwai', 'Goma sha takwas', 'Goma sha tara'];
+    const scales = ['', 'Dubu', 'Miliyan', 'Biliyan', 'Tiriliyan'];
+
+    function convertGroup(val) {
+        let res = '';
+        if (val >= 100) {
+            res += ones[Math.floor(val / 100)] + ' Dari ';
+            val %= 100;
+        }
+        if (val >= 10 && val <= 19) {
+            res += teens[val - 10] + ' ';
+        } else if (val >= 20) {
+            res += tens[Math.floor(val / 10)] + (val % 10 !== 0 ? ' da ' + ones[val % 10] : '') + ' ';
+        } else if (val > 0) {
+            res += ones[val] + ' ';
+        }
+        return res.trim();
+    }
+
+    let sign = n < 0 ? 'Negative ' : '';
+    let absN = Math.abs(n);
+    let parts = absN.toString().split('.');
+    let integerPart = parseInt(parts[0]);
+    let decimalPart = parts[1];
+
+    let wordArr = [];
+    if (integerPart === 0) {
+        wordArr.push('Sifili');
+    } else {
+        let scaleIdx = 0;
+        while (integerPart > 0) {
+            let chunk = integerPart % 1000;
+            if (chunk > 0) {
+                let chunkWords = convertGroup(chunk);
+                wordArr.unshift(chunkWords + (scales[scaleIdx] ? ' ' + scales[scaleIdx] : ''));
+            }
+            integerPart = Math.floor(integerPart / 1000);
+            scaleIdx++;
+        }
+    }
+
+    let result = sign + wordArr.join(', ').trim();
+
+    if (decimalPart) {
+        result += ' Point';
+        for (let digit of decimalPart) {
+            result += ' ' + (digit === '0' ? 'Sifili' : ones[parseInt(digit)]);
+        }
+    }
+
+    return result.trim();
+}
+
 function updateResult() {
     const display = left + (operator ? ' ' + operator + ' ' : '') + right;
     document.getElementById('result').value = display || '0';
@@ -191,8 +239,11 @@ function updateResult() {
     const wordResult = document.getElementById('word-result');
     const wordArea = document.getElementById('word-area');
 
+    // Show words when we have a complete number (left is set and no operator/right in progress)
     if (left && !operator && !right) {
-        wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + numberToWords(left) + '</strong>';
+        const language = languageSelect ? languageSelect.value : 'english';
+        const words = language === 'hausa' ? numberToWordsHausa(left) : numberToWords(left);
+        wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + words + '</strong>';
         wordArea.style.display = 'flex';
     } else {
         wordResult.innerHTML = '';
@@ -206,7 +257,6 @@ function speakResult() {
     const wordResultEl = document.getElementById('word-result');
 
     // Get text content only (strips the <span class="small-label"> part if needed)
-    // Actually we just want the number part
     const words = wordResultEl.querySelector('strong')?.innerText || '';
 
     if (!words) return;
@@ -227,7 +277,7 @@ function speakResult() {
 function enableSpeakButton() {
     const speakBtn = document.getElementById('speak-btn');
     if (!speakBtn) return;
-    const hasContent = document.getElementById('word-result').innerHTML.trim().length > 0;
+    const hasContent = document.getElementById('word-result').querySelector('strong')?.innerText.trim().length > 0;
     speakBtn.disabled = !hasContent;
 }
 
