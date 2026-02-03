@@ -1,80 +1,109 @@
 var left = '';
 var operator = '';
 var right = '';
-let wordPlaceholder = document.getElementById('word-result');
+
+const resultInput = document.getElementById('result');
+const wordResult = document.getElementById('word-result');
+
+/* ---------------input---------------- */
+
 function appendToResult(value) {
-    if (operator.length == 0) {
+    if (operator === '') {
         left += value;
     } else {
         right += value;
     }
     updateResult();
 }
-function bracketToResult(value) {
-    document.getElementById('result').value += value;
-}
+
 function operatorToResult(value) {
-    if (right.length) {
+    if (left === '') return;
+    if (right !== '') {
         calculateResult();
     }
     operator = value;
     updateResult();
 }
+
 function clearResult() {
     left = '';
     right = '';
     operator = '';
-
-    document.getElementById('word-text').innerHTML = '';
-    updateResult();
-    enableSpeakButton();
+    resultInput.value = '';
+    wordResult.innerHTML = '';
 }
+
+function backspace() {
+    if (right !== '') {
+        right = right.slice(0, -1);
+    } else if (operator !== '') {
+        operator = '';
+    } else {
+        left = left.slice(0, -1);
+    }
+    updateResult();
+}
+
+/* ----------------display---------------- */
 
 function updateResult() {
-	@@ -187,47 +186,6 @@ function numberToWords(numVal) {
-        words = '';
-    }
-
-    document.getElementById('word-text').innerHTML = wordArr.join(' point ');
-    enableSpeakButton();
-    // return ;
+    resultInput.value = left + operator + right;
 }
 
-// Text-to-Speech Magic - Makes numbers talk!
-function speakResult() {
-    const speakBtn = document.getElementById('speak-btn');
-    const textToSpeak = document.getElementById('word-text').innerHTML;
+/* ----------------calculation---------------- */
 
-    // Stop any ongoing speech
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-        speakBtn.classList.remove('speaking');
+function calculateResult() {
+    if (left === '' || operator === '' || right === '') return;
+
+    let expression = left + operator + right;
+
+    try {
+        let result = eval(expression);
+        resultInput.value = result;
+
+        left = result.toString();
+        right = '';
+        operator = '';
+    } catch (e) {
+        resultInput.value = 'Error';
+        left = '';
+        right = '';
+        operator = '';
+    }
+}
+
+/* ----------------fraction function---------------- */
+
+function convertToFraction() {
+    let decimal = parseFloat(resultInput.value);
+    if (isNaN(decimal)) return;
+
+    if (Number.isInteger(decimal)) {
+        resultInput.value = decimal + "/1";
+        left = '';
+        right = '';
+        operator = '';
         return;
     }
 
-    // Create and configure speech
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.rate = 0.9;  // Slightly slower for clarity
-    utterance.pitch = 1;
-    utterance.volume = 1;
+    let tolerance = 1.0E-6;
+    let h1 = 1, h2 = 0, k1 = 0, k2 = 1;
+    let b = decimal;
 
-    // When speech starts
-    utterance.onstart = function() {
-        speakBtn.classList.add('speaking');
-    };
+    do {
+        let a = Math.floor(b);
+        let aux = h1;
+        h1 = a * h1 + h2;
+        h2 = aux;
+        aux = k1;
+        k1 = a * k1 + k2;
+        k2 = aux;
+        b = 1 / (b - a);
+    } while (Math.abs(decimal - h1 / k1) > decimal * tolerance);
 
-    // When speech ends
-    utterance.onend = function() {
-        speakBtn.classList.remove('speaking');
-    };
+    resultInput.value = h1 + "/" + k1;
 
-    // Launch the speech!
-    window.speechSynthesis.speak(utterance);
-}
-
-// Enable speak button when result is ready
-function enableSpeakButton() {
-    const speakBtn = document.getElementById('speak-btn');
-    const hasContent = document.getElementById('word-text').innerHTML.trim().length > 0;
-    speakBtn.disabled = !hasContent;
+    left = '';
+    right = '';
+    operator = '';
 }

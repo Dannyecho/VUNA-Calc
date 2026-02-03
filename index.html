@@ -121,25 +121,26 @@
                   </div>
                   <br /><br />
                   
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="." onclick="appendToResult('.')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="0" onclick="appendToResult(0)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="-" onclick="operatorToResult('-')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="submit"
-                          value="="
-                          onclick="calculateResult()"
-                        />
-                    </div>
-                </div>
+                 <div class="row">
+  <div class="col-md-3">
+      <input class="btn btn-light btn-block" type="button" value="." onclick="appendToResult('.')" />
+  </div>
+  <div class="col-md-3">
+      <input class="btn btn-light btn-block" type="button" value="0" onclick="appendToResult(0)" />
+  </div>
+  <div class="col-md-3">
+      <input class="btn btn-info btn-block" type="button" value="Frac" onclick="convertToFraction()" />
+  </div>
+  <div class="col-md-3">
+      <input
+      class="btn btn-secondary btn-block px-3"
+        type="submit"
+        value="="
+        onclick="calculateResult()"
+      />
+  </div>
+</div>
+
                   <br /><br />
                 </div>
               </div>
