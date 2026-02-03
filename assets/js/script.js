@@ -1,9 +1,4 @@
-var left = '';
-var operator = '';
-var right = '';
-var steps = [];
-var MAX_STEPS = 6;
-
+var currentExpression = '';
 
 var currencyRates = {
   'USD': 1,
@@ -171,92 +166,84 @@ function fetchCurrencyRates() {
 }
 
 function appendToResult(value) {
-    if (operator.length === 0) {
-        left += value.toString();
-    } else {
-        right += value.toString();
-    }
+    currentExpression += value.toString();
     updateResult();
 }
 
 function bracketToResult(value) {
-    if (operator.length === 0) {
-        left += value;
-    } else {
-        right += value;
-    }
+    currentExpression += value;
     updateResult();
 }
 
 function backspace() {
-    if (right.length > 0) {
-        right = right.slice(0, -1);
-    } else if (operator.length > 0) {
-        operator = '';
-    } else if (left.length > 0) {
-        left = left.slice(0, -1);
-    }
+    currentExpression = currentExpression.slice(0, -1);
     updateResult();
 }
 
 function operatorToResult(value) {
-    if (left.length === 0) return;
-    if (right.length > 0) {
-        calculateResult();
+    if (value === '^') {
+        currentExpression += '**';
+    } else {
+        currentExpression += value;
     }
-    operator = value;
     updateResult();
 }
 
 function clearResult() {
-  left = "";
-  right = "";
-  operator = "";
-  steps = [];
-
-  document.getElementById("word-result").innerHTML = "";
-  document.getElementById("word-area").style.display = "none";
-  document.getElementById("steps").innerText = "";
-
-  updateResult();
+    currentExpression = '';
+    document.getElementById('word-result').innerHTML = '';
+    document.getElementById('word-area').style.display = 'none';
+    updateResult();
 }
 
 
 
 function calculateResult() {
-  if (left.length === 0 || operator.length === 0 || right.length === 0) return;
+    if (currentExpression.length === 0) return;
 
-  const l = parseFloat(left);
-  const r = parseFloat(right);
-  let result;
+    try {
+        let result = eval(currentExpression);
+        if (isNaN(result) || !isFinite(result)) {
+            result = 'Error';
+        }
+        currentExpression = result.toString();
+        updateResult();
+    } catch (e) {
+        currentExpression = 'Error';
+        updateResult();
+    }
+}
 
-  switch (operator) {
-    case "+":
-      result = l + r;
-      break;
-    case "-":
-      result = l - r;
-      break;
-    case "*":
-      result = l * r;
-      break;
-    case "/":
-      result = r !== 0 ? l / r : "Error";
-      break;
-    default:
-      return;
-  }
+function isPrime(num) {
+    if (num <= 1) return false;
+    if (num <= 3) return true;
+    if (num % 2 === 0 || num % 3 === 0) return false;
+    
+    for (let i = 5; i * i <= num; i += 6) {
+        if (num % i === 0 || num % (i + 2) === 0) return false;
+    }
+    return true;
+}
 
-  if (steps.length < MAX_STEPS) {
-    steps.push(`Step ${steps.length + 1}: ${l} ${operator} ${r} = ${result}`);
-  }
-
-  left = result.toString();
-  operator = "";
-  right = "";
-
-  updateStepsDisplay();
-  updateResult();
+function checkPrime() {
+    const num = parseFloat(currentExpression);
+    
+    if (isNaN(num) || !Number.isInteger(num) || num < 0 || currentExpression.includes(' ') || currentExpression.includes('+') || currentExpression.includes('-') || currentExpression.includes('*') || currentExpression.includes('/') || currentExpression.includes('^') || currentExpression.includes('(') || currentExpression.includes(')')) {
+        alert('Please enter a single positive whole number to check if it\'s prime');
+        return;
+    }
+    
+    const wordResult = document.getElementById('word-result');
+    const wordArea = document.getElementById('word-area');
+    
+    if (isPrime(num)) {
+        wordResult.innerHTML = '<span class="small-label">Prime Check</span><strong>' + num + ' is a PRIME number! ✓</strong>';
+    } else {
+        wordResult.innerHTML = '<span class="small-label">Prime Check</span><strong>' + num + ' is NOT a prime number ✗</strong>';
+    }
+    
+    wordArea.style.display = 'flex';
+    enableSpeakButton();
 }
 
 
@@ -325,14 +312,15 @@ function numberToWords(num) {
 }
 
 function updateResult() {
-    const display = left + (operator ? ' ' + operator + ' ' : '') + right;
-    document.getElementById('result').value = display || '0';
+    document.getElementById('result').value = currentExpression || '0';
 
     const wordResult = document.getElementById('word-result');
     const wordArea = document.getElementById('word-area');
 
-    if (left && !operator && !right) {
-        wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + numberToWords(left) + '</strong>';
+    // Check if currentExpression is a valid number
+    const num = parseFloat(currentExpression);
+    if (!isNaN(num) && isFinite(num) && currentExpression.trim() === num.toString()) {
+        wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + numberToWords(currentExpression) + '</strong>';
         wordArea.style.display = 'flex';
     } else {
         wordResult.innerHTML = '';
@@ -369,6 +357,8 @@ function enableSpeakButton() {
     speakBtn.disabled = !hasContent;
 }
 
+fetchCurrencyRates()
+
 function copyResult() {
     const text = document.getElementById('result').value;
     if (!text) return;
@@ -379,29 +369,10 @@ function copyResult() {
 }
 
 function percentToResult() {
-  if (!left) return;
-
-  if (!operator) {
-    left = (parseFloat(left) / 100).toString();
-    updateResult();
-    return;
-  }
-
-  if (!right) return;
-
-  let result = (parseFloat(right) / 100) * parseFloat(left);
-
-  left = result.toString();
-  operator = '';
-  right = '';
-
-  updateResult();
+    const num = parseFloat(currentExpression);
+    if (!isNaN(num) && currentExpression.trim() === num.toString()) {
+        currentExpression = (num / 100).toString();
+        updateResult();
+    }
 }
-
-fetchCurrencyRates()
-function updateStepsDisplay() {
-  const stepsDiv = document.getElementById("steps");
-  if (!stepsDiv) return;
-
-  stepsDiv.innerText = steps.join("\n");
-}
+  
