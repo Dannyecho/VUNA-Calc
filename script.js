@@ -1,86 +1,93 @@
-var currentExpression = '';
+var left = '';
+var operator = '';
+var right = '';
 
 function appendToResult(value) {
-    currentExpression += value.toString();
-    updateResult();
-}
-
-function bracketToResult(value) {
-    currentExpression += value;
-    updateResult();
-}
-
-function backspace() {
-    currentExpression = currentExpression.slice(0, -1);
-    updateResult();
-}
-
-function operatorToResult(value) {
-    if (value === '^') {
-        currentExpression += '**';
+    if (operator.length === 0) {
+        left += value.toString();
     } else {
-        currentExpression += value;
+        right += value.toString();
     }
     updateResult();
 }
 
+function bracketToResult(value) {
+    if (operator.length === 0) {
+        left += value;
+    } else {
+        right += value;
+    }
+    updateResult();
+}
+
+function backspace() {
+    if (right.length > 0) {
+        right = right.slice(0, -1);
+    } else if (operator.length > 0) {
+        operator = '';
+    } else if (left.length > 0) {
+        left = left.slice(0, -1);
+    }
+    updateResult();
+}
+
+function operatorToResult(value) {
+    if (left.length === 0) return;
+    if (right.length > 0) {
+        calculateResult();
+    }
+    operator = value;
+    updateResult();
+}
+
 function clearResult() {
-    currentExpression = '';
+    left = '';
+    right = '';
+    operator = '';
     document.getElementById('word-result').innerHTML = '';
     document.getElementById('word-area').style.display = 'none';
     updateResult();
 }
 
-
-
 function calculateResult() {
-    if (currentExpression.length === 0) return;
+    if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
-    try {
-        let result = eval(currentExpression);
-        if (isNaN(result) || !isFinite(result)) {
-            result = 'Error';
-        }
-        currentExpression = result.toString();
-        updateResult();
-    } catch (e) {
-        currentExpression = 'Error';
-        updateResult();
+    let result;
+    const l = parseFloat(left);
+    const r = parseFloat(right);
+
+    switch (operator) {
+        case '+': result = l + r; break;
+        case '-': result = l - r; break;
+        case '*': result = l * r; break;
+        case '/': result = r !== 0 ? l / r : 'Error'; break;
+        default: return;
     }
+
+    left = result.toString();
+    operator = '';
+    right = '';
+    updateResult();
 }
+function CalculateCubeRoot() {
+    if (left.length === 0) return;
 
-function isPrime(num) {
-    if (num <= 1) return false;
-    if (num <= 3) return true;
-    if (num % 2 === 0 || num % 3 === 0) return false;
-    
-    for (let i = 5; i * i <= num; i += 6) {
-        if (num % i === 0 || num % (i + 2) === 0) return false;
+    // If there is a pending operation, solve it first
+    if (operator && right) {
+        calculateResult();
     }
-    return true;
+
+    let value = parseFloat(left);
+    if (isNaN(value)) return;
+
+    // Cube root (supports negative numbers)
+    let result = Math.cbrt(value);
+
+    left = result.toFixed(6).toString();
+    operator = '';
+    right = '';
+    updateResult();
 }
-
-function checkPrime() {
-    const num = parseFloat(currentExpression);
-    
-    if (isNaN(num) || !Number.isInteger(num) || num < 0 || currentExpression.includes(' ') || currentExpression.includes('+') || currentExpression.includes('-') || currentExpression.includes('*') || currentExpression.includes('/') || currentExpression.includes('^') || currentExpression.includes('(') || currentExpression.includes(')')) {
-        alert('Please enter a single positive whole number to check if it\'s prime');
-        return;
-    }
-    
-    const wordResult = document.getElementById('word-result');
-    const wordArea = document.getElementById('word-area');
-    
-    if (isPrime(num)) {
-        wordResult.innerHTML = '<span class="small-label">Prime Check</span><strong>' + num + ' is a PRIME number! ✓</strong>';
-    } else {
-        wordResult.innerHTML = '<span class="small-label">Prime Check</span><strong>' + num + ' is NOT a prime number ✗</strong>';
-    }
-    
-    wordArea.style.display = 'flex';
-    enableSpeakButton();
-}
-
 
 
 function numberToWords(num) {
@@ -147,15 +154,14 @@ function numberToWords(num) {
 }
 
 function updateResult() {
-    document.getElementById('result').value = currentExpression || '0';
+    const display = left + (operator ? ' ' + operator + ' ' : '') + right;
+    document.getElementById('result').value = display || '0';
 
     const wordResult = document.getElementById('word-result');
     const wordArea = document.getElementById('word-area');
 
-    // Check if currentExpression is a valid number
-    const num = parseFloat(currentExpression);
-    if (!isNaN(num) && isFinite(num) && currentExpression.trim() === num.toString()) {
-        wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + numberToWords(currentExpression) + '</strong>';
+    if (left && !operator && !right) {
+        wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + numberToWords(left) + '</strong>';
         wordArea.style.display = 'flex';
     } else {
         wordResult.innerHTML = '';
@@ -168,6 +174,8 @@ function speakResult() {
     const speakBtn = document.getElementById('speak-btn');
     const wordResultEl = document.getElementById('word-result');
 
+    // Get text content only (strips the <span class="small-label"> part if needed)
+    // Actually we just want the number part
     const words = wordResultEl.querySelector('strong')?.innerText || '';
 
     if (!words) return;
@@ -191,21 +199,3 @@ function enableSpeakButton() {
     const hasContent = document.getElementById('word-result').innerHTML.trim().length > 0;
     speakBtn.disabled = !hasContent;
 }
-
-function copyResult() {
-    const text = document.getElementById('result').value;
-    if (!text) return;
-
-    navigator.clipboard.writeText(text)
-    .then(() => alert('Result copied!'))
-    .catch(() => alert('Failed to copy'));
-}
-
-function percentToResult() {
-    const num = parseFloat(currentExpression);
-    if (!isNaN(num) && currentExpression.trim() === num.toString()) {
-        currentExpression = (num / 100).toString();
-        updateResult();
-    }
-}
-  
