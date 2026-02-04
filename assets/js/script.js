@@ -20,7 +20,7 @@ function toggleTheme() {
 
 var currentExpression = '';
 
-var currencyRates = {
+var currencyRates = { 
   'USD': 1,
   'EUR': 0.92,
   'GBP': 0.79,
@@ -211,6 +211,8 @@ let operator = '';
 let right = '';
 let steps = [];
 const MAX_STEPS = 6;
+let ANS = null; // stores last calculated answer
+
 
 // ------------------------------
 // Basic Calculator Functions
@@ -246,6 +248,22 @@ function clearResult() {
     updateResult();
 }
 
+function useANS() {
+    if (ANS === null) {
+        alert("No previous answer yet");
+        return;
+    }
+
+    // If expression ends with a number, add multiplication
+    if (currentExpression && /[0-9)]$/.test(currentExpression)) {
+        currentExpression += '*';
+    }
+
+    currentExpression += ANS.toString();
+    updateResult();
+}
+
+
 // ------------------------------
 // Calculate Result
 // ------------------------------
@@ -254,9 +272,13 @@ function calculateResult() {
 
     try {
         let result = eval(currentExpression);
+
         if (isNaN(result) || !isFinite(result)) {
             result = 'Error';
+        } else {
+            ANS = result; // ✅ SAVE LAST ANSWER
         }
+
         currentExpression = result.toString();
         updateResult();
     } catch (e) {
@@ -264,6 +286,7 @@ function calculateResult() {
         updateResult();
     }
 }
+
 
 function applyLogarithm() {
   if (left.length === 0) return;
