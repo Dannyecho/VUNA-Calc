@@ -1,3 +1,8 @@
+// ANS memory feature implemented by sammyBOY-oss
+
+// TEST CHANGE - ANS FEATURE WORK
+
+
 // ------------------------------
 // Theme Toggle Logic
 // ------------------------------
@@ -276,7 +281,7 @@ function calculateResult() {
         if (isNaN(result) || !isFinite(result)) {
             result = 'Error';
         } else {
-            ANS = result; // ✅ SAVE LAST ANSWER
+            ANS = result; // store last answer
         }
 
         currentExpression = result.toString();
@@ -286,6 +291,14 @@ function calculateResult() {
         updateResult();
     }
 }
+
+// ------------------------------
+// Use ANS
+// ------------------------------
+function useANS() {
+    appendToResult(ANS.toString());
+}
+
 
 
 function applyLogarithm() {
