@@ -2,6 +2,9 @@ var left = '';
 var operator = '';
 var right = '';
 
+
+
+
 function appendToResult(value) {
     if (operator.length === 0) {
         left += value.toString();
@@ -50,6 +53,8 @@ function clearResult() {
 }
 
 function calculateResult() {
+
+
     if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
     let result;
@@ -133,6 +138,86 @@ function numberToWords(num) {
     return result.trim();
 }
 
+// hausa language
+
+function numberToHausa(num) {
+    if (num === 'Error') return 'Kuskure';
+
+    const ones = ['', 'Daya', 'Biyu', 'Uku', 'Hudu', 'Biyar', 'Shida', 'Bakwai', 'Takwas', 'Tara'];
+    const tens = ['', '', 'Ashirin', 'Talatin', 'Arba’in', 'Hamsin', 'Sittin', 'Sab’in', 'Tamanin', 'Tis’in'];
+    const teens = ['Goma', 'Sha daya', 'Sha biyu', 'Sha uku', 'Sha hudu', 'Sha biyar', 'Sha shida', 'Sha bakwai', 'Sha takwas', 'Sha tara'];
+    const scales = ['', 'Dubu', 'Miliyan', 'Biliyan', 'Triliyan'];
+
+    function convertGroup(val) {
+        let res = '';
+        if (val >= 100) {
+            res += ones[Math.floor(val / 100)] + ' Dari ';
+            val %= 100;
+        }
+
+        if (val >= 10 && val <= 19) {
+            res += teens[val - 10] + ' ';
+        } 
+        else if (val >= 20) {
+            res += tens[Math.floor(val / 10)] + (val % 10 ? ' da ' + ones[val % 10] : '') + ' ';
+        } 
+        else if (val > 0) {
+            res += ones[val] + ' ';
+        }
+
+        return res.trim();
+    }
+
+    let n = parseFloat(num);
+    if (isNaN(n)) return '';
+
+    let sign = n < 0 ? 'Mara kyau ' : '';
+    let absN = Math.abs(n);
+    let parts = absN.toString().split('.');
+    let integerPart = parseInt(parts[0]);
+    let decimalPart = parts[1];
+
+    let wordArr = [];
+
+    if (integerPart === 0) {
+        wordArr.push('Sifili');
+    } else {
+        let scaleIdx = 0;
+        while (integerPart > 0) {
+            let chunk = integerPart % 1000;
+            if (chunk > 0) {
+                let chunkWords = convertGroup(chunk);
+                wordArr.unshift(chunkWords + (scales[scaleIdx] ? ' ' + scales[scaleIdx] : ''));
+            }
+            integerPart = Math.floor(integerPart / 1000);
+            scaleIdx++;
+        }
+    }
+
+    let result = sign + wordArr.join(', ').trim();
+
+    if (decimalPart) {
+        result += ' Nuni';
+        for (let digit of decimalPart) {
+            result += ' ' + (digit === '0' ? 'Sifili' : ones[parseInt(digit)]);
+        }
+    }
+
+    return result.trim();
+}
+// translate to hausas 
+function translateToHausa() {
+    if (!left || operator || right) return;
+
+    const hausa = numberToHausa(left);
+    const wordResult = document.getElementById('word-result');
+
+    wordResult.innerHTML =
+        '<span class="small-label">Sakamako a Hausa</span><strong>' + hausa + '</strong>';
+}
+
+
+
 function updateResult() {
     const display = left + (operator ? ' ' + operator + ' ' : '') + right;
     document.getElementById('result').value = display || '0';
@@ -178,4 +263,15 @@ function enableSpeakButton() {
     if (!speakBtn) return;
     const hasContent = document.getElementById('word-result').innerHTML.trim().length > 0;
     speakBtn.disabled = !hasContent;
+}
+
+
+// back to eng all null
+function backToEnglish() {
+    if (!left || operator || right) return;
+
+    const wordResult = document.getElementById('word-result');
+
+    wordResult.innerHTML =
+        '<span class="small-label">Result in words</span><strong>' + numberToWords(left) + '</strong>';
 }
