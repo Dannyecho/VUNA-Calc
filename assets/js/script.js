@@ -583,3 +583,60 @@ function normalizeSpeech(text) {
     .split(" ")
     .filter(t => t.trim() !== "");
 }
+
+// ===== CUBE ROOT FUNCTION =====
+
+function calculateCubeRoot() {
+  const num = parseFloat(currentExpression);
+  
+  if (isNaN(num)) {
+    alert('Please enter a valid number');
+    return;
+  }
+  
+  // Calculate cube root (works with negative numbers)
+  let result = Math.cbrt(num);
+  currentExpression = result.toFixed(6).toString();
+  updateResult();
+}
+
+// ===== STEPS DISPLAY FUNCTION =====
+
+function updateStepsDisplay() {
+  const stepsDiv = document.getElementById('steps');
+  if (stepsDiv) {
+    stepsDiv.innerText = steps.join('\n');
+  }
+}
+
+// ===== SQUARE ROOT FUNCTION =====
+
+function calculateSquare() {
+  const num = parseFloat(currentExpression);
+  
+  if (isNaN(num)) {
+    alert('Please enter a valid number');
+    return;
+  }
+  
+  // Calculate square
+  let result = num * num;
+  currentExpression = result.toString();
+  updateResult();
+}
+
+// ===== CUBE FUNCTION =====
+
+function calculateCube() {
+  const num = parseFloat(currentExpression);
+  
+  if (isNaN(num)) {
+    alert('Please enter a valid number');
+    return;
+  }
+  
+  // Calculate cube
+  let result = num * num * num;
+  currentExpression = result.toString();
+  updateResult();
+}

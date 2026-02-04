@@ -240,6 +240,65 @@
       text-transform: uppercase;
       font-size: 1.2rem;
     }
+
+    .theme-toggle-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    body.dark-mode {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .calculator-card {
+      background: rgba(45, 45, 45, 0.9);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode .display-container {
+      background: #333333;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode #result {
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .btn-light {
+      background: #444444;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .btn-light:hover {
+      background: #555555;
+    }
+
+    body.dark-mode .accordion-button {
+      background-color: #444444;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .accordion-button:not(.collapsed) {
+      background-color: #555555;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+      background-color: #444444;
+      color: #e0e0e0;
+      border-color: #555555;
+    }
+
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+      background-color: #555555;
+      color: #e0e0e0;
+      border-color: #0d6efd;
+    }
   </style>
 </head>
 
@@ -323,16 +382,18 @@
                 <button class="btn btn-power btn-special" onclick="calculateSquare()">x²</button>
                 <button class="btn btn-power btn-special" onclick="calculateCube()">x³</button>
                 
-                <!--  Row 7                  -->
+                <!--  Row 7 -->
                 <button class="btn btn-action" onclick="factorPrimeCheck()" stylex="grid-column: span 2;">Factors</button>
                 <button class="btn btn-action" onclick="applyLogarithm()">
                     log
-                  </button>
+                </button>
+                <button class="btn btn-special" onclick="calculateCubeRoot()">∛</button>
                 <button id="voice-input-btn" class="btn btn-special" aria-label="Speak calculation input" onclick="startVoiceInput()">
                 🎙️
-              </button>
+                </button>
                 <button class="btn btn-equals" onclick="calculateResult()" stylex="grid-column: span 2;">=</button>
               </div>
+
               <div class="row">
                 <div class="col-md-12">
                     <!-- Unit Converter Accordion -->
