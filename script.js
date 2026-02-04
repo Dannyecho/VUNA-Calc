@@ -1,6 +1,10 @@
+alert("JS LOADED");
+
 var left = '';
 var operator = '';
 var right = '';
+var lastAnswer = '';
+
 
 function appendToResult(value) {
     if (operator.length === 0) {
@@ -50,24 +54,23 @@ function clearResult() {
 }
 
 function calculateResult() {
-    if (left.length === 0 || operator.length === 0 || right.length === 0) return;
+    if (!left || !operator || !right) return;
 
     let result;
-    const l = parseFloat(left);
-    const r = parseFloat(right);
+    const l = Number(left);
+    const r = Number(right);
 
-    switch (operator) {
-        case '+': result = l + r; break;
-        case '-': result = l - r; break;
-        case '*': result = l * r; break;
-        case '/': result = r !== 0 ? l / r : 'Error'; break;
-        case '^': result = Math.pow(l, r); break;
-        default: return;
-    }
+    if (operator === '+') result = l + r;
+    if (operator === '-') result = l - r;
+    if (operator === '*') result = l * r;
+    if (operator === '/') result = r !== 0 ? l / r : 'Error';
 
-    left = result.toString();
+    lastAnswer = String(result); // 🔥 REQUIRED
+
+    left = lastAnswer;
     operator = '';
     right = '';
+
     updateResult();
 }
 
@@ -316,3 +319,18 @@ function percentToResult() {
     updateResult();
     convertToWords(left);
 }
+
+function useANS() {
+    if (!lastAnswer) return;
+
+    if (!operator) {
+        left += lastAnswer;
+    } else {
+        right += lastAnswer;
+    }
+
+    updateResult();
+}
+
+
+
