@@ -14,6 +14,52 @@ body {
   font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+body.dark-mode {
+  --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  --card-bg: rgba(30, 30, 46, 0.95);
+  --primary-color: #4dabf7;
+  color: #e9ecef;
+}
+
+body.dark-mode .calculator-card {
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .display-container {
+  background: #212529;
+  color: #e9ecef;
+}
+
+body.dark-mode #result {
+  color: #e9ecef;
+}
+
+body.dark-mode .btn-light {
+  background: #2d3748;
+  color: #e9ecef;
+}
+
+body.dark-mode .btn-light:hover {
+  background: #374151;
+}
+
+body.dark-mode .word-display-area {
+  background: rgba(45, 55, 72, 0.6);
+  border-color: rgba(77, 171, 247, 0.3);
+}
+
+body.dark-mode .steps-section {
+  background: rgba(45, 55, 72, 0.5);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .steps-container {
+  background: #212529;
+  color: #e9ecef;
+  border-color: #374151;
+}
+
 .calculator-card {
   background: var(--card-bg);
   backdrop-filter: blur(10px);
@@ -38,18 +84,41 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  position: relative;
+}
+
+.steps-section {
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.steps-section h6 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 10px;
 }
 
 .steps-container {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 16px;
-  margin-bottom: 20px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-  height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  min-height: 60px;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  white-space: pre-line;
+  color: #212529;
+  border: 1px solid #dee2e6;
+}
+
+#save-steps-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 #result {
@@ -60,9 +129,24 @@ body {
   border: none;
   background: transparent;
   padding: 0;
+  padding-right: 40px;
   color: #212529;
   box-shadow: none;
   width: 100%;
+}
+
+#copy-icon {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+#copy-icon:hover {
+  transform: scale(1.2);
 }
 
 .word-display-area {
@@ -71,7 +155,7 @@ body {
   border-radius: 16px;
   padding: 12px 18px;
   border: 1px dashed rgba(13, 110, 253, 0.2);
-  display: none; /* Hidden by default */
+  display: none;
   align-items: center;
   justify-content: space-between;
   gap: 15px;
@@ -222,6 +306,16 @@ body {
   color: white;
 }
 
+.btn-special {
+  background: #e7f6ed;
+  color: #198754;
+  font-size: 16px;
+}
+
+.btn-special:hover {
+  background: #d1f0dd;
+}
+
 .group-header {
   color: #495057;
   font-weight: 700;
@@ -229,6 +323,22 @@ body {
   margin-bottom: 20px;
   text-transform: uppercase;
   font-size: 1.2rem;
+}
+
+body.dark-mode .group-header {
+  color: #e9ecef;
+}
+
+.theme-toggle-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 24px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 #steps {

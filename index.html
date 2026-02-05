@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calculator</title>
+  <title>VUNA Calculator</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
   <style>
     :root {
@@ -84,6 +84,18 @@
       background: #2d3748;
       color: #e9ecef;
       border-color: #4a5568;
+    }
+
+    body.dark-mode .group-header {
+      color: #e9ecef;
+    }
+
+    body.dark-mode .steps-section h6 {
+      color: #e9ecef;
+    }
+
+    body.dark-mode .border {
+      background: rgba(45, 55, 72, 0.5) !important;
     }
 
     .theme-toggle-btn {
@@ -285,6 +297,7 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
+      margin-top: 20px;
     }
 
     .calculator .btn {
@@ -365,10 +378,6 @@
       text-transform: uppercase;
       font-size: 1.2rem;
     }
-
-    body.dark-mode .group-header {
-      color: #e9ecef;
-    }
   </style>
 </head>
 
@@ -378,6 +387,7 @@
     title="Toggle dark/light mode">
     🌙
   </button>
+  
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-6 col-md-6 col-sm-8">
@@ -387,9 +397,11 @@
             <i>Created by set 2025/26 Software Engineering</i>
           </p>
         </div>
+        
         <div class="card calculator-card">
           <div class="card-body p-4">
             <div class="calculator">
+              <!-- Display -->
               <div class="display-container">
                 <input type="text" class="form-control" id="result" placeholder="0" disabled />
                 <span id="copy-icon" onclick="copyResult()">📋</span>
@@ -411,6 +423,7 @@
                 </button>
               </div>
 
+              <!-- Word Display Area -->
               <div class="word-display-area" id="word-area">
                 <div id="word-result"></div>
                 <button id="speak-btn" onclick="speakResult()" disabled title="Speak Result">
@@ -428,6 +441,7 @@
                 </button>
               </div>
 
+              <!-- Calculator Buttons -->
               <div class="btn-grid">
                 <!-- Row 1 -->
                 <button class="btn btn-light" onclick="bracketToResult('(')">(</button>
@@ -459,152 +473,146 @@
                 <button class="btn btn-operator" onclick="operatorToResult('-')">−</button>
                 <button class="btn btn-operator" onclick="percentToResult('%')">%</button>
 
-                <!-- Row 6 - New functions -->
+                <!-- Row 6 - Special Functions -->
                 <button class="btn btn-special" onclick="operatorToResult('^')">x^y</button>
                 <button class="btn btn-special" onclick="checkPrime()">Prime?</button>
-                <button class="btn btn-power btn-special" onclick="calculateSquare()">x²</button>
-                <button class="btn btn-power btn-special" onclick="calculateCube()">x³</button>
+                <button class="btn btn-special" onclick="calculateSquare()">x²</button>
+                <button class="btn btn-special" onclick="calculateCube()">x³</button>
 
-                <!--  Row 7                  -->
+                <!-- Row 7 - Advanced Functions -->
                 <button class="btn btn-action" onclick="factorPrimeCheck()">Factors</button>
                 <button class="btn btn-action" onclick="applyLogarithm()">log</button>
-                <button id="voice-input-btn" class="btn btn-special" aria-label="Speak calculation input"
-                  onclick="startVoiceInput()">
-                  🎙️
-                </button>
+                <button class="btn btn-special" onclick="startVoiceInput()" title="Voice Input">🎙️</button>
                 <button class="btn btn-equals" onclick="calculateResult()">=</button>
               </div>
-              <div class="row">
-                <div class="col-md-12">
-                  <!-- Unit Converter Accordion -->
-                  <div class="accordion mt-4" id="converterAccordion">
-                    <div class="accordion-item">
-                      <h2 class="accordion-header" id="headingConverter">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                          data-bs-target="#collapseConverter" aria-expanded="false" aria-controls="collapseConverter">
-                          🔄 Unit Converter
-                        </button>
-                      </h2>
-                      <div id="collapseConverter" class="accordion-collapse collapse"
-                        aria-labelledby="headingConverter" data-bs-parent="#converterAccordion">
-                        <div class="accordion-body">
-                          <!-- Length Conversion -->
-                          <div class="mb-3">
-                            <label class="form-label small" style="font-weight: 600;">Length</label>
-                            <div class="input-group input-group-sm">
-                              <input type="number" class="form-control" id="length-value" placeholder="Value" value="1"
-                                oninput="convertUnit('length')">
-                              <select class="form-select form-select-sm" id="from-length"
-                                onchange="convertUnit('length')">
-                                <option value="km">km</option>
-                                <option value="m">m</option>
-                                <option value="mile">miles</option>
-                                <option value="yard">yards</option>
-                                <option value="ft">feet</option>
-                                <option value="inch">inches</option>
-                              </select>
-                              <span class="input-group-text">→</span>
-                              <select class="form-select form-select-sm" id="to-length"
-                                onchange="convertUnit('length')">
-                                <option value="mile">miles</option>
-                                <option value="km">km</option>
-                                <option value="m">m</option>
-                                <option value="yard">yards</option>
-                                <option value="ft">feet</option>
-                                <option value="inch">inches</option>
-                              </select>
-                              <span class="input-group-text" id="length-result">0</span>
-                            </div>
-                          </div>
 
-                          <!-- Weight Conversion -->
-                          <div class="mb-3">
-                            <label class="form-label small" style="font-weight: 600;">Weight</label>
-                            <div class="input-group input-group-sm">
-                              <input type="number" class="form-control" id="weight-value" placeholder="Value" value="1"
-                                oninput="convertUnit('weight')">
-                              <select class="form-select form-select-sm" id="from-weight"
-                                onchange="convertUnit('weight')">
-                                <option value="kg">kg</option>
-                                <option value="g">g</option>
-                                <option value="lb">pounds</option>
-                                <option value="oz">ounces</option>
-                              </select>
-                              <span class="input-group-text">→</span>
-                              <select class="form-select form-select-sm" id="to-weight"
-                                onchange="convertUnit('weight')">
-                                <option value="lb">pounds</option>
-                                <option value="kg">kg</option>
-                                <option value="g">g</option>
-                                <option value="oz">ounces</option>
-                              </select>
-                              <span class="input-group-text" id="weight-result">0</span>
-                            </div>
-                          </div>
-
-                          <!-- Temperature Conversion -->
-                          <div class="mb-3">
-                            <label class="form-label small" style="font-weight: 600;">Temperature</label>
-                            <div class="input-group input-group-sm">
-                              <input type="number" class="form-control" id="temp-value" placeholder="Value" value="0"
-                                oninput="convertUnit('temperature')">
-                              <select class="form-select form-select-sm" id="from-temp"
-                                onchange="convertUnit('temperature')">
-                                <option value="C">°C</option>
-                                <option value="F">°F</option>
-                                <option value="K">K</option>
-                              </select>
-                              <span class="input-group-text">→</span>
-                              <select class="form-select form-select-sm" id="to-temp"
-                                onchange="convertUnit('temperature')">
-                                <option value="F">°F</option>
-                                <option value="C">°C</option>
-                                <option value="K">K</option>
-                              </select>
-                              <span class="input-group-text" id="temp-result">0</span>
-                            </div>
-                          </div>
-
-                          <!-- Currency Conversion -->
-                          <div class="mb-3">
-                            <label class="form-label small" style="font-weight: 600;">Currency</label>
-                            <div class="input-group input-group-sm">
-                              <input type="number" class="form-control" id="currency-value" placeholder="Amount"
-                                value="1" oninput="convertUnit('currency')">
-                              <select class="form-select form-select-sm" id="from-currency"
-                                onchange="convertUnit('currency')">
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="GBP">GBP</option>
-                                <option value="JPY">JPY</option>
-                                <option value="CAD">CAD</option>
-                                <option value="AUD">AUD</option>
-                                <option value="NGN">NGN</option>
-                              </select>
-                              <span class="input-group-text">→</span>
-                              <select class="form-select form-select-sm" id="to-currency"
-                                onchange="convertUnit('currency')">
-                                <option value="EUR">EUR</option>
-                                <option value="USD">USD</option>
-                                <option value="GBP">GBP</option>
-                                <option value="JPY">JPY</option>
-                                <option value="CAD">CAD</option>
-                                <option value="AUD">AUD</option>
-                                <option value="NGN">NGN</option>
-                              </select>
-                              <span class="input-group-text" id="currency-result">0</span>
-                              <button id="currency-refresh-btn" class="btn btn-sm btn-outline-info"
-                                onclick="fetchCurrencyRates()" title="Refresh rates">🔄</button>
-                            </div>
-                            <small class="text-muted" id="currency-timestamp"></small>
-                          </div>
-
-                          <!-- Quick Conversion Examples -->
-                          <div class="alert alert-info alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
-                            <strong>Examples:</strong> "5 km to miles" → <span id="example-result">3.11</span> | Add 10
-                            → <span id="example-add">13.11</span>
-                          </div>
+              <!-- Unit Converter Accordion -->
+              <div class="accordion mt-4" id="converterAccordion">
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="headingConverter">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                      data-bs-target="#collapseConverter" aria-expanded="false" aria-controls="collapseConverter">
+                      🔄 Unit Converter
+                    </button>
+                  </h2>
+                  <div id="collapseConverter" class="accordion-collapse collapse"
+                    aria-labelledby="headingConverter" data-bs-parent="#converterAccordion">
+                    <div class="accordion-body">
+                      <!-- Length Conversion -->
+                      <div class="mb-3">
+                        <label class="form-label small" style="font-weight: 600;">Length</label>
+                        <div class="input-group input-group-sm">
+                          <input type="number" class="form-control" id="length-value" placeholder="Value" value="1"
+                            oninput="convertUnit('length')">
+                          <select class="form-select form-select-sm" id="from-length"
+                            onchange="convertUnit('length')">
+                            <option value="km">km</option>
+                            <option value="m">m</option>
+                            <option value="mile">miles</option>
+                            <option value="yard">yards</option>
+                            <option value="ft">feet</option>
+                            <option value="inch">inches</option>
+                          </select>
+                          <span class="input-group-text">→</span>
+                          <select class="form-select form-select-sm" id="to-length"
+                            onchange="convertUnit('length')">
+                            <option value="mile">miles</option>
+                            <option value="km">km</option>
+                            <option value="m">m</option>
+                            <option value="yard">yards</option>
+                            <option value="ft">feet</option>
+                            <option value="inch">inches</option>
+                          </select>
+                          <span class="input-group-text" id="length-result">0</span>
                         </div>
+                      </div>
+
+                      <!-- Weight Conversion -->
+                      <div class="mb-3">
+                        <label class="form-label small" style="font-weight: 600;">Weight</label>
+                        <div class="input-group input-group-sm">
+                          <input type="number" class="form-control" id="weight-value" placeholder="Value" value="1"
+                            oninput="convertUnit('weight')">
+                          <select class="form-select form-select-sm" id="from-weight"
+                            onchange="convertUnit('weight')">
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="lb">pounds</option>
+                            <option value="oz">ounces</option>
+                          </select>
+                          <span class="input-group-text">→</span>
+                          <select class="form-select form-select-sm" id="to-weight"
+                            onchange="convertUnit('weight')">
+                            <option value="lb">pounds</option>
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="oz">ounces</option>
+                          </select>
+                          <span class="input-group-text" id="weight-result">0</span>
+                        </div>
+                      </div>
+
+                      <!-- Temperature Conversion -->
+                      <div class="mb-3">
+                        <label class="form-label small" style="font-weight: 600;">Temperature</label>
+                        <div class="input-group input-group-sm">
+                          <input type="number" class="form-control" id="temp-value" placeholder="Value" value="0"
+                            oninput="convertUnit('temperature')">
+                          <select class="form-select form-select-sm" id="from-temp"
+                            onchange="convertUnit('temperature')">
+                            <option value="C">°C</option>
+                            <option value="F">°F</option>
+                            <option value="K">K</option>
+                          </select>
+                          <span class="input-group-text">→</span>
+                          <select class="form-select form-select-sm" id="to-temp"
+                            onchange="convertUnit('temperature')">
+                            <option value="F">°F</option>
+                            <option value="C">°C</option>
+                            <option value="K">K</option>
+                          </select>
+                          <span class="input-group-text" id="temp-result">0</span>
+                        </div>
+                      </div>
+
+                      <!-- Currency Conversion -->
+                      <div class="mb-3">
+                        <label class="form-label small" style="font-weight: 600;">Currency</label>
+                        <div class="input-group input-group-sm">
+                          <input type="number" class="form-control" id="currency-value" placeholder="Amount"
+                            value="1" oninput="convertUnit('currency')">
+                          <select class="form-select form-select-sm" id="from-currency"
+                            onchange="convertUnit('currency')">
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                            <option value="JPY">JPY</option>
+                            <option value="CAD">CAD</option>
+                            <option value="AUD">AUD</option>
+                            <option value="NGN">NGN</option>
+                          </select>
+                          <span class="input-group-text">→</span>
+                          <select class="form-select form-select-sm" id="to-currency"
+                            onchange="convertUnit('currency')">
+                            <option value="EUR">EUR</option>
+                            <option value="USD">USD</option>
+                            <option value="GBP">GBP</option>
+                            <option value="JPY">JPY</option>
+                            <option value="CAD">CAD</option>
+                            <option value="AUD">AUD</option>
+                            <option value="NGN">NGN</option>
+                          </select>
+                          <span class="input-group-text" id="currency-result">0</span>
+                          <button id="currency-refresh-btn" class="btn btn-sm btn-outline-info"
+                            onclick="fetchCurrencyRates()" title="Refresh rates">🔄</button>
+                        </div>
+                        <small class="text-muted" id="currency-timestamp"></small>
+                      </div>
+
+                      <!-- Quick Conversion Examples -->
+                      <div class="alert alert-info alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
+                        <strong>Examples:</strong> "5 km to miles" → <span id="example-result">3.11</span> | Add 10
+                        → <span id="example-add">13.11</span>
                       </div>
                     </div>
                   </div>
@@ -617,6 +625,7 @@
       </div>
     </div>
   </div>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/script.js"></script>
 </body>
