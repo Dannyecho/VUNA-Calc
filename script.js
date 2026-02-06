@@ -2,9 +2,6 @@ var left = '';
 var operator = '';
 var right = '';
 
-
-
-
 function appendToResult(value) {
     if (operator.length === 0) {
         left += value.toString();
@@ -52,9 +49,63 @@ function clearResult() {
     updateResult();
 }
 
+function convertToHex() {
+    // Check if there's a value to convert
+    if (currentExpression.length === 0) {
+        alert('Please enter a number first');
+        return;
+    }
+
+    // Parse the current expression as a number
+    const num = parseFloat(currentExpression);
+    
+    // Validate the input
+    if (isNaN(num)) {
+        alert('Invalid number. Please enter a valid decimal number.');
+        return;
+    }
+    
+    // Check if the number is an integer (hexadecimal conversion works best with integers)
+    if (!Number.isInteger(num)) {
+        alert('Hexadecimal conversion works with whole numbers only. Your number will be rounded.');
+    }
+    
+    // Convert to integer (rounds if decimal)
+    const integerNum = Math.floor(Math.abs(num));
+    
+    // Perform the conversion to hexadecimal
+    const hexValue = integerNum.toString(16).toUpperCase();
+    
+    // Get references to display elements
+    const wordResult = document.getElementById('word-result');
+    const wordArea = document.getElementById('word-area');
+    
+    // Create formatted display message
+    let displayMessage = '<span class="small-label">Hexadecimal Conversion</span>';
+    displayMessage += '<strong>';
+    
+    // Add negative sign if original number was negative
+    if (num < 0) {
+        displayMessage += 'Decimal: -' + integerNum + ' = Hex: -0x' + hexValue;
+    } else {
+        displayMessage += 'Decimal: ' + integerNum + ' = Hex: 0x' + hexValue;
+    }
+    
+    displayMessage += '</strong>';
+    
+    // Display the result
+    wordResult.innerHTML = displayMessage;
+    wordArea.style.display = 'flex';
+    
+    // Update the main display to show the hex value
+    currentExpression = hexValue;
+    updateResult();
+    
+    // Enable the speak button for the result
+    enableSpeakButton();
+}
+
 function calculateResult() {
-
-
     if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
     let result;
@@ -66,12 +117,114 @@ function calculateResult() {
         case '-': result = l - r; break;
         case '*': result = l * r; break;
         case '/': result = r !== 0 ? l / r : 'Error'; break;
+        case '^': result = Math.pow(l, r); break;
         default: return;
     }
 
     left = result.toString();
     operator = '';
     right = '';
+    updateResult();
+}
+
+
+
+// Calculate square root (√)
+function calculateSquareRoot() {
+    let currentValue;
+    
+    // If we have a complete expression, calculate it first
+    if (left && operator && right) {
+        calculateResult();
+        currentValue = left;
+    } else if (left) {
+        currentValue = left;
+    } else {
+        return; // Nothing to calculate
+    }
+    
+    // Convert to number and calculate square root
+    let num = parseFloat(currentValue);
+    
+    if (num < 0) {
+        alert('Cannot calculate square root of negative number');
+        return;
+    }
+    
+    let result = Math.sqrt(num);
+    
+    // Update the calculator
+    left = result.toString();
+    operator = '';
+    right = '';
+    
+    updateResult();
+}
+
+// Calculate square (x²)
+function calculateSquare() {
+    let currentValue;
+    
+    // If we have a complete expression, calculate it first
+    if (left && operator && right) {
+        calculateResult();
+        currentValue = left;
+    } else if (left) {
+        currentValue = left;
+    } else {
+        return; // Nothing to calculate
+    }
+    
+    // Convert to number and calculate square
+    let num = parseFloat(currentValue);
+    let result = num * num;
+    
+    // Update the calculator
+    left = result.toString();
+    operator = '';
+    right = '';
+    
+    updateResult();
+}
+
+// Calculate cube (x³)
+function calculateCube() {
+    let currentValue;
+    
+    // If we have a complete expression, calculate it first
+    if (left && operator && right) {
+        calculateResult();
+        currentValue = left;
+    } else if (left) {
+        currentValue = left;
+    } else {
+        return; // Nothing to calculate
+    }
+    
+    // Convert to number and calculate cube
+    let num = parseFloat(currentValue);
+    let result = num * num * num;
+    
+    // Update the calculator
+    left = result.toString();
+    operator = '';
+    right = '';
+    
+    updateResult();
+}
+
+// Calculate power (x^y)
+function calculatePower() {
+    // Only proceed if left exists
+    if (!left) return;
+    
+    // If we already have a complete expression, calculate it first
+    if (operator && right) {
+        calculateResult();
+    }
+    
+    // Set operator to power (^)
+    operator = '^';
     updateResult();
 }
 
@@ -138,88 +291,6 @@ function numberToWords(num) {
     return result.trim();
 }
 
-// hausa language
-
-function numberToHausa(num) {
-    if (num === 'Error') return 'Kuskure';
-
-    const ones = ['', 'Daya', 'Biyu', 'Uku', 'Hudu', 'Biyar', 'Shida', 'Bakwai', 'Takwas', 'Tara'];
-    const tens = ['', '', 'Ashirin', 'Talatin', 'Arba’in', 'Hamsin', 'Sittin', 'Sab’in', 'Tamanin', 'Tis’in'];
-    const teens = ['Goma', 'Sha daya', 'Sha biyu', 'Sha uku', 'Sha hudu', 'Sha biyar', 'Sha shida', 'Sha bakwai', 'Sha takwas', 'Sha tara'];
-    const scales = ['', 'Dubu', 'Miliyan', 'Biliyan', 'Triliyan'];
-
-    function convertGroup(val) {
-        let res = '';
-        if (val >= 100) {
-            res += ones[Math.floor(val / 100)] + ' Dari ';
-            val %= 100;
-        }
-
-        if (val >= 10 && val <= 19) {
-            res += teens[val - 10] + ' ';
-        } 
-        else if (val >= 20) {
-            res += tens[Math.floor(val / 10)] + (val % 10 ? ' da ' + ones[val % 10] : '') + ' ';
-        } 
-        else if (val > 0) {
-            res += ones[val] + ' ';
-        }
-
-        return res.trim();
-    }
-
-    let n = parseFloat(num);
-    if (isNaN(n)) return '';
-
-    let sign = n < 0 ? 'Mara kyau ' : '';
-    let absN = Math.abs(n);
-    let parts = absN.toString().split('.');
-    let integerPart = parseInt(parts[0]);
-    let decimalPart = parts[1];
-
-    let wordArr = [];
-
-    if (integerPart === 0) {
-        wordArr.push('Sifili');
-    } else {
-        let scaleIdx = 0;
-        while (integerPart > 0) {
-            let chunk = integerPart % 1000;
-            if (chunk > 0) {
-                let chunkWords = convertGroup(chunk);
-                wordArr.unshift(chunkWords + (scales[scaleIdx] ? ' ' + scales[scaleIdx] : ''));
-            }
-            integerPart = Math.floor(integerPart / 1000);
-            scaleIdx++;
-        }
-    }
-
-    let result = sign + wordArr.join(', ').trim();
-
-    if (decimalPart) {
-        result += ' Nuni';
-        for (let digit of decimalPart) {
-            result += ' ' + (digit === '0' ? 'Sifili' : ones[parseInt(digit)]);
-        }
-    }
-
-    return result.trim();
-}
-// translate to hausas 
-function translateToHausa() {
-    if (!left || operator || right) return;
-
-    const hausa = numberToHausa(left);
-    const wordResult = document.getElementById('word-result');
-
-    wordResult.innerHTML =
-        '<span class="small-label">Sakamako a Hausa</span><strong>' + hausa + '</strong>';
-}
-
-
-
-
-
 function updateResult() {
     const display = left + (operator ? ' ' + operator + ' ' : '') + right;
     document.getElementById('result').value = display || '0';
@@ -267,13 +338,39 @@ function enableSpeakButton() {
     speakBtn.disabled = !hasContent;
 }
 
+// Copy numeric result to clipboard
+function copyResult() {
+    const text = document.getElementById('result').value;
+    if (!text) return;
 
-// back to eng all null
-function backToEnglish() {
-    if (!left || operator || right) return;
+    navigator.clipboard.writeText(text)
+    .then(() => alert('Result copied!'))
+    .catch(() => alert('Failed to copy'));
+}
 
-    const wordResult = document.getElementById('word-result');
+function percentToResult() {
+    // Only proceed if left exists
+    if (!left) return;
 
-    wordResult.innerHTML =
-        '<span class="small-label">Result in words</span><strong>' + numberToWords(left) + '</strong>';
+    // If no operator, just divide left by 100
+    if (!operator) {
+        left = (parseFloat(left) / 100).toString();
+        updateResult();
+        convertToWords(left);
+        return;
+    }
+
+    // If operator exists but right is empty, wait for user input
+    if (!right) return;
+
+    // If both operator and right exist, calculate percentage of left
+    let result = (parseFloat(right) / 100) * parseFloat(left);
+
+    // Move result to left, clear operator and right
+    left = result.toString();
+    operator = '';
+    right = '';
+
+    updateResult();
+    convertToWords(left);
 }

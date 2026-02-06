@@ -131,6 +131,25 @@ After calculation, the result is converted to English words using a sophisticate
 - Scales (thousand, million, billion, trillion)
 - Decimal numbers (displayed with "point" between whole and decimal parts)
 
+<<<<<<< HEAD
+=======
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
+
+## 📄 License
+
+This project is licensed under the GNU v2.0 License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Credits
+
+Created by **GROUP 2** as a collaborative project to demonstrate calculator functionality with natural language output.
+
+## 📞 Support
+
+For bug reports and feature requests, please open an issue on the [GitHub repository](https://github.com/Olivia-Anigbogu/VUNA-Calc/issues).
+
+>>>>>>> c872eb4 (Enhance README.md with detailed project description, features, usage instructions, and future enhancements)
 ## 🚀 Future Enhancements
 
 Potential features for future versions:
@@ -140,6 +159,7 @@ Potential features for future versions:
 - Calculation history
 - Dark/Light theme toggle
 - Mobile app version
+<<<<<<< HEAD
 A simple calculator that displays computational results in english language. 
 
 
@@ -160,3 +180,5 @@ A simple calculator that displays computational results in english language.
 
 ---
 
+=======
+>>>>>>> c872eb4 (Enhance README.md with detailed project description, features, usage instructions, and future enhancements)
