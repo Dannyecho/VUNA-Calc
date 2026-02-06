@@ -285,6 +285,33 @@
                   </svg>
                 </button>
               </div>
+              <div class="diff-panel">
+                <div class="display-container my-3">
+                  <div class="col-md-12">
+                    <h4 class="group-header mb-0">Differentiate</h4>
+                    <div class="diff-controls row align-items-end">
+                      <div class="col-9">
+                        <input
+                          type="text"
+                          class="form-control diff-input"
+                          id="diff-input"
+                          placeholder="e.g., x^3 + 4x or sin(x)"
+                        />
+                      </div>
+                      <div class="col">
+                        <a
+                          class="btn btn-block btn-operator diff-btn"
+                          onclick="differentiateExpression()"
+                        >
+                          d/dx
+                        </a>
+                      </div>
+
+                  </div>
+                  </div>
+                </div>
+                <div id="diff-output" class="diff-outputx"></div>
+              </div>
 
                 <div class="btn-grid">
                   <!-- Row 1 -->
@@ -548,3 +575,5 @@
 </body>
 
 </html>
+
+
