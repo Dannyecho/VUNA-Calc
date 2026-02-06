@@ -632,6 +632,65 @@
                             </div>
                           </div>
                         </div>
+
+                        <!-- Physics Calculator Accordion - NEW SECTION -->
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingPhysics">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                              type="button" data-bs-toggle="collapse" data-bs-target="#collapsePhysics"
+                              aria-expanded="false" aria-controls="collapsePhysics">
+                              <span>⚛️ Physics Calculator</span>
+                            </button>
+                          </h2>
+                          <div id="collapsePhysics" class="accordion-collapse collapse"
+                            aria-labelledby="headingPhysics" data-bs-parent="#converterAccordion">
+                            <div class="accordion-body">
+                              
+                              <!-- Category Selection -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Select Category</label>
+                                <select class="form-select form-select-sm" id="physics-category" onchange="updatePhysicsFormulas()">
+                                  <option value="">-- Select Category --</option>
+                                  <option value="mechanics">Mechanics</option>
+                                  <option value="electricity">Electricity</option>
+                                  <option value="thermodynamics">Thermodynamics</option>
+                                  <option value="waves">Waves</option>
+                                </select>
+                              </div>
+
+                              <!-- Formula Selection -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Select Formula</label>
+                                <select class="form-select form-select-sm" id="physics-formula" onchange="updatePhysicsInputs()">
+                                  <option value="">-- Select Formula --</option>
+                                </select>
+                              </div>
+
+                              <!-- Dynamic Inputs Container -->
+                              <div id="physics-inputs-container"></div>
+
+                              <!-- Calculate Button -->
+                              <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-primary btn-sm" onclick="calculatePhysics()">
+                                  Calculate
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="clearPhysicsCalculator()">
+                                  Clear
+                                </button>
+                              </div>
+
+                              <!-- Result Display -->
+                              <div id="physics-result"></div>
+
+                              <!-- Info Box -->
+                              <div class="alert alert-info alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
+                                <strong>💡 Tip:</strong> Select a category and formula to get started. Common formulas include velocity, force, electrical power, and wave speed.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- END Physics Calculator Section -->
+
                       </div>
   
                       <div class="word-display-area" id="word-area">
