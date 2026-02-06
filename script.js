@@ -49,6 +49,62 @@ function clearResult() {
     updateResult();
 }
 
+function convertToHex() {
+    // Check if there's a value to convert
+    if (currentExpression.length === 0) {
+        alert('Please enter a number first');
+        return;
+    }
+
+    // Parse the current expression as a number
+    const num = parseFloat(currentExpression);
+    
+    // Validate the input
+    if (isNaN(num)) {
+        alert('Invalid number. Please enter a valid decimal number.');
+        return;
+    }
+    
+    // Check if the number is an integer (hexadecimal conversion works best with integers)
+    if (!Number.isInteger(num)) {
+        alert('Hexadecimal conversion works with whole numbers only. Your number will be rounded.');
+    }
+    
+    // Convert to integer (rounds if decimal)
+    const integerNum = Math.floor(Math.abs(num));
+    
+    // Perform the conversion to hexadecimal
+    const hexValue = integerNum.toString(16).toUpperCase();
+    
+    // Get references to display elements
+    const wordResult = document.getElementById('word-result');
+    const wordArea = document.getElementById('word-area');
+    
+    // Create formatted display message
+    let displayMessage = '<span class="small-label">Hexadecimal Conversion</span>';
+    displayMessage += '<strong>';
+    
+    // Add negative sign if original number was negative
+    if (num < 0) {
+        displayMessage += 'Decimal: -' + integerNum + ' = Hex: -0x' + hexValue;
+    } else {
+        displayMessage += 'Decimal: ' + integerNum + ' = Hex: 0x' + hexValue;
+    }
+    
+    displayMessage += '</strong>';
+    
+    // Display the result
+    wordResult.innerHTML = displayMessage;
+    wordArea.style.display = 'flex';
+    
+    // Update the main display to show the hex value
+    currentExpression = hexValue;
+    updateResult();
+    
+    // Enable the speak button for the result
+    enableSpeakButton();
+}
+
 function calculateResult() {
     if (left.length === 0 || operator.length === 0 || right.length === 0) return;
 
@@ -70,6 +126,8 @@ function calculateResult() {
     right = '';
     updateResult();
 }
+
+
 
 // Calculate square root (√)
 function calculateSquareRoot() {
