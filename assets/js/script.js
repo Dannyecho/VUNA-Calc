@@ -605,6 +605,39 @@ function differentiateBinary(node) {
   }
 }
 
+function convertToFraction() {
+    const display = document.getElementById('result');
+    if (!display || !display.value) return;
+
+    const value = Number(display.value);
+    if (isNaN(value)) return;
+
+    // Handle integers
+    if (Number.isInteger(value)) {
+        display.value = value + "/1";
+        currentExpression = display.value;
+        return;
+    }
+
+    let tolerance = 1.0E-6;
+    let h1 = 1, h2 = 0, k1 = 0, k2 = 1;
+    let b = value;
+
+    do {
+        let a = Math.floor(b);
+        let aux = h1;
+        h1 = a * h1 + h2;
+        h2 = aux;
+        aux = k1;
+        k1 = a * k1 + k2;
+        k2 = aux;
+        b = 1 / (b - a);
+    } while (Math.abs(value - h1 / k1) > value * tolerance);
+
+    display.value = `${h1}/${k1}`;
+    currentExpression = display.value;
+}
+
 function differentiatePower(base, exponent) {
   if (exponent.type === "number") {
     return {
