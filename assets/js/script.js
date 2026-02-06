@@ -246,11 +246,13 @@ function operatorToResult(value) {
 
 function clearResult() {
     currentExpression = '';
+    steps = [];
     document.getElementById('word-result').innerHTML = '';
     document.getElementById('word-area').style.display = 'none';
+    document.getElementById('steps').innerText = '';
+    updateStepsDisplay();
     updateResult();
 }
-
 // ------------------------------
 // Calculate Result
 // ------------------------------
@@ -258,13 +260,21 @@ function calculateResult() {
     if (!currentExpression) return;
 
     try {
-        let result = eval(currentExpression);
+        const originalExpression = currentExpression;
+        let result = eval(normalizeExpression(currentExpression));
 
         if (isNaN(result) || !isFinite(result)) {
             throw new Error();
         }
 
-       calculationHistory?.push({
+        // Track calculation in steps
+        if (steps.length < MAX_STEPS) {
+            steps.push(`Step ${steps.length + 1}: ${originalExpression} = ${result}`);
+        }
+        updateStepsDisplay();
+
+        // Add to history
+        calculationHistory?.push({
             expression: currentExpression,
             words: numberToWords(result),
             time: new Date().toLocaleTimeString()
@@ -280,10 +290,11 @@ function calculateResult() {
         document.getElementById('word-result').innerHTML = numberToWords(result);
 
     } catch (e) {
-        currentExpression= 'Error';
+        currentExpression = 'Error';
         updateResult();
     }
 }
+
 function tenPower() {
     if (!currentExpression) return;
 
@@ -1117,9 +1128,64 @@ function factorPrimeCheck() {
     updateStepsDisplay();
 }
 
+// Update Steps Display
 function updateStepsDisplay() {
-  // This function might be used elsewhere in your code
-  // Keeping it here for compatibility
+    const stepsDiv = document.getElementById("steps");
+    const saveBtn = document.getElementById("save-steps-btn");
+    
+    if (!stepsDiv) return;
+    
+    stepsDiv.innerText = steps.join("\n");
+    
+    // Enable/disable save button based on steps
+    if (saveBtn) {
+        saveBtn.disabled = steps.length === 0;
+    }
+}
+
+// Save Steps as Image
+function saveStepsAsImage() {
+    if (steps.length === 0) return;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size
+    canvas.width = 600;
+    const lineHeight = 40;
+    const padding = 40;
+    const headerHeight = 60;
+    canvas.height = headerHeight + (steps.length * lineHeight) + padding * 2;
+    
+    // Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Header
+    ctx.fillStyle = '#0d6efd';
+    ctx.font = 'bold 24px "Segoe UI", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Calculation Steps', canvas.width / 2, padding + 30);
+    
+    // Steps
+    ctx.fillStyle = '#212529';
+    ctx.font = '18px "Segoe UI", Arial, sans-serif';
+    ctx.textAlign = 'left';
+    
+    steps.forEach((step, index) => {
+        const y = headerHeight + padding + (index * lineHeight) + 20;
+        ctx.fillText(step, padding, y);
+    });
+    
+    // Convert to blob and download
+    canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `calculation-steps-${Date.now()}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
 }
 
 fetchCurrencyRates()
@@ -1336,3 +1402,47 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
+
+// Modified function to add square calculation to steps
+function calculateSquare() {
+    const num = parseFloat(currentExpression);
+    
+    if (isNaN(num) || currentExpression.includes(' ') || currentExpression.includes('+') || 
+        currentExpression.includes('-') || currentExpression.includes('*') || 
+        currentExpression.includes('/') || currentExpression.includes('^') || 
+        currentExpression.includes('(') || currentExpression.includes(')')) {
+        alert('Please enter a single number first');
+        return;
+    }
+    
+    const result = num * num;
+    if (steps.length < MAX_STEPS) {
+        steps.push(`Step ${steps.length + 1}: ${num}² = ${result}`);
+    }
+    currentExpression = result.toString();
+    updateStepsDisplay();
+    updateResult();
+}
+
+// Modified function to add cube calculation to steps
+function calculateCube() {
+    const num = parseFloat(currentExpression);
+    
+    if (isNaN(num) || currentExpression.includes(' ') || currentExpression.includes('+') || 
+        currentExpression.includes('-') || currentExpression.includes('*') || 
+        currentExpression.includes('/') || currentExpression.includes('^') || 
+        currentExpression.includes('(') || currentExpression.includes(')')) {
+        alert('Please enter a single number first');
+        return;
+    }
+    
+    const result = num * num * num;
+    if (steps.length < MAX_STEPS) {
+        steps.push(`Step ${steps.length + 1}: ${num}³ = ${result}`);
+    }
+    currentExpression = result.toString();
+    updateStepsDisplay();
+    updateResult();
+}
+
