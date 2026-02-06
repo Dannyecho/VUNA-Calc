@@ -4,6 +4,10 @@
   --card-bg: rgba(255, 255, 255, 0.9);
   --btn-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   --btn-hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+
+  /* Language colors */
+  --lang-igbo: #198754;
+  --lang-active-bg: rgba(25, 135, 84, 0.12);
 }
 
 body {
@@ -13,6 +17,10 @@ body {
   align-items: center;
   font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+
+/* ===============================
+   CARD
+   =============================== */
 
 .calculator-card {
   background: var(--card-bg);
@@ -28,6 +36,10 @@ body {
   transform: translateY(-5px);
 }
 
+/* ===============================
+   DISPLAY
+   =============================== */
+
 .display-container {
   background: #f8f9fa;
   padding: 20px;
@@ -39,49 +51,6 @@ body {
   align-items: center;
   justify-content: flex-end;
   position: relative;
-}
-
-.steps-container {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 16px;
-  margin-bottom: 20px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-  height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.diff-panel {
-  background: #f8f9fa;
-  padding: 16px;
-  border-radius: 16px;
-  margin-bottom: 16px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.diff-controls {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.diff-input {
-  font-size: 14px;
-  border-radius: 12px;
-}
-
-.diff-btn {
-  white-space: nowrap;
-}
-
-.diff-output {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #495057;
-  min-height: 22px;
-  word-break: break-word;
 }
 
 #result {
@@ -97,19 +66,9 @@ body {
   width: 100%;
 }
 
-#memory-indicator {
-  position: absolute;
-  left: 16px;
-  top: 12px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #0b5ed7;
-  background: rgba(13, 110, 253, 0.1);
-  border-radius: 6px;
-  padding: 2px 6px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
+/* ===============================
+   WORD RESULT (EN / IGBO)
+   =============================== */
 
 .word-display-area {
   margin-top: 15px;
@@ -117,31 +76,22 @@ body {
   border-radius: 16px;
   padding: 12px 18px;
   border: 1px dashed rgba(13, 110, 253, 0.2);
-  display: none; /* Hidden by default */
+  display: none;
   align-items: center;
   justify-content: space-between;
   gap: 15px;
   animation: slideUp 0.3s ease-out;
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* Igbo text clarity */
 #word-result {
   font-size: 14px;
   color: #495057;
   font-weight: 400;
-  line-height: 1.4;
+  line-height: 1.6;
   word-wrap: break-word;
   flex-grow: 1;
+  font-family: "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif;
 }
 
 #word-result strong {
@@ -158,6 +108,46 @@ body {
   display: block;
   margin-bottom: 2px;
 }
+
+/* ===============================
+   LANGUAGE SWITCH
+   =============================== */
+
+.language-switch {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.language-btn {
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.language-btn.en {
+  background: #e7f1ff;
+  color: var(--primary-color);
+}
+
+.language-btn.ig {
+  background: rgba(25, 135, 84, 0.15);
+  color: var(--lang-igbo);
+}
+
+.language-btn.active {
+  border-color: currentColor;
+  background: var(--lang-active-bg);
+}
+
+/* ===============================
+   SPEAK BUTTON
+   =============================== */
 
 #speak-btn {
   background: var(--primary-color);
@@ -185,22 +175,9 @@ body {
   box-shadow: none;
 }
 
-#speak-btn.speaking {
-  background: #fa5252;
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(250, 82, 82, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(250, 82, 82, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(250, 82, 82, 0);
-  }
-}
+/* ===============================
+   BUTTON GRID
+   =============================== */
 
 .btn-grid {
   display: grid;
@@ -230,6 +207,10 @@ body {
   transform: translateY(0);
 }
 
+/* ===============================
+   BUTTON TYPES
+   =============================== */
+
 .btn-light {
   background: #ffffff;
   color: #495057;
@@ -244,50 +225,31 @@ body {
   color: var(--primary-color);
 }
 
-.btn-operator:hover {
-  background: #cfe2ff;
-}
-
 .btn-action {
   background: #fff5f5;
   color: #fa5252;
 }
 
-.btn-action:hover {
-  background: #ffe3e3;
-}
-
 .btn-equals {
   background: var(--primary-color);
   color: white;
-  grid-column: span 1;
 }
 
 .btn-equals:hover {
   background: #0b5ed7;
-  color: white;
 }
 
-.group-header {
-  color: #495057;
-  font-weight: 700;
-  letter-spacing: 2px;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-  font-size: 1.2rem;
-}
+/* ===============================
+   ANIMATIONS
+   =============================== */
 
-.btn-memory {
-  background: #f1f3f5;
-  color: #495057;
-  font-size: 14px;
-}
-
-.btn-memory:hover {
-  background: #e9ecef;
-}
-
-#steps {
-  min-height: 50px;
-  white-space: pre-line;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
