@@ -180,37 +180,6 @@ function enableSpeakButton() {
     speakBtn.disabled = !hasContent;
 }
 
-function squareResult() {
-    if (left.length === 0) return;
-    const num = parseFloat(left);
-    left = (num * num).toString();
-    operator = '';
-    right = '';
-    updateResult();
-}
-
-function sqrtResult() {
-    if (left.length === 0) return;
-    const num = parseFloat(left);
-    if (num < 0) {
-        left = 'Error';
-    } else {
-        left = Math.sqrt(num).toString();
-    }
-    operator = '';
-    right = '';
-    updateResult();
-}
-
-function cubeResult() {
-    if (left.length === 0) return;
-    const num = parseFloat(left);
-    left = (num * num * num).toString();
-    operator = '';
-    right = '';
-    updateResult();
-}
-
 function cubeRootResult() {
     if (left.length === 0) return;
     const num = parseFloat(left);
