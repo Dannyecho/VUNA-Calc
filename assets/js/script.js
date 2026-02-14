@@ -239,7 +239,6 @@ function updateStepsDisplay() {
 
   stepsDiv.innerText = steps.join("\n");
 }
-
 function insertPi() {
     appendToResult(Math.PI.toFixed(6))
 }
