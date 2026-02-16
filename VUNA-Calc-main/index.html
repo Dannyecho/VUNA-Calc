@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />    
+    <style>
+      .calculator {
+        border-radius: 10px;
+      }
+      #result {
+        text-align: right;
+      }
+      #word-result{
+        background-color: #0dcaf0;
+        border: solid 1px #0d6efd;
+        text-transform: capitalize;
+        font-weight: bold;
+        color: #ffffff;}
+        
+      .logo-header {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.app-logo {
+  width: 120px;      /* adjust size */
+  height: auto;
+}
+
+      
+    </style>
+  </head>
+  <body>
+
+    <!-- Logo Header -->
+<div class="logo-header">
+  <img src="assets/veritas.jpg" alt="Calculator Logo" class="app-logo">
+</div>
+
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-3">
+                <h4 class="text-white text-center">GROUP 2</h4>
+            </div>
+        </div>
+      <div class="row justify-content-center mt-3">
+        <div class="col-md-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="calculator">
+                  <input
+                    type="text"
+                    class="form-control mb-2"
+                    id="result"
+                    disabled
+                  />
+                  <div id="word-result" class="px-3 py-2 mb-3"></div>
+                  <div class="row">
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="(" onclick="bracketToResult('(')" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value=")" onclick="bracketToResult(')')" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="←" onclick="backspace()" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-warning btn-block"
+                          type="button"
+                          value="AC"
+                          onclick="clearResult()"
+                        />
+                    </div>
+                  </div>            
+                  <br /><br />
+                  <div class="row">
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="7" onclick="appendToResult(7)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="8" onclick="appendToResult(8)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="9" onclick="appendToResult(9)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input
+                        class="btn btn-secondary btn-block px-3"
+                          type="button"
+                          value="/"
+                          onclick="operatorToResult('/')"
+                        />
+                    </div>
+                  </div>
+                  <br /><br />
+                  <div class="row">
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="4" onclick="appendToResult(4)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="5" onclick="appendToResult(5)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="6" onclick="appendToResult(6)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input
+                        class="btn btn-secondary btn-block px-3"
+                          type="button"
+                          value="*"
+                          onclick="operatorToResult('*')"
+                          />
+                    </div>
+                  </div>
+                  <br /><br />
+                  
+                  <div class="row">
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="1" onclick="appendToResult(1)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="2" onclick="appendToResult(2)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="3" onclick="appendToResult(3)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input
+                        class="btn btn-secondary btn-block px-3"
+                          type="button"
+                          value="+"
+                          onclick="operatorToResult('+')"
+                          />
+                    </div>
+                  </div>
+                  <br /><br />
+                  
+                  <div class="row">
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="." onclick="appendToResult('.')" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="0" onclick="appendToResult(0)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input class="btn btn-light btn-block" type="button" value="-" onclick="operatorToResult('-')" />
+                    </div>
+                    <div class="col-md-3">
+                        <input
+                        class="btn btn-secondary btn-block px-3"
+                          type="submit"
+                          value="="
+                          onclick="calculateResult()"
+                        />
+                    </div>
+                </div>
+                  <br /><br />
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/german.js"></script>
+  </body>
+</html>

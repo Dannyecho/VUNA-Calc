@@ -11,54 +11,34 @@ if (languageSelect) {
 }
 
 function appendToResult(value) {
-    if (operator.length === 0) {
-        left += value.toString();
-    } else {
-        right += value.toString();
-    }
+    currentExpression += value.toString();
     updateResult();
 }
 
 function bracketToResult(value) {
-    if (operator.length === 0) {
-        left += value;
-    } else {
-        right += value;
-    }
+    currentExpression += value;
     updateResult();
 }
 
 function backspace() {
-    if (right.length > 0) {
-        right = right.slice(0, -1);
-    } else if (operator.length > 0) {
-        operator = '';
-    } else if (left.length > 0) {
-        left = left.slice(0, -1);
-    }
+    currentExpression = currentExpression.slice(0, -1);
     updateResult();
 }
 
 function operatorToResult(value) {
-    if (left.length === 0) return;
-    if (right.length > 0) {
-        calculateResult();
+    if (value === '^') {
+        currentExpression += '**';
+    } else {
+        currentExpression += value;
     }
-    operator = value;
     updateResult();
 }
 
 function clearResult() {
-  left = "";
-  right = "";
-  operator = "";
-  steps = [];
-
-  document.getElementById("word-result").innerHTML = "";
-  document.getElementById("word-area").style.display = "none";
-  document.getElementById("steps").innerText = "";
-
-  updateResult();
+    currentExpression = '';
+    document.getElementById('word-result').innerHTML = '';
+    document.getElementById('word-area').style.display = 'none';
+    updateResult();
 }
 
 function calculateResult() {
@@ -431,8 +411,7 @@ function numberToWordsSpanish(num) {
 }
 
 function updateResult() {
-    const display = left + (operator ? ' ' + operator + ' ' : '') + right;
-    document.getElementById('result').value = display || '0';
+    document.getElementById('result').value = currentExpression || '0';
 
     const wordResult = document.getElementById('word-result');
     const wordArea = document.getElementById('word-area');
@@ -510,8 +489,9 @@ function enableSpeakButton() {
     speakBtn.disabled = !hasContent;
 }
 
-function updateStepsDisplay() {
-  const stepsDiv = document.getElementById("steps");
-  if (!stepsDiv) return;
+function copyResult() {
+    const text = document.getElementById('result').value;
+    if (!text) return;
+
   stepsDiv.innerText = steps.join("\n");
 }
