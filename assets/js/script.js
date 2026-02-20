@@ -55,6 +55,24 @@ const unitConversions = {
     F: { offset: 32, scale: 5 / 9 },
     K: { offset: -273.15, scale: 1 },
   },
+  area: {
+    sqm: 1,
+    sqkm: 1e6,
+    sqmile: 2.58999e6,
+    sqyard: 0.836127,
+    sqft: 0.092903,
+    sqinch: 0.00064516,
+    hectare: 10000,
+    acre: 4046.86,
+  },
+  data: {
+    bit: 1 / 8,
+    byte: 1,
+    kb: 1024,
+    mb: 1024 * 1024,
+    gb: 1024 * 1024 * 1024,
+    tb: 1024 * 1024 * 1024 * 1024,
+  },
 };
 
 function convertUnit(type) {
@@ -130,6 +148,32 @@ function convertUnit(type) {
     const result = usd * currencyRates[toCurrency];
     document.getElementById("currency-result").textContent =
       formatResult(result);
+  } else if (type === "area") {
+    const value = parseFloat(document.getElementById("area-value").value) || 0;
+    const fromUnit = document.getElementById("from-area").value;
+    const toUnit = document.getElementById("to-area").value;
+
+    if (value === 0) {
+      document.getElementById("area-result").textContent = "0";
+      return;
+    }
+
+    const sqm = value * unitConversions.area[fromUnit];
+    const result = sqm / unitConversions.area[toUnit];
+    document.getElementById("area-result").textContent = formatResult(result);
+  } else if (type === "data") {
+    const value = parseFloat(document.getElementById("data-value").value) || 0;
+    const fromUnit = document.getElementById("from-data").value;
+    const toUnit = document.getElementById("to-data").value;
+
+    if (value === 0) {
+      document.getElementById("data-result").textContent = "0";
+      return;
+    }
+
+    const bytes = value * unitConversions.data[fromUnit];
+    const result = bytes / unitConversions.data[toUnit];
+    document.getElementById("data-result").textContent = formatResult(result);
   }
 }
 
@@ -140,6 +184,8 @@ window.addEventListener("DOMContentLoaded", function () {
     convertUnit("weight");
     convertUnit("temperature");
     convertUnit("currency");
+    convertUnit("area");
+    convertUnit("data");
   } catch (e) {
     console.warn("Converter init error:", e);
   }
@@ -2064,77 +2110,80 @@ function cubeRootResult() {
 // ============================================
 
 function calculatePercentageChange() {
-    // Get input values
-    const original = parseFloat(document.getElementById('pc-original').value);
-    const newValue = parseFloat(document.getElementById('pc-new').value);
-    
-    // Validation
-    if (isNaN(original) || isNaN(newValue)) {
-        alert('Please enter valid numbers');
-        return;
-    }
-    
-    if (original === 0) {
-        alert('Original value cannot be zero');
-        return;
-    }
-    
-    // Calculate percentage change
-    const absoluteChange = newValue - original;
-    const percentageChange = (absoluteChange / Math.abs(original)) * 100;
-    
-    // Determine description
-    let description = '';
-    if (percentageChange > 0) {
-        description = `an increase of ${Math.abs(percentageChange).toFixed(2)}%`;
-    } else if (percentageChange < 0) {
-        description = `a decrease of ${Math.abs(percentageChange).toFixed(2)}%`;
-    } else {
-        description = 'no change';
-    }
-    
-    // Display results
-    const resultDiv = document.getElementById('pc-result');
-    document.getElementById('pc-change-value').textContent = percentageChange.toFixed(2);
-    document.getElementById('pc-absolute-change').textContent = absoluteChange.toFixed(2);
-    document.getElementById('pc-description').textContent = `From ${original} to ${newValue} is ${description}`;
-    resultDiv.style.display = 'block';
-    
-    // Update main calculator display with the result
-    left = percentageChange.toFixed(2).toString();
-    operator = '';
-    right = '';
-    updateResult();
+  // Get input values
+  const original = parseFloat(document.getElementById("pc-original").value);
+  const newValue = parseFloat(document.getElementById("pc-new").value);
+
+  // Validation
+  if (isNaN(original) || isNaN(newValue)) {
+    alert("Please enter valid numbers");
+    return;
+  }
+
+  if (original === 0) {
+    alert("Original value cannot be zero");
+    return;
+  }
+
+  // Calculate percentage change
+  const absoluteChange = newValue - original;
+  const percentageChange = (absoluteChange / Math.abs(original)) * 100;
+
+  // Determine description
+  let description = "";
+  if (percentageChange > 0) {
+    description = `an increase of ${Math.abs(percentageChange).toFixed(2)}%`;
+  } else if (percentageChange < 0) {
+    description = `a decrease of ${Math.abs(percentageChange).toFixed(2)}%`;
+  } else {
+    description = "no change";
+  }
+
+  // Display results
+  const resultDiv = document.getElementById("pc-result");
+  document.getElementById("pc-change-value").textContent =
+    percentageChange.toFixed(2);
+  document.getElementById("pc-absolute-change").textContent =
+    absoluteChange.toFixed(2);
+  document.getElementById("pc-description").textContent =
+    `From ${original} to ${newValue} is ${description}`;
+  resultDiv.style.display = "block";
+
+  // Update main calculator display with the result
+  left = percentageChange.toFixed(2).toString();
+  operator = "";
+  right = "";
+  updateResult();
 }
 
 function clearPercentageChange() {
-    // Clear input fields
-    document.getElementById('pc-original').value = '100';
-    document.getElementById('pc-new').value = '150';
-    
-    // Hide result
-    document.getElementById('pc-result').style.display = 'none';
-    
-    // Clear calculator display
-    left = '';
-    operator = '';
-    right = '';
-    updateResult();
+  // Clear input fields
+  document.getElementById("pc-original").value = "100";
+  document.getElementById("pc-new").value = "150";
+
+  // Hide result
+  document.getElementById("pc-result").style.display = "none";
+
+  // Clear calculator display
+  left = "";
+  operator = "";
+  right = "";
+  updateResult();
 }
 
 // Function to calculate the 2x2 determinant
 function calculateMatrix() {
   // 1. Fetch values (default to 0 if empty)
-  const a = parseFloat(document.getElementById('m11').value) || 0;
-  const b = parseFloat(document.getElementById('m12').value) || 0;
-  const c = parseFloat(document.getElementById('m21').value) || 0;
-  const d = parseFloat(document.getElementById('m22').value) || 0;
+  const a = parseFloat(document.getElementById("m11").value) || 0;
+  const b = parseFloat(document.getElementById("m12").value) || 0;
+  const c = parseFloat(document.getElementById("m21").value) || 0;
+  const d = parseFloat(document.getElementById("m22").value) || 0;
 
   // 2. Determinant Formula: (a * d) - (b * c)
-  const detResult = (a * d) - (b * c);
-  
+  const detResult = a * d - b * c;
+
   // 3. Update the UI Result
-  document.getElementById('matrix-result').innerText = detResult;
+  document.getElementById("matrix-result").innerText = detResult;
 
   // 4. Sync with main calculator display
   currentExpression = detResult.toString();
@@ -2142,53 +2191,52 @@ function calculateMatrix() {
 
   // 5. Automatically trigger word translation and speech if needed
   if (typeof numberToWords === "function") {
-      const words = numberToWords(detResult);
-      const wordArea = document.getElementById("word-area");
-      const wordText = document.getElementById("word-result-text") || document.getElementById("word-result");
-      
-      if (wordText) wordText.innerHTML = words;
-      if (wordArea) wordArea.style.display = "flex";
-      enableSpeakButton();
+    const words = numberToWords(detResult);
+    const wordArea = document.getElementById("word-area");
+    const wordText =
+      document.getElementById("word-result-text") ||
+      document.getElementById("word-result");
+
+    if (wordText) wordText.innerHTML = words;
+    if (wordArea) wordArea.style.display = "flex";
+    enableSpeakButton();
   }
 }
 
 function redoCalculation() {
-  
-  var calcHistory =localStorage.getItem("calcHistory")
-  var History = JSON.parse(calcHistory)
-  
-  var lastIn = History[History.length - 1];
-  console.log(lastIn)
-    if (lastIn) {
-        // Restore the entire calculation with result
-      const tokenizer = /(-?\d*\.?\d+|[()+\-*/%^])/g;
+  var calcHistory = localStorage.getItem("calcHistory");
+  var History = JSON.parse(calcHistory);
 
-      const match = lastIn.expression.match(tokenizer);
-      console.log(match)
-      if (match) {
+  var lastIn = History[History.length - 1];
+  console.log(lastIn);
+  if (lastIn) {
+    // Restore the entire calculation with result
+    const tokenizer = /(-?\d*\.?\d+|[()+\-*/%^])/g;
+
+    const match = lastIn.expression.match(tokenizer);
+    console.log(match);
+    if (match) {
       var left = match[0];
       var operator = match[1];
       var right = match[2];
-        
-        
-        // Show the full expression first
-        document.getElementById('result').value = match.join("") + '=' + lastIn.answer ;
-        
-        // Then restore to just the result
-        
-        
-        // Disable redo button after use
-        // disableRedo();
-    
-      }
+
+      // Show the full expression first
+      document.getElementById("result").value =
+        match.join("") + "=" + lastIn.answer;
+
+      // Then restore to just the result
+
+      // Disable redo button after use
+      // disableRedo();
     }
   }
+}
 function enableRedo() {
-    const redoBtn = document.getElementById('redoBtn');
-    redoBtn.disabled = false;
+  const redoBtn = document.getElementById("redoBtn");
+  redoBtn.disabled = false;
 }
 
 function disableRedo() {
-    const redoBtn = document.getElementById('redoBtn');
-    redoBtn.disabled = true;
-} 
+  const redoBtn = document.getElementById("redoBtn");
+  redoBtn.disabled = true;
+}

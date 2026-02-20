@@ -864,6 +864,62 @@ border-radius:15px;">
                                 </div>
                                 <small class="text-muted" id="currency-timestamp"></small>
                               </div>
+                              <!-- Area Conversion -->
+                               <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Area</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="area-value" placeholder="Value"
+                                  value="1" oninput="convertUnit('area')">
+                                  <select class="form-select form-select-sm" id="from-area" onchange="convertUnit('area')">
+                                    <option value="sqm">m²</option>
+                                    <option value="sqkm">km²</option>
+                                    <option value="sqmile">mi²</option>
+                                    <option value="sqyard">yd²</option>
+                                    <option value="sqft">ft²</option>
+                                    <option value="sqinch">in²</option>
+                                    <option value="hectare">hectare</option>
+                                    <option value="acre">acre</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-area" onchange="convertUnit('area')">
+                                    <option value="sqmile">mi²</option>
+                                    <option value="sqm">m²</option>
+                                    <option value="sqkm">km²</option>
+                                    <option value="sqyard">yd²</option>
+                                    <option value="sqft">ft²</option>
+                                    <option value="sqinch">in²</option>
+                                    <option value="hectare">hectare</option>
+                                    <option value="acre">acre</option>
+                                  </select>
+                                  <span class="input-group-text" id="area-result">0</span>
+                                </div>
+                              </div>
+                              <!-- Data Storage Conversion -->
+                               <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Data Storage</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="data-value" placeholder="Value"
+                                  value="1" oninput="convertUnit('data')">
+                                  <select class="form-select form-select-sm" id="from-data" onchange="convertUnit('data')">
+                                    <option value="bit">bit</option>
+                                    <option value="byte">B</option>
+                                    <option value="kb">KB</option>
+                                    <option value="mb">MB</option>
+                                    <option value="gb">GB</option>
+                                    <option value="tb">TB</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-data" onchange="convertUnit('data')">
+                                    <option value="B">B</option>
+                                    <option value="bit">bit</option>
+                                    <option value="kb">KB</option>
+                                    <option value="mb">MB</option>
+                                    <option value="gb">GB</option>
+                                    <option value="tb">TB</option>
+                                  </select>
+                                  <span class="input-group-text" id="data-result">0</span>
+                                </div>
+                              </div>
 
                               <!-- Quick Conversion Examples -->
                               <div class="alert alert-info alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
