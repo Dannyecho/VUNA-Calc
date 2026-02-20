@@ -1,153 +1,1080 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calculator</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />    
-    <style>
-      .calculator {
-        border-radius: 10px;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --btn-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --btn-hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .calculator-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .calculator-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .display-container {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    #result {
+      text-align: right;
+      font-size: 38px;
+      font-weight: 600;
+      height: auto;
+      border: none;
+      background: transparent;
+      padding: 0;
+      color: #212529;
+      box-shadow: none;
+      width: 100%;
+    }
+
+    .word-display-area {
+      margin-top: 15px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 16px;
+      padding: 12px 18px;
+      border: 1px dashed rgba(13, 110, 253, 0.2);
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
       }
-      #result {
-        text-align: right;
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
-      #word-result{
-        background-color: #0dcaf0;
-        border: solid 1px #0d6efd;
-        text-transform: capitalize;
-        font-weight: bold;
-        color: #ffffff;
+    }
+
+    #word-result {
+      font-size: 14px;
+      color: #495057;
+      font-weight: 400;
+      line-height: 1.4;
+      word-wrap: break-word;
+      flex-grow: 1;
+    }
+
+    #word-result strong {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .small-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #adb5bd;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    #speak-btn {
+      background: var(--primary-color);
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+    }
+
+    #speak-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      background: #0b5ed7;
+    }
+
+    #speak-btn:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      box-shadow: none;
+    }
+
+    #speak-btn.speaking {
+      background: #fa5252;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(250, 82, 82, 0.4);
       }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-        <div class="row justify-content-center mt-5">
-            <div class="col-md-3">
-                <h4 class="text-white text-center">GROUP 2</h4>
-            </div>
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(250, 82, 82, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(250, 82, 82, 0);
+      }
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .calculator .btn {
+      height: 60px;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      border: none;
+      box-shadow: var(--btn-shadow);
+    }
+
+    .calculator .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--btn-hover-shadow);
+    }
+
+    .calculator .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-light {
+      background: #ffffff;
+      color: #495057;
+    }
+
+    .btn-light:hover {
+      background: #f1f3f5;
+    }
+
+    .btn-operator {
+      background: #e7f1ff;
+      color: var(--primary-color);
+    }
+
+    .btn-operator:hover {
+      background: #cfe2ff;
+    }
+
+    .btn-action {
+      background: #fff5f5;
+      color: #fa5252;
+    }
+
+    .btn-action:hover {
+      background: #ffe3e3;
+    }
+
+    .btn-equals {
+      background: var(--primary-color);
+      color: white;
+      grid-column: span 1;
+    }
+
+    .btn-equals:hover {
+      background: #0b5ed7;
+      color: white;
+    }
+
+    .btn-special {
+      background: #e7f6ed;
+      color: #198754;
+      font-size: 16px;
+    }
+
+    .btn-special:hover {
+      background: #d1f0dd;
+    }
+
+    .group-header {
+      color: #495057;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      font-size: 1.2rem;
+    }
+
+    .theme-toggle-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    body.dark-mode {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .calculator-card {
+      background: rgba(45, 45, 45, 0.9);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode .display-container {
+      background: #333333;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode #result {
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .btn-light {
+      background: #444444;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .btn-light:hover {
+      background: #555555;
+    }
+
+    body.dark-mode .accordion-button {
+      background-color: #444444;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .accordion-button:not(.collapsed) {
+      background-color: #555555;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+      background-color: #444444;
+      color: #e0e0e0;
+      border-color: #555555;
+    }
+
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+      background-color: #555555;
+      color: #e0e0e0;
+      border-color: #0d6efd;
+    }
+
+    #hausa-btn {
+      background: #198754;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
+    }
+
+    #hausa-btn:hover:not(:disabled) {
+      background: #157347;
+      transform: scale(1.05);
+    }
+
+    #hausa-btn:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      box-shadow: none;
+    }
+
+    #english-btn {
+      background: #0d6efd;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    #history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .history-item {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.5s ease;
+      opacity: 0; /* for fade-in */
+    }
+
+    .history-item.show {
+      opacity: 1;
+    }
+
+    .history-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+    }
+
+    .history-item-expression {
+      font-weight: 600;
+      color: #212529;
+      font-size: 16px;
+    }
+
+    .history-item-words {
+      font-style: italic;
+      color: #495057;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .history-item-time {
+      font-size: 12px;
+      color: #6c757d;
+      margin-top: 2px;
+      text-align: right;
+    }
+
+    /* Clear history button styling */
+    #clear-history-btn {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      background: var(--primary-color);
+      border: none;
+      border-radius: 12px;
+      padding: 6px 0;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    #clear-history-btn:hover {
+      background: #0b5ed7;
+      transform: translateY(-2px);
+    }
+
+    #clear-history-btn:active {
+      transform: translateY(0);
+    }
+    .history-actions {
+      display: none;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .history-item:hover .history-actions {
+      display: flex;
+    }
+
+    .history-action-btn {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-delete {
+      background: #ffe3e3;
+      color: #fa5252;
+    }
+
+    .btn-delete:hover {
+      background: #ffc9c9;
+    }
+
+    .btn-remark {
+      background: #e7f1ff;
+      color: #0d6efd;
+    }
+
+    .btn-remark:hover {
+      background: #cfe2ff;
+    }
+
+    .remark-box {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .remark-box input {
+      flex: 1;
+      border-radius: 12px;
+      border: 1px solid #ced4da;
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+
+    .remark-text {
+      font-size: 13px;
+      color: #6c757d;
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    #scroll-to-calculator {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+
+      background: rgba(13, 110, 253, 0.15);
+      color: var(--primary-color);
+      border: none;
+
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+
+      opacity: 0.15;
+      transform: translateY(10px);
+      pointer-events: none;
+
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+    }
+    body:hover #scroll-to-calculator {
+      opacity: 0.6;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    #scroll-to-calculator:hover {
+      opacity: 1;
+      background: var(--primary-color);
+      color: white;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Theme Toggle Button -->
+  <button class="btn btn-outline-secondary theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()"
+    title="Toggle dark/light mode">
+    🌙
+  </button>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-md-10 col-sm-8">
+        <div class="border border-dotted border-3 rounded-3 p-3 mb-4 bg-white bg-opacity-50">
+          <h4 class="text-center group-header mb-0">VUNA CALCULATOR</h4>
+          <p class="text-center text-small text-muted">
+            <i>Created by set 2025/26 Software Engineering</i>
+          </p>
+
         </div>
-      <div class="row justify-content-center mt-3">
-        <div class="col-md-3">
-            <div class="card">
-              <div class="card-body">
+        <div class="row">
+          <div class="col-md-8">
+            <div class="card calculator-card">
+              <div class="card-body p-4">
                 <div class="calculator">
-                  <input
-                    type="text"
-                    class="form-control mb-2"
-                    id="result"
-                    disabled
-                  />
-                  <div id="word-result" class="px-3 py-2 mb-3"></div>
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="(" onclick="bracketToResult('(')" />
+                  <div class="display-container">
+                    <input type="text" class="form-control" id="result" placeholder="0" disabled />
+                    <span class="input-group-text" id="copy-icon" style="cursor:pointer;"
+                      onclick="copyResult()">📋</span>
+                  </div>
+                  <div class="word-display-area" id="word-area">
+                    <div id="word-result"></div>
+                    <button id="hausa-btn" onclick="translateToHausa()">HA</button>
+                    <button id="english-btn" onclick="backToEnglish()">EN</button>
+                    <button id="speak-btn" onclick="speakResult()" disabled title="Speak Result">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                          d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z" />
+                        <path
+                          d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z" />
+                        <path
+                          d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182l-.707.707A3.489 3.489 0 0 1 9.025 8a3.489 3.489 0 0 1-1.025 2.475l.707.707z" />
+                        <path
+                          d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="diff-panel">
+                    <div class="display-container my-3">
+                      <div class="col-md-12">
+                        <h4 class="group-header mb-0">Differentiate</h4>
+                        <div class="diff-controls row align-items-end">
+                          <div class="col-9">
+                            <input type="text" class="form-control diff-input" id="diff-input"
+                              placeholder="e.g., x^3 + 4x or sin(x)" />
+                          </div>
+                          <div class="col">
+                            <a class="btn btn-block btn-operator diff-btn" onclick="differentiateExpression()">
+                              d/dx
+                            </a>
+                          </div>
+
+                        </div>
+                      </div>
                     </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value=")" onclick="bracketToResult(')')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="←" onclick="backspace()" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-warning btn-block"
-                          type="button"
-                          value="AC"
-                          onclick="clearResult()"
-                        />
-                    </div>
-                  </div>            
-                  <br /><br />
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="7" onclick="appendToResult(7)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="8" onclick="appendToResult(8)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="9" onclick="appendToResult(9)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="/"
-                          onclick="operatorToResult('/')"
-                        />
+                    <div id="diff-output" class="diff-outputx"></div>
+                  </div>
+                  <!-- Geometry Modal -->
+                  <div id="geometryModal" style="
+display:none;
+position:fixed;
+top:0; left:0;
+width:100%; height:100%;
+background:rgba(0,0,0,0.5);
+align-items:center;
+justify-content:center;
+z-index:9999;">
+
+                    <div style="
+background:white;
+padding:20px;
+width:300px;
+border-radius:15px;">
+
+                      <h5 class="text-center mb-3">Geometry Formulas</h5>
+
+                      <select id="shapeSelect" class="form-control mb-2" onchange="updateGeometryInputs()">
+                        <option value="">Select Formula</option>
+
+                        <option value="rectangle">Area of Rectangle</option>
+                        <option value="triangle">Area of Triangle</option>
+                        <option value="circle">Area of Circle</option>
+                        <option value="square">Area of Square</option>
+
+                        <option value="perimeterSquare">Perimeter of Square</option>
+                        <option value="perimeterRectangle">Perimeter of Rectangle</option>
+
+                        <option value="cubeVolume">Volume of Cube</option>
+                        <option value="cylinderVolume">Volume of Cylinder</option>
+                      </select>
+
+                      <input type="number" id="input1" class="form-control mb-2" placeholder="Value 1">
+                      <input type="number" id="input2" class="form-control mb-2" placeholder="Value 2">
+
+                      <button class="btn btn-primary w-100 mb-2" onclick="calculateGeometry()">Calculate</button>
+                      <button class="btn btn-secondary w-100" onclick="closeGeometry()">Close</button>
+
                     </div>
                   </div>
-                  <br /><br />
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="4" onclick="appendToResult(4)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="5" onclick="appendToResult(5)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="6" onclick="appendToResult(6)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="*"
-                          onclick="operatorToResult('*')"
-                          />
-                    </div>
+
+
+                  <div class="btn-grid">
+                    <!-- Row 1 -->
+                    <button class="btn btn-light" onclick="bracketToResult('(')">
+                      (
+                    </button>
+                    <button class="btn btn-light" onclick="bracketToResult(')')">
+                      )
+                    </button>
+                    <button class="btn btn-light" onclick="backspace()">←</button>
+                    <button class="btn btn-action" onclick="clearResult()">
+                      AC
+                    </button>
+
+                    <!-- Row trig -->
+                    <button id="sin-btn" class="btn btn-light" onclick="trigButtonPressed('sin')">
+                      sin
+                    </button>
+                    <button id="cos-btn" class="btn btn-light" onclick="trigButtonPressed('cos')">
+                      cos
+                    </button>
+                    <button id="tan-btn" class="btn btn-light" onclick="trigButtonPressed('tan')">tan</button>
+                    <button id="" class="btn btn-operator" onclick="toggleInverseMode()">
+                      2nd
+                    </button>
+
+                    <!-- Row 2 -->
+                    <button class="btn btn-light" onclick="appendToResult(7)">
+                      7
+                    </button>
+                    <button class="btn btn-light" onclick="appendToResult(8)">
+                      8
+                    </button>
+                    <button class="btn btn-light" onclick="appendToResult(9)">
+                      9
+                    </button>
+                    <button class="btn btn-operator" onclick="operatorToResult('/')">
+                      ÷
+                    </button>
+
+                    <!-- Row 3 -->
+                    <button class="btn btn-light" onclick="appendToResult(4)">
+                      4
+                    </button>
+                    <button class="btn btn-light" onclick="appendToResult(5)">
+                      5
+                    </button>
+                    <button class="btn btn-light" onclick="appendToResult(6)">
+                      6
+                    </button>
+                    <button class="btn btn-operator" onclick="operatorToResult('*')">
+                      ×
+                    </button>
+
+                    <!-- Row 4 -->
+                    <button class="btn btn-light" onclick="appendToResult(1)">
+                      1
+                    </button>
+                    <button class="btn btn-light" onclick="appendToResult(2)">
+                      2
+                    </button>
+                    <button class="btn btn-light" onclick="appendToResult(3)">
+                      3
+                    </button>
+                    <button class="btn btn-operator" onclick="operatorToResult('+')">
+                      +
+                    </button>
+
+                    <!-- Row 5 -->
+                    <button class="btn btn-light" onclick="appendToResult('.')">.</button>
+                    <button class="btn btn-light" onclick="appendToResult(0)">0</button>
+                    <button class="btn btn-operator" onclick="operatorToResult('-')">−</button>
+                    <button class="btn btn-operator" onclick="percentToResult('%')">%</button>
+
+                    <!-- Row 6 - New functions -->
+                    <button class="btn btn-special" onclick="operatorToResult('^')">x^y</button>
+                    <button class="btn btn-special" onclick="checkPrime()">Prime?</button>
+                    
+                    
+                    <button class="btn btn-power btn-special" onclick="calculateSquare()">x²</button>
+                    <button class="btn btn-power btn-special" onclick="calculateCube()">x³</button>
+                    <button class="btn btn-special" onclick="cubeRootResult()">∛x</button>
+
+                    <!--  Row 7                  -->
+                    <button class="btn btn-action" onclick="factorPrimeCheck()"
+                      stylex="grid-column: span 2;">Factors</button>
+  
+                    <!-- Row 7 - Permutation & Combination -->
+                    <button class="btn btn-special" onclick="calculatePermutation()" title="Permutation: nPr = n!/(n-r)!">nPr</button>
+                    <button class="btn btn-special" onclick="calculateCombination()" title="Combination: nCr = n!/r!(n-r)!">nCr</button>
+                    <button class="btn btn-special" onclick="calculateFactorial()" title="Factorial: n!">n!</button>
+                    <button class="btn btn-action" onclick="applyLogarithm()">
+                      log
+                    </button>
+
+                    <!--  Row 8                  -->
+                    <button class="btn btn-action" onclick="factorPrimeCheck()"
+                      stylex="grid-column: span 2;">Factors</button>
+                    <button class="btn btn-special" onclick="tenPower()">10<sup>x</sup></button>
+                    <button id="voice-input-btn" class="btn btn-special" aria-label="Speak calculation input"
+                      onclick="startVoiceInput()">
+                      🎙️
+                    </button>
+                    <button class="btn btn-operator" onclick="convertToHex()">HEX</button>
+                    <button class="btn btn-operator" onclick="openGeometry()">📐 Geo</button>
+                    
+                    
+                    <!-- Row 8                  -->
+                    <button class="btn btn-equals" onclick="calculateResult()" stylex="grid-column: span 3;">=</button>
                   </div>
-                  <br /><br />
-                  
                   <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="1" onclick="appendToResult(1)" />
+                    <div class="col-md-12">
+                      <!-- Unit Converter Accordion -->
+                      <div class="accordion mt-4" id="converterAccordion">
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingConverter">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                            type="button" data-bs-toggle="collapse" data-bs-target="#collapseConverter"
+                            aria-expanded="false" aria-controls="collapseConverter">
+                            <span>🔄 Unit Converter</span>
+                          </button>
+                        </h2>
+                        <div id="collapseConverter" class="accordion-collapse collapse"
+                        aria-labelledby="headingConverter" data-bs-parent="#converterAccordion">
+                            <div class="accordion-body">
+                              <!-- Length Conversion -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Length</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="length-value" placeholder="Value"
+                                    value="1" oninput="convertUnit('length')">
+                                  <select class="form-select form-select-sm" id="from-length"
+                                    onchange="convertUnit('length')">
+                                    <option value="km">km</option>
+                                    <option value="m">m</option>
+                                    <option value="mile">miles</option>
+                                    <option value="yard">yards</option>
+                                    <option value="ft">feet</option>
+                                    <option value="inch">inches</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-length"
+                                  onchange="convertUnit('length')">
+                                  <option value="mile">miles</option>
+                                    <option value="km">km</option>
+                                    <option value="m">m</option>
+                                    <option value="yard">yards</option>
+                                    <option value="ft">feet</option>
+                                    <option value="inch">inches</option>
+                                  </select>
+                                  <span class="input-group-text" id="length-result">0</span>
+                                </div>
+                              </div>
+                              
+                              <!-- Weight Conversion -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Weight</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="weight-value" placeholder="Value"
+                                    value="1" oninput="convertUnit('weight')">
+                                    <select class="form-select form-select-sm" id="from-weight"
+                                    onchange="convertUnit('weight')">
+                                    <option value="kg">kg</option>
+                                    <option value="g">g</option>
+                                    <option value="lb">pounds</option>
+                                    <option value="oz">ounces</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-weight"
+                                  onchange="convertUnit('weight')">
+                                  <option value="lb">pounds</option>
+                                  <option value="kg">kg</option>
+                                  <option value="g">g</option>
+                                  <option value="oz">ounces</option>
+                                </select>
+                                <span class="input-group-text" id="weight-result">0</span>
+                              </div>
+                            </div>
+                            
+                            <!-- Temperature Conversion -->
+                            <div class="mb-3">
+                              <label class="form-label small" style="font-weight: 600;">Temperature</label>
+                              <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="temp-value" placeholder="Value"
+                                  value="0" oninput="convertUnit('temperature')">
+                                  <select class="form-select form-select-sm" id="from-temp"
+                                  onchange="convertUnit('temperature')">
+                                  <option value="C">°C</option>
+                                  <option value="F">°F</option>
+                                  <option value="K">K</option>
+                                </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-temp"
+                                    onchange="convertUnit('temperature')">
+                                    <option value="F">°F</option>
+                                    <option value="C">°C</option>
+                                    <option value="K">K</option>
+                                  </select>
+                                  <span class="input-group-text" id="temp-result">0</span>
+                                </div>
+                              </div>
+                              <!-- Currency Conversion -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Currency</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="currency-value" placeholder="Amount"
+                                    value="1" oninput="convertUnit('currency')">
+                                  <select class="form-select form-select-sm" id="from-currency"
+                                    onchange="convertUnit('currency')">
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="JPY">JPY</option>
+                                    <option value="CAD">CAD</option>
+                                    <option value="AUD">AUD</option>
+                                    <option value="NGN">NGN</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-currency"
+                                  onchange="convertUnit('currency')">
+                                  <option value="EUR">EUR</option>
+                                  <option value="USD">USD</option>
+                                  <option value="GBP">GBP</option>
+                                    <option value="JPY">JPY</option>
+                                    <option value="CAD">CAD</option>
+                                    <option value="AUD">AUD</option>
+                                    <option value="NGN">NGN</option>
+                                  </select>
+                                  <span class="input-group-text" id="currency-result">0</span>
+                                  <button id="currency-refresh-btn" class="btn btn-sm btn-outline-info"
+                                  onclick="fetchCurrencyRates()" title="Refresh rates">🔄</button>
+                                </div>
+                                <small class="text-muted" id="currency-timestamp"></small>
+                              </div>
+
+                              <!-- Quick Conversion Examples -->
+                              <div class="alert alert-info alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
+                                <strong>Examples:</strong> "5 km to miles" → <span id="example-result">3.11</span> | Add
+                                10
+                                → <span id="example-add">13.11</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Physics Calculator Accordion - NEW SECTION -->
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingPhysics">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                              type="button" data-bs-toggle="collapse" data-bs-target="#collapsePhysics"
+                              aria-expanded="false" aria-controls="collapsePhysics">
+                              <span>⚛️ Physics Calculator</span>
+                            </button>
+                          </h2>
+                          <div id="collapsePhysics" class="accordion-collapse collapse"
+                          aria-labelledby="headingPhysics" data-bs-parent="#converterAccordion">
+                            <div class="accordion-body">
+                              
+                              <!-- Category Selection -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Select Category</label>
+                                <select class="form-select form-select-sm" id="physics-category" onchange="updatePhysicsFormulas()">
+                                  <option value="">-- Select Category --</option>
+                                  <option value="mechanics">Mechanics</option>
+                                  <option value="electricity">Electricity</option>
+                                  <option value="thermodynamics">Thermodynamics</option>
+                                  <option value="waves">Waves</option>
+                                </select>
+                              </div>
+                              
+                              <!-- Formula Selection -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Select Formula</label>
+                                <select class="form-select form-select-sm" id="physics-formula" onchange="updatePhysicsInputs()">
+                                  <option value="">-- Select Formula --</option>
+                                </select>
+                              </div>
+                              
+                              <!-- Dynamic Inputs Container -->
+                              <div id="physics-inputs-container"></div>
+                              
+                              <!-- Calculate Button -->
+                              <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-primary btn-sm" onclick="calculatePhysics()">
+                                  Calculate
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="clearPhysicsCalculator()">
+                                  Clear
+                                </button>
+                              </div>
+
+                              <!-- Result Display -->
+                              <div id="physics-result"></div>
+                              
+                              <!-- Info Box -->
+                              <div class="alert alert-info alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
+                                <strong>💡 Tip:</strong> Select a category and formula to get started. Common formulas include velocity, force, electrical power, and wave speed.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- END Physics Calculator Section -->
+
+                        <!-- Percentage Change Calculator - NEW -->
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingPercentageChange">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                              type="button" data-bs-toggle="collapse" data-bs-target="#collapsePercentageChange"
+                              aria-expanded="false" aria-controls="collapsePercentageChange">
+                              <span>📊 Percentage Change</span>
+                            </button>
+                          </h2>
+                          <div id="collapsePercentageChange" class="accordion-collapse collapse"
+                            aria-labelledby="headingPercentageChange" data-bs-parent="#converterAccordion">
+                            <div class="accordion-body">
+                              <p class="text-muted small mb-3">Calculate percentage increase or decrease between two values</p>
+                              
+                              <!-- Original Value -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Original Value</label>
+                                <input type="number" class="form-control" id="pc-original" placeholder="Enter original value" value="100">
+                              </div>
+
+                              <!-- New Value -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">New Value</label>
+                                <input type="number" class="form-control" id="pc-new" placeholder="Enter new value" value="150">
+                              </div>
+
+                              <!-- Calculate Button -->
+                              <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-primary btn-sm" onclick="calculatePercentageChange()">
+                                  Calculate Change
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="clearPercentageChange()">
+                                  Clear
+                                </button>
+                              </div>
+
+                              <!-- Result Display -->
+                              <div id="pc-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
+                                <div class="mb-2"><strong>Percentage Change:</strong> <span id="pc-change-value">0</span>%</div>
+                                <div class="mb-2"><strong>Absolute Change:</strong> <span id="pc-absolute-change">0</span></div>
+                                <div><strong>Description:</strong> <span id="pc-description" style="font-style: italic; color: #555;"></span></div>
+                              </div>
+
+                              <!-- Examples -->
+                              <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                <strong>Examples:</strong><br>
+                                • Original: 100, New: 150 → <strong>50% increase</strong><br>
+                                • Original: 200, New: 150 → <strong>25% decrease</strong><br>
+                                • Original: 50, New: 50 → <strong>0% (no change)</strong>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- END Percentage Change Calculator Section -->
+
+                      </div>
+                      <!-- Simultaneous Equation Solver -->
+    <div class="mb-3">
+    <button class="btn btn-special w-100 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#simul-solver" aria-expanded="false" aria-controls="simul-solver">
+      Solve Simultaneous Equations
+    </button>
+    
+    <div class="collapse" id="simul-solver">
+      <div class="card card-body p-3">
+        <div class="mb-2">
+          <label class="form-label small-label">Equation 1 (e.g. 2x+3y=6)</label>
+          <input type="text" class="form-control" id="eq1" placeholder="2x + 3y = 6">
+        </div>
+        <div class="mb-2">
+          <label class="form-label small-label">Equation 2 (e.g. x- y=1)</label>
+          <input type="text" class="form-control" id="eq2" placeholder="x - y = 1">
+        </div>
+        <button class="btn btn-operator w-100" id="solve-btn" onclick="solveSimultaneous()">Solve</button>
+      </div>
+    </div>
+    </div>
+
+                      <div class="word-display-area" id="word-area">
+                        <div id="word-result"></div>
+                        <button id="speak-btn" onclick="speakResult()" disabled title="Speak Result">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                            viewBox="0 0 16 16">
+                            <path
+                              d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z" />
+                            <path
+                              d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z" />
+                            <path
+                              d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182l-.707.707A3.489 3.489 0 0 1 9.025 8a3.489 3.489 0 0 1-1.025 2.475l.707.707z" />
+                            <path
+                              d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="2" onclick="appendToResult(2)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="3" onclick="appendToResult(3)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="+"
-                          onclick="operatorToResult('+')"
-                          />
-                    </div>
+
                   </div>
-                  <br /><br />
-                  
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="." onclick="appendToResult('.')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="0" onclick="appendToResult(0)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="-" onclick="operatorToResult('-')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="submit"
-                          value="="
-                          onclick="calculateResult()"
-                        />
-                    </div>
-                </div>
-                  <br /><br />
                 </div>
               </div>
             </div>
           </div>
+          <div class="col-md-4">
+            <button id="toggle-history-btn" class="btn btn-primary" style="text-align: center;"
+              onclick="toggleHistory()">Show History</button>
+            <div id="history-column" class="mt-3 d-none">
+              <div class="card bg-white bg-opacity-75 border-0 rounded-3">
+                <div class="card-body p-2">
+                  <div>
+                    <p class="text-muted mb-3" style="letter-spacing:1px; display: inline-block;">CALCULATION
+                      HISTORY <button id="clear-history-btn"
+                        style="color: red; outline: none; background-color: transparent; border: none;"
+                        onclick="clearHistory()">Clear All</button></p>
+                    <div id="history-list"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <template id="history-empty-template">
+              <div class="text-center text-muted py-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor"
+                  class="bi bi-clock-history mb-2 opacity-25" viewBox="0 0 16 16">
+                  <path
+                    d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17l-1 .025zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155l-.964-.267c.046-.165.086-.332.12-.501zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038l-.845-.535zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432l-.707-.707z" />
+                  <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z" />
+                  <path
+                    d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z" />
+                </svg>
+                <p class="mb-0">No calculations yet</p>
+              </div>
+            </template>
+            <template id="history-item-template">
+              <div class="history-item">
+                <div class="history-item-expression"></div>
+                <div class="history-item-words"></div>
+                <div class="remark-text"></div>
+                <div class="history-actions">
+                  <button class="history-action-btn btn-delete">🗑 Delete</button>
+                  <button class="history-action-btn btn-remark">📝 Comment</button>
+                </div>
+
+                <div class="remark-box d-none">
+                  <input type="text" placeholder="Add remark..." />
+                  <button class="btn btn-sm btn-primary">Set</button>
+                  <button class="btn btn-sm btn-outline-secondary">✕</button>
+                </div>
+                <div class="history-item-time"></div>
+              </div>
+            </template>
+          </div>
+        </div>
       </div>
-    </div>
-    <script src="assets/js/bootstrap.min.js"></script>
-    <script src="assets/js/script.js"></script>
-  </body>
+
+
+
+      <script src="assets/js/bootstrap.min.js"></script>
+      <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script> -->
+      <script src="assets/js/script.js"></script>
+      <button id="scroll-to-calculator" title="Back to Calculator">
+        ↑
+      </button>
+
+</body>
+
 </html>
