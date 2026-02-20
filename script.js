@@ -496,6 +496,129 @@ function showSolution() {
     // Display steps
     displaySteps(steps);
 }
+// Step-by-Step Solution Function
+function showSolution() {
+    // Get current expression
+    if (!left || !operator || !right) {
+        // If incomplete expression, show message
+        alert('Please enter a complete expression (e.g., 2 + 3) to see step-by-step solution');
+        return;
+    }
+
+    const steps = [];
+    const l = parseFloat(left);
+    const r = parseFloat(right);
+    
+    // Add initial step
+    steps.push({
+        number: 1,
+        expression: `${left} ${operator} ${right}`,
+        explanation: `Starting with the expression: ${left} ${operator} ${right}`,
+        runningTotal: null
+    });
+
+    let result;
+    let intermediateSteps = [];
+
+    // Break down based on operator
+    switch(operator) {
+        case '+':
+            result = l + r;
+            intermediateSteps = [
+                {
+                    number: 2,
+                    expression: `${l} + ${r}`,
+                    explanation: `Add ${l} and ${r}`,
+                    runningTotal: `${l} + ${r} = ${result}`
+                }
+            ];
+            break;
+            
+        case '-':
+            result = l - r;
+            intermediateSteps = [
+                {
+                    number: 2,
+                    expression: `${l} - ${r}`,
+                    explanation: `Subtract ${r} from ${l}`,
+                    runningTotal: `${l} - ${r} = ${result}`
+                }
+            ];
+            break;
+            
+        case '*':
+            result = l * r;
+            intermediateSteps = [
+                {
+                    number: 2,
+                    expression: `${l} × ${r}`,
+                    explanation: `Multiply ${l} by ${r}`,
+                    runningTotal: `${l} × ${r} = ${result}`
+                }
+            ];
+            break;
+            
+        case '/':
+            if (r === 0) {
+                alert('Cannot divide by zero');
+                return;
+            }
+            result = l / r;
+            intermediateSteps = [
+                {
+                    number: 2,
+                    expression: `${l} ÷ ${r}`,
+                    explanation: `Divide ${l} by ${r}`,
+                    runningTotal: `${l} ÷ ${r} = ${result.toFixed(4)}`
+                }
+            ];
+            break;
+            
+        case '^':
+            result = Math.pow(l, r);
+            
+            // Show repeated multiplication for integer exponents
+            if (Number.isInteger(r) && r > 0) {
+                let multiplication = l;
+                for (let i = 1; i < r; i++) {
+                    multiplication += ` × ${l}`;
+                }
+                intermediateSteps = [
+                    {
+                        number: 2,
+                        expression: `${l}^${r} = ${l} × ${l} (${r} times)`,
+                        explanation: `${l} raised to power ${r} means multiplying ${l} by itself ${r} times`,
+                        runningTotal: `${multiplication} = ${result}`
+                    }
+                ];
+            } else {
+                intermediateSteps = [
+                    {
+                        number: 2,
+                        expression: `${l}^${r}`,
+                        explanation: `Calculate ${l} raised to the power of ${r}`,
+                        runningTotal: `${l}^${r} = ${result.toFixed(6)}`
+                    }
+                ];
+            }
+            break;
+    }
+
+    // Add intermediate steps
+    steps.push(...intermediateSteps);
+
+    // Add final result step
+    steps.push({
+        number: steps.length + 1,
+        expression: `Final Result`,
+        explanation: `The result of ${left} ${operator} ${right} is:`,
+        runningTotal: result.toString(),
+        isFinal: true
+    });
+
+    // Display steps
+    displaySteps(steps);
+}
 
 function displaySteps(steps) {
     const stepsArea = document.getElementById('steps-area');
@@ -544,34 +667,10 @@ function closeSteps() {
     document.getElementById('steps-area').style.display = 'none';
 }
 
-// Also modify your calculateResult function to clear steps when new calculation starts
+// Modify your calculateResult function to clear steps when new calculation starts
 function calculateResult() {
     // Your existing calculateResult code...
     
     // Hide steps area when new calculation is performed
     document.getElementById('steps-area').style.display = 'none';
-}
-function showPercentageSteps() {
-    const steps = [];
-    
-    if (operator && right) {
-        // Show percentage calculation steps
-        steps.push({
-            number: 1,
-            expression: `Calculate ${right}% of ${left}`,
-            explanation: `To find ${right}% of ${left}, multiply ${left} by ${right}%`,
-            runningTotal: `${left} × (${right} ÷ 100)`
-        });
-        
-        const percentage = (parseFloat(right) / 100) * parseFloat(left);
-        
-        steps.push({
-            number: 2,
-            expression: `${left} × 0.${right}`,
-            explanation: `Convert ${right}% to decimal: ${right} ÷ 100 = 0.${right}`,
-            runningTotal: `${left} × 0.${right} = ${percentage}`
-        });
-        
-        displaySteps(steps);
-    }
 }

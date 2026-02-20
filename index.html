@@ -337,6 +337,7 @@
       font-size: 12px;
       font-weight: bold;
     }
+    
     #history-list {
       display: flex;
       flex-direction: column;
@@ -407,6 +408,7 @@
     #clear-history-btn:active {
       transform: translateY(0);
     }
+    
     .history-actions {
       display: none;
       gap: 8px;
@@ -472,24 +474,21 @@
       width: 46px;
       height: 46px;
       border-radius: 14px;
-
       background: rgba(13, 110, 253, 0.15);
       color: var(--primary-color);
       border: none;
-
       font-size: 22px;
       font-weight: 700;
       cursor: pointer;
-
       opacity: 0.15;
       transform: translateY(10px);
       pointer-events: none;
-
       transition: all 0.3s ease;
       box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
       backdrop-filter: blur(6px);
       z-index: 999;
     }
+    
     body:hover #scroll-to-calculator {
       opacity: 0.6;
       transform: translateY(0);
@@ -502,6 +501,144 @@
       color: white;
       transform: scale(1.05);
     }
+
+    /* Step-by-Step Solution Styles */
+    .steps-area {
+      margin-top: 20px;
+      padding: 15px;
+      background: linear-gradient(145deg, #f8f9ff, #ffffff);
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      border-left: 5px solid #4CAF50;
+      animation: slideDown 0.3s ease;
+    }
+
+    .steps-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .steps-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      padding: 0 8px;
+    }
+
+    .close-btn:hover {
+      color: #000;
+    }
+
+    .steps-content {
+      font-family: 'Courier New', monospace;
+    }
+
+    .step-item {
+      padding: 10px;
+      margin: 5px 0;
+      background: white;
+      border-radius: 8px;
+      border-left: 3px solid #4CAF50;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .step-item .step-number {
+      color: #4CAF50;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .step-item .step-expression {
+      font-size: 1.1rem;
+      margin: 5px 0;
+    }
+
+    .step-item .step-explanation {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 3px;
+    }
+
+    .step-item.running-total {
+      background: #f0f7ff;
+      border-left-color: #2196F3;
+    }
+
+    .step-item.final-result {
+      background: #e8f5e9;
+      border-left-color: #4CAF50;
+      font-weight: bold;
+    }
+
+    .btn-subtext {
+      display: block;
+      font-size: 0.7rem;
+      opacity: 0.8;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    body.dark-mode .steps-area {
+      background: linear-gradient(145deg, #2a2a2a, #333333);
+      border-left-color: #66bb6a;
+    }
+
+    body.dark-mode .steps-header {
+      border-bottom-color: #444;
+    }
+
+    body.dark-mode .steps-title {
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .step-item {
+      background: #3a3a3a;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .step-item .step-explanation {
+      color: #aaa;
+    }
+
+    body.dark-mode .step-item.running-total {
+      background: #2a3a4a;
+    }
+
+    body.dark-mode .step-item.final-result {
+      background: #1e3a2a;
+    }
   </style>
 </head>
 
@@ -509,10 +646,9 @@
   <!-- Theme Toggle Button -->
   <button class="btn btn-outline-secondary theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()"
     title="Toggle dark/light mode">
-
     🌙
-  
   </button>
+  
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10 col-md-10 col-sm-8">
@@ -521,8 +657,8 @@
           <p class="text-center text-small text-muted">
             <i>Created by set 2025/26 Software Engineering</i>
           </p>
-
         </div>
+        
         <div class="row">
           <div class="col-md-8">
             <div class="card calculator-card">
@@ -533,6 +669,7 @@
                     <span class="input-group-text" id="copy-icon" style="cursor:pointer;"
                       onclick="copyResult()">📋</span>
                   </div>
+                  
                   <div class="word-display-area" id="word-area">
                     <div id="word-result"></div>
                     <button id="hausa-btn" onclick="translateToHausa()">HA</button>
@@ -551,6 +688,18 @@
                       </svg>
                     </button>
                   </div>
+
+                  <!-- NEW: Step-by-Step Solution Area -->
+                  <div id="steps-area" class="steps-area" style="display: none;">
+                    <div class="steps-header">
+                      <span class="steps-title">📝 Step-by-Step Solution</span>
+                      <button class="close-btn" onclick="closeSteps()">×</button>
+                    </div>
+                    <div id="steps-content" class="steps-content">
+                      <!-- Steps will be dynamically inserted here -->
+                    </div>
+                  </div>
+
                   <div class="diff-panel">
                     <div class="display-container my-3">
                       <div class="col-md-12">
@@ -565,55 +714,45 @@
                               d/dx
                             </a>
                           </div>
-
                         </div>
                       </div>
                     </div>
                     <div id="diff-output" class="diff-outputx"></div>
                   </div>
+
                   <!-- Geometry Modal -->
                   <div id="geometryModal" style="
-display:none;
-position:fixed;
-top:0; left:0;
-width:100%; height:100%;
-background:rgba(0,0,0,0.5);
-align-items:center;
-justify-content:center;
-z-index:9999;">
-
+                  display:none;
+                  position:fixed;
+                  top:0; left:0;
+                  width:100%; height:100%;
+                  background:rgba(0,0,0,0.5);
+                  align-items:center;
+                  justify-content:center;
+                  z-index:9999;">
                     <div style="
-background:white;
-padding:20px;
-width:300px;
-border-radius:15px;">
-
+                    background:white;
+                    padding:20px;
+                    width:300px;
+                    border-radius:15px;">
                       <h5 class="text-center mb-3">Geometry Formulas</h5>
-
                       <select id="shapeSelect" class="form-control mb-2" onchange="updateGeometryInputs()">
                         <option value="">Select Formula</option>
-
                         <option value="rectangle">Area of Rectangle</option>
                         <option value="triangle">Area of Triangle</option>
                         <option value="circle">Area of Circle</option>
                         <option value="square">Area of Square</option>
-
                         <option value="perimeterSquare">Perimeter of Square</option>
                         <option value="perimeterRectangle">Perimeter of Rectangle</option>
-
                         <option value="cubeVolume">Volume of Cube</option>
                         <option value="cylinderVolume">Volume of Cylinder</option>
                       </select>
-
                       <input type="number" id="input1" class="form-control mb-2" placeholder="Value 1">
                       <input type="number" id="input2" class="form-control mb-2" placeholder="Value 2">
-
                       <button class="btn btn-primary w-100 mb-2" onclick="calculateGeometry()">Calculate</button>
                       <button class="btn btn-secondary w-100" onclick="closeGeometry()">Close</button>
-
                     </div>
                   </div>
-
 
                   <div class="btn-grid">
                     <!-- Row 1 -->
@@ -687,44 +826,39 @@ border-radius:15px;">
                     <button class="btn btn-light" onclick="appendToResult(0)">0</button>
                     <button class="btn btn-operator" onclick="operatorToResult('-')">−</button>
                     <button class="btn btn-operator" onclick="percentToResult('%')">%</button>
-                    <button class="btn btn-special" onclick="tenPower()">10<sup>x</sup></button>
+                    
 
                     <!-- Row 6 - New functions -->
                     <button class="btn btn-special" onclick="operatorToResult('^')">x^y</button>
                     <button class="btn btn-special" onclick="checkPrime()">Prime?</button>
-                    
-                    
                     <button class="btn btn-power btn-special" onclick="calculateSquare()">x²</button>
                     <button class="btn btn-power btn-special" onclick="calculateCube()">x³</button>
                     <button class="btn btn-special" onclick="cubeRootResult()">∛x</button>
 
-                    <!--  Row 7                  -->
-                    <button class="btn btn-action" onclick="factorPrimeCheck()"
-                      stylex="grid-column: span 2;">Factors</button>
-  
-                    <!-- Row 7 - Permutation & Combination -->
+                    <!-- Row 7 -->
+                    <button class="btn btn-action" onclick="factorPrimeCheck()">Factors</button>
                     <button class="btn btn-special" onclick="calculatePermutation()" title="Permutation: nPr = n!/(n-r)!">nPr</button>
                     <button class="btn btn-special" onclick="calculateCombination()" title="Combination: nCr = n!/r!(n-r)!">nCr</button>
                     <button class="btn btn-special" onclick="calculateFactorial()" title="Factorial: n!">n!</button>
-                    <button class="btn btn-action" onclick="applyLogarithm()">
-                      log
-                    </button>
+                    <button class="btn btn-action" onclick="applyLogarithm()">log</button>
 
-                    <!--  Row 8                  -->
-                    <button class="btn btn-action" onclick="factorPrimeCheck()"
-                      stylex="grid-column: span 2;">Factors</button>
+                    <!-- Row 8 -->
                     <button class="btn btn-special" onclick="tenPower()">10<sup>x</sup></button>
                     <button id="voice-input-btn" class="btn btn-special" aria-label="Speak calculation input"
-                      onclick="startVoiceInput()">
-                      🎙️
-                    </button>
+                      onclick="startVoiceInput()">🎙️</button>
                     <button class="btn btn-operator" onclick="convertToHex()">HEX</button>
                     <button class="btn btn-operator" onclick="openGeometry()">📐 Geo</button>
                     
+                    <!-- NEW: Step-by-Step Solution Button -->
+                    <button class="btn btn-special" onclick="showSolution()" style="grid-column: span 2;">
+                      <span>📝 Show Steps</span>
+                      <small class="btn-subtext">Step-by-step</small>
+                    </button>
                     
-                    <!-- Row 8                  -->
-                    <button class="btn btn-equals" onclick="calculateResult()" stylex="grid-column: span 3;">=</button>
+                    <!-- Row 9 -->
+                    <button class="btn btn-equals" onclick="calculateResult()" style="grid-column: span 2;">=</button>
                   </div>
+                  
                   <div class="row">
                     <div class="col-md-12">
                       <!-- Unit Converter Accordion -->
@@ -853,14 +987,13 @@ border-radius:15px;">
                               <!-- Quick Conversion Examples -->
                               <div class="alert alert-info alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
                                 <strong>Examples:</strong> "5 km to miles" → <span id="example-result">3.11</span> | Add
-                                10
-                                → <span id="example-add">13.11</span>
+                                10 → <span id="example-add">13.11</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <!-- Physics Calculator Accordion - NEW SECTION -->
+                        <!-- Physics Calculator Accordion -->
                         <div class="accordion-item">
                           <h2 class="accordion-header" id="headingPhysics">
                             <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
@@ -916,9 +1049,8 @@ border-radius:15px;">
                             </div>
                           </div>
                         </div>
-                        <!-- END Physics Calculator Section -->
 
-                        <!-- Percentage Change Calculator - NEW -->
+                        <!-- Percentage Change Calculator -->
                         <div class="accordion-item">
                           <h2 class="accordion-header" id="headingPercentageChange">
                             <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
@@ -971,53 +1103,35 @@ border-radius:15px;">
                             </div>
                           </div>
                         </div>
-                        <!-- END Percentage Change Calculator Section -->
-
                       </div>
-                      <!-- Simultaneous Equation Solver -->
-    <div class="mb-3">
-    <button class="btn btn-special w-100 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#simul-solver" aria-expanded="false" aria-controls="simul-solver">
-      Solve Simultaneous Equations
-    </button>
-    
-    <div class="collapse" id="simul-solver">
-      <div class="card card-body p-3">
-        <div class="mb-2">
-          <label class="form-label small-label">Equation 1 (e.g. 2x+3y=6)</label>
-          <input type="text" class="form-control" id="eq1" placeholder="2x + 3y = 6">
-        </div>
-        <div class="mb-2">
-          <label class="form-label small-label">Equation 2 (e.g. x- y=1)</label>
-          <input type="text" class="form-control" id="eq2" placeholder="x - y = 1">
-        </div>
-        <button class="btn btn-operator w-100" id="solve-btn" onclick="solveSimultaneous()">Solve</button>
-      </div>
-    </div>
-    </div>
 
-                      <div class="word-display-area" id="word-area">
-                        <div id="word-result"></div>
-                        <button id="speak-btn" onclick="speakResult()" disabled title="Speak Result">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                            viewBox="0 0 16 16">
-                            <path
-                              d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z" />
-                            <path
-                              d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z" />
-                            <path
-                              d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182l-.707.707A3.489 3.489 0 0 1 9.025 8a3.489 3.489 0 0 1-1.025 2.475l.707.707z" />
-                            <path
-                              d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
-                          </svg>
+                      <!-- Simultaneous Equation Solver -->
+                      <div class="mb-3">
+                        <button class="btn btn-special w-100 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#simul-solver" aria-expanded="false" aria-controls="simul-solver">
+                          Solve Simultaneous Equations
                         </button>
+                        
+                        <div class="collapse" id="simul-solver">
+                          <div class="card card-body p-3">
+                            <div class="mb-2">
+                              <label class="form-label small-label">Equation 1 (e.g. 2x+3y=6)</label>
+                              <input type="text" class="form-control" id="eq1" placeholder="2x + 3y = 6">
+                            </div>
+                            <div class="mb-2">
+                              <label class="form-label small-label">Equation 2 (e.g. x- y=1)</label>
+                              <input type="text" class="form-control" id="eq2" placeholder="x - y = 1">
+                            </div>
+                            <button class="btn btn-operator w-100" id="solve-btn" onclick="solveSimultaneous()">Solve</button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-
                   </div>
                 </div>
               </div>
             </div>
           </div>
+          
           <div class="col-md-4">
             <button id="toggle-history-btn" class="btn btn-primary" style="text-align: center;"
               onclick="toggleHistory()">Show History</button>
@@ -1034,6 +1148,7 @@ border-radius:15px;">
                 </div>
               </div>
             </div>
+            
             <template id="history-empty-template">
               <div class="text-center text-muted py-5">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor"
@@ -1047,6 +1162,7 @@ border-radius:15px;">
                 <p class="mb-0">No calculations yet</p>
               </div>
             </template>
+            
             <template id="history-item-template">
               <div class="history-item">
                 <div class="history-item-expression"></div>
@@ -1056,7 +1172,6 @@ border-radius:15px;">
                   <button class="history-action-btn btn-delete">🗑 Delete</button>
                   <button class="history-action-btn btn-remark">📝 Comment</button>
                 </div>
-
                 <div class="remark-box d-none">
                   <input type="text" placeholder="Add remark..." />
                   <button class="btn btn-sm btn-primary">Set</button>
@@ -1068,16 +1183,15 @@ border-radius:15px;">
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-
-
-      <script src="assets/js/bootstrap.min.js"></script>
-      <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script> -->
-      <script src="assets/js/script.js"></script>
-      <button id="scroll-to-calculator" title="Back to Calculator">
-        ↑
-      </button>
-
+  <script src="assets/js/bootstrap.min.js"></script>
+  <script src="assets/js/script.js"></script>
+  
+  <button id="scroll-to-calculator" title="Back to Calculator">
+    ↑
+  </button>
 </body>
 
 </html>
