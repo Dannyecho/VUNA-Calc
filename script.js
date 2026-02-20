@@ -375,29 +375,3 @@ function percentToResult() {
     convertToWords(left);
 }
 // Calculate Antilog (10^x)
-function calculateAntiLog() {
-    let currentValue;
-
-    // If a full expression exists, calculate it first
-    if (left && operator && right) {
-        calculateResult();
-        currentValue = left;
-    } else if (left) {
-        currentValue = left;
-    } else {
-        return; // Nothing to calculate
-    }
-
-    let num = parseFloat(currentValue);
-    if (isNaN(num)) return;
-
-    // Antilog base 10
-    let result = Math.pow(10, num);
-
-    // Update calculator state
-    left = result.toString();
-    operator = '';
-    right = '';
-
-    updateResult();
-}
