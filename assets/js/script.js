@@ -1608,9 +1608,10 @@ function renderHistory() {
         remarkText.textContent = item.remark;
       }
       // DELETE
+      const actualIndex = calculationHistory.length - 1 - index;
       tpl.querySelector(".btn-delete").onclick = (e) => {
         e.stopPropagation();
-        calculationHistory.splice(index, 1);
+        calculationHistory.splice(actualIndex, 1);
         saveHistoryToStorage();
         renderHistory();
       };
