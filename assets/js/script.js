@@ -2049,15 +2049,21 @@ function updateGeometryInputs() {
   }
 }
 
+// The cube root function
 function cubeRootResult() {
   if (currentExpression.length === 0) return;
   const num = parseFloat(currentExpression);
   const cbrt = num < 0 ? -Math.pow(Math.abs(num), 1 / 3) : Math.pow(num, 1 / 3);
-  currentExpression = cbrt.toString();
+  
+  const tolerance = 1e-10;
+  const rounded = Math.abs(cbrt - Math.round(cbrt)) < tolerance ? Math.round(cbrt) : cbrt;
+  
+  currentExpression = rounded.toString();
   operator = "";
   right = "";
   updateResult();
 }
+
 
 // ============================================
 // PERCENTAGE CHANGE CALCULATOR FUNCTIONS
