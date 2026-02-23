@@ -2049,7 +2049,7 @@ function updateGeometryInputs() {
   }
 }
 
-// The cube root function
+// The Cube Root Function
 function cubeRootResult() {
   if (currentExpression.length === 0) return;
   const num = parseFloat(currentExpression);
