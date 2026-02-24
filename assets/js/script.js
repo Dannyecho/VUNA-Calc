@@ -2191,4 +2191,139 @@ function enableRedo() {
 function disableRedo() {
     const redoBtn = document.getElementById('redoBtn');
     redoBtn.disabled = true;
+}
+
+// ==============================
+// Quadratic Equation Solver
+// ==============================
+function solveQuadratic() {
+    const a = parseFloat(document.getElementById('quad-a').value);
+    const b = parseFloat(document.getElementById('quad-b').value);
+    const c = parseFloat(document.getElementById('quad-c').value);
+    const resultDiv = document.getElementById('quad-result');
+
+    // Validation
+    if (isNaN(a) || isNaN(b) || isNaN(c)) {
+        resultDiv.innerHTML = '<div class="quad-error">❌ Please enter valid numbers for all coefficients</div>';
+        return;
+    }
+
+    if (a === 0) {
+        resultDiv.innerHTML = '<div class="quad-error">❌ Coefficient a cannot be zero (not a quadratic equation)</div>';
+        return;
+    }
+
+    // Calculate discriminant (Δ = b² - 4ac)
+    const discriminant = (b * b) - (4 * a * c);
+    
+    let resultHTML = `<div class="quad-result-container">`;
+    resultHTML += `<div class="quad-discriminant">Discriminant (Δ) = b² - 4ac = ${b}² - 4(${a})(${c}) = <strong>${discriminant.toFixed(4)}</strong></div>`;
+
+    if (discriminant > 0) {
+        // Two distinct real roots
+        const sqrtDiscriminant = Math.sqrt(discriminant);
+        const root1 = (-b + sqrtDiscriminant) / (2 * a);
+        const root2 = (-b - sqrtDiscriminant) / (2 * a);
+
+        resultHTML += `<div class="quad-result-box">`;
+        resultHTML += `<div class="quad-result-label">Root 1 (x₁)</div>`;
+        resultHTML += `<div class="quad-result-value">${formatNumber(root1)}</div>`;
+        resultHTML += `</div>`;
+
+        resultHTML += `<div class="quad-result-box">`;
+        resultHTML += `<div class="quad-result-label">Root 2 (x₂)</div>`;
+        resultHTML += `<div class="quad-result-value">${formatNumber(root2)}</div>`;
+        resultHTML += `</div>`;
+
+        resultHTML += `<p style="margin-top: 12px; font-size: 14px; color: #495057;"><strong>Solution:</strong> Two distinct real roots: x = ${formatNumber(root1)} or x = ${formatNumber(root2)}</p>`;
+
+        // Store in history
+        if (typeof calculationHistory !== 'undefined') {
+            calculationHistory.push({
+                expression: `${a}x² + ${b}x + ${c} = 0`,
+                words: `The quadratic equation ${a}x squared plus ${b}x plus ${c} equals zero has two real roots: ${formatNumber(root1)} and ${formatNumber(root2)}`,
+                answer: `x₁ = ${formatNumber(root1)}, x₂ = ${formatNumber(root2)}`,
+                time: new Date().toLocaleTimeString()
+            });
+            if (calculationHistory.length > 20) calculationHistory.shift();
+            localStorage.setItem('calcHistory', JSON.stringify(calculationHistory));
+            renderHistory();
+        }
+
+    } else if (discriminant === 0) {
+        // One real root (repeated)
+        const root = -b / (2 * a);
+
+        resultHTML += `<div class="quad-result-box">`;
+        resultHTML += `<div class="quad-result-label">Root (Double Root)</div>`;
+        resultHTML += `<div class="quad-result-value">${formatNumber(root)}</div>`;
+        resultHTML += `</div>`;
+
+        resultHTML += `<p style="margin-top: 12px; font-size: 14px; color: #495057;"><strong>Solution:</strong> One real root (repeated): x = ${formatNumber(root)}</p>`;
+
+        // Store in history
+        if (typeof calculationHistory !== 'undefined') {
+            calculationHistory.push({
+                expression: `${a}x² + ${b}x + ${c} = 0`,
+                words: `The quadratic equation ${a}x squared plus ${b}x plus ${c} equals zero has one repeated real root: ${formatNumber(root)}`,
+                answer: `x = ${formatNumber(root)}`,
+                time: new Date().toLocaleTimeString()
+            });
+            if (calculationHistory.length > 20) calculationHistory.shift();
+            localStorage.setItem('calcHistory', JSON.stringify(calculationHistory));
+            renderHistory();
+        }
+
+    } else {
+        // Complex roots
+        const realPart = -b / (2 * a);
+        const imaginaryPart = Math.sqrt(-discriminant) / (2 * a);
+
+        resultHTML += `<div class="quad-result-box">`;
+        resultHTML += `<div class="quad-result-label">Root 1 (Complex)</div>`;
+        resultHTML += `<div class="quad-result-value quad-complex-root">${formatNumber(realPart)} + ${formatNumber(imaginaryPart)}i</div>`;
+        resultHTML += `</div>`;
+
+        resultHTML += `<div class="quad-result-box">`;
+        resultHTML += `<div class="quad-result-label">Root 2 (Complex Conjugate)</div>`;
+        resultHTML += `<div class="quad-result-value quad-complex-root">${formatNumber(realPart)} - ${formatNumber(imaginaryPart)}i</div>`;
+        resultHTML += `</div>`;
+
+        resultHTML += `<p style="margin-top: 12px; font-size: 14px; color: #495057;"><strong>Solution:</strong> Two complex conjugate roots: x = ${formatNumber(realPart)} ± ${formatNumber(imaginaryPart)}i</p>`;
+
+        // Store in history
+        if (typeof calculationHistory !== 'undefined') {
+            calculationHistory.push({
+                expression: `${a}x² + ${b}x + ${c} = 0`,
+                words: `The quadratic equation ${a}x squared plus ${b}x plus ${c} equals zero has two complex conjugate roots`,
+                answer: `x = ${formatNumber(realPart)} ± ${formatNumber(imaginaryPart)}i`,
+                time: new Date().toLocaleTimeString()
+            });
+            if (calculationHistory.length > 20) calculationHistory.shift();
+            localStorage.setItem('calcHistory', JSON.stringify(calculationHistory));
+            renderHistory();
+        }
+    }
+
+    resultHTML += `</div>`;
+    resultDiv.innerHTML = resultHTML;
+}
+
+function clearQuadratic() {
+    // Clear input fields
+    document.getElementById('quad-a').value = '1';
+    document.getElementById('quad-b').value = '0';
+    document.getElementById('quad-c').value = '0';
+    
+    // Clear result display
+    document.getElementById('quad-result').innerHTML = '';
+}
+
+function formatNumber(num) {
+    if (Number.isInteger(num)) {
+        return num.toString();
+    }
+    // Round to 4 decimal places and remove trailing zeros
+    const rounded = parseFloat(num.toFixed(4));
+    return rounded.toString();
 } 
