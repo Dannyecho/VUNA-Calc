@@ -62,6 +62,23 @@
       width: 100%;
     }
 
+
+    #answer-preview {
+      padding: 0 16px;
+      border-radius: 16px;
+      background: #1d1d1e !important;
+      display: block;
+      font-size: 1.2rem;
+      color: #ffffff;
+      font-style: italic;
+      letter-spacing: 0.02em;
+      transition: opacity 0.2s ease;
+    }
+
+    #answer-preview:empty {
+      opacity: 0;
+    }
+
     .word-display-area {
       margin-top: 15px;
       background: rgba(255, 255, 255, 0.6);
@@ -553,6 +570,11 @@
                       </svg>
                     </button>
                   </div>
+                  <div class="preview-panel">
+
+                    <div id="answer-preview">
+                    </div>
+                  </div>
                   <div class="diff-panel">
                     <div class="display-container my-3">
                       <div class="col-md-12">
@@ -620,16 +642,11 @@ border-radius:15px;">
                   <div class="btn-grid">
                     <div class="row ">
                       <div class="col-md-12">
-                        <input class="btn btn-info btn-block w-100"
-                          type="button"
-                          value="↻ REDO"
-                          id="redoBtn"
-                          onclick="redoCalculation()"
-                          
-                        />
+                        <input class="btn btn-info btn-block w-100" type="button" value="↻ REDO" id="redoBtn"
+                          onclick="redoCalculation()" />
                       </div>
                     </div>
-  
+
 
 
                     <!-- Row 1 -->
