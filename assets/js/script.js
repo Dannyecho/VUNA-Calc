@@ -1342,6 +1342,116 @@ function numberToHausa(num) {
 
   return result.trim();
 }
+// ===============================
+// IGBO LANGUAGE SUPPORT (NEW)
+// ===============================
+
+function numberToIgbo(num) {
+  if (num === "Error") return "Njehie";
+
+  const ones = [
+    "",
+    "Otu",
+    "Abụọ",
+    "Atọ",
+    "Anọ",
+    "Ise",
+    "Isii",
+    "Asaa",
+    "Asatọ",
+    "Itoolu",
+  ];
+
+  const tens = [
+    "",
+    "Iri",
+    "Iri Abụọ",
+    "Iri Atọ",
+    "Iri Anọ",
+    "Iri Ise",
+    "Iri Isii",
+    "Iri Asaa",
+    "Iri Asatọ",
+    "Iri Itoolu",
+  ];
+
+  let n = parseFloat(num);
+  if (isNaN(n)) return "";
+
+  if (n === 0) return "Efue";
+
+  let sign = n < 0 ? "Nke na-adịghị mma " : "";
+  let absN = Math.abs(n);
+
+  let integerPart = Math.floor(absN);
+  let decimalPart = absN.toString().split(".")[1];
+
+  function convertGroup(val) {
+    let result = "";
+
+    if (val < 10) {
+      result = ones[val];
+    } else if (val < 100) {
+      let t = Math.floor(val / 10);
+      let o = val % 10;
+      result = tens[t];
+      if (o !== 0) result += " na " + ones[o];
+    } else {
+      let h = Math.floor(val / 100);
+      let remainder = val % 100;
+      result = ones[h] + " Narị";
+      if (remainder !== 0) result += " na " + convertGroup(remainder);
+    }
+
+    return result;
+  }
+
+  let words = convertGroup(integerPart);
+
+  if (decimalPart) {
+    words += " Ntụpọ";
+    for (let digit of decimalPart) {
+      words += " " + ones[parseInt(digit)];
+    }
+  }
+
+  return sign + words;
+}
+
+// Translate result to Igbo
+function translateToIgbo() {
+  const num = currentExpression;
+  if (!num) return;
+
+  const igboWords = numberToIgbo(num);
+
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+
+  wordResult.innerHTML =
+    '<span class="small-label">Nsonaazụ na Igbo</span><strong>' +
+    igboWords +
+    "</strong>";
+
+  wordArea.style.display = "flex";
+  enableSpeakButton();
+}
+// Igbo translation
+function translateToIgbo() {
+  const resultEl = document.getElementById("word-result");
+  const result = document.getElementById("result").value;
+
+  if (!result) return;
+
+  // Display the result in Igbo words
+  resultEl.innerHTML = '<span class="small-label">Nsonaazụ na Igbo</span><strong>' + numberToIgbo(result) + '</strong>';
+}
+
+// Simple Igbo number-to-words converter (expand as needed)
+function numberToIgbo(num) {
+  // For now, simple placeholder
+  return "Igbo words for " + num;
+}
 // translate to hausas
 function translateToHausa() {
   if (!left || operator || right) return;
@@ -1384,12 +1494,12 @@ function updateResult() {
 // ------------------------------
 // Text-to-Speech
 // ------------------------------
+
 function speakResult() {
   const speakBtn = document.getElementById("speak-btn");
   const wordResultEl = document.getElementById("word-result");
 
   const words = wordResultEl.querySelector("strong")?.innerText || "";
-
   if (!words) return;
 
   if (window.speechSynthesis.speaking) {
@@ -1400,6 +1510,17 @@ function speakResult() {
 
   const utterance = new SpeechSynthesisUtterance(words);
   utterance.rate = 0.9;
+
+  // Try to use Igbo voice if available
+  const voices = speechSynthesis.getVoices();
+  const igboVoice = voices.find(v => v.lang.toLowerCase().includes("ig"));
+
+  if (igboVoice) {
+    utterance.voice = igboVoice;
+  } else {
+    utterance.lang = "en-US"; // fallback
+  }
+
   utterance.onstart = () => speakBtn.classList.add("speaking");
   utterance.onend = () => speakBtn.classList.remove("speaking");
 
