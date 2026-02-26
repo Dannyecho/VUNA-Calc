@@ -891,7 +891,7 @@ border-radius:15px;">
                                     <option value="hectare">hectare</option>
                                     <option value="acre">acre</option>
                                   </select>
-                                  <span class="input-group-text" id="area-result">0</span>
+                                  <button class="btn btn-primary btn-sm" onclick="calculateArea()">Calculate</button>
                                 </div>
                               </div>
                               <!-- Data Storage Conversion -->
@@ -901,8 +901,8 @@ border-radius:15px;">
                                   <input type="number" class="form-control" id="data-value" placeholder="Value"
                                   value="1" oninput="convertUnit('data')">
                                   <select class="form-select form-select-sm" id="from-data" onchange="convertUnit('data')">
-                                    <option value="bit">bit</option>
-                                    <option value="byte">B</option>
+                                    <option value="bit">Bit</option>
+                                    <option value="byte">Byte</option>
                                     <option value="kb">KB</option>
                                     <option value="mb">MB</option>
                                     <option value="gb">GB</option>
@@ -910,14 +910,14 @@ border-radius:15px;">
                                   </select>
                                   <span class="input-group-text">→</span>
                                   <select class="form-select form-select-sm" id="to-data" onchange="convertUnit('data')">
-                                    <option value="B">B</option>
-                                    <option value="bit">bit</option>
+                                    <option value="bit">Bit</option>
+                                    <option value="byte">Byte</option>
                                     <option value="kb">KB</option>
                                     <option value="mb">MB</option>
                                     <option value="gb">GB</option>
                                     <option value="tb">TB</option>
                                   </select>
-                                  <span class="input-group-text" id="data-result">0</span>
+                                  <button class="btn btn-primary btn-sm" onclick="calculateData()">Calculate</button>
                                 </div>
                               </div>
 
