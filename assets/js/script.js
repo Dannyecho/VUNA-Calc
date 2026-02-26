@@ -2240,3 +2240,72 @@ function disableRedo() {
   const redoBtn = document.getElementById("redoBtn");
   redoBtn.disabled = true;
 }
+
+// ============================================
+// QUADRATIC EQUATION SOLVER FUNCTIONS
+// ============================================
+
+function solveQuadratic() {
+    // Get input values
+    const a = parseFloat(document.getElementById('quad-a').value);
+    const b = parseFloat(document.getElementById('quad-b').value);
+    const c = parseFloat(document.getElementById('quad-c').value);
+
+    // Validation
+    if (isNaN(a) || isNaN(b) || isNaN(c)) {
+        alert('Please enter valid numbers for a, b, and c');
+        return;
+    }
+
+    if (a === 0) {
+        alert(' "a" cannot be 0 in a quadratic equation (ax² + bx + c = 0)');
+        return;
+    }
+
+    // Calculate discriminant (D = b² - 4ac)
+    const discriminant = (b * b) - (4 * a * c);
+
+    let roots = '';
+    let description = '';
+
+    if (discriminant > 0) {
+        const root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+        const root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+        roots = `x₁ = ${root1.toFixed(4)}, x₂ = ${root2.toFixed(4)}`;
+        description = 'Two distinct real roots';
+    } else if (discriminant === 0) {
+        const root = -b / (2 * a);
+        roots = `x = ${root.toFixed(4)} (repeated)`;
+        description = 'One repeated real root';
+    } else {
+        const realPart = (-b / (2 * a)).toFixed(4);
+        const imaginaryPart = (Math.sqrt(-discriminant) / (2 * a)).toFixed(4);
+        roots = `x₁ = ${realPart} + ${imaginaryPart}i, x₂ = ${realPart} - ${imaginaryPart}i`;
+        description = 'Two complex/imaginary roots';
+    }
+
+    // Display results
+    const resultDiv = document.getElementById('quad-result');
+    document.getElementById('quad-roots-value').textContent = roots;
+    document.getElementById('quad-discriminant').textContent = discriminant.toFixed(4);
+    document.getElementById('quad-description').textContent = description;
+    resultDiv.style.display = 'block';
+
+    // Update main calculator display with the discriminant (or root if real)
+    currentExpression = discriminant.toString();
+    updateResult();
+}
+
+function clearQuadratic() {
+    // Clear input fields
+    document.getElementById('quad-a').value = '1';
+    document.getElementById('quad-b').value = '5';
+    document.getElementById('quad-c').value = '6';
+
+    // Hide result
+    document.getElementById('quad-result').style.display = 'none';
+
+    // Clear calculator display
+    currentExpression = '';
+    updateResult();
+}

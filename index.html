@@ -1051,7 +1051,65 @@ border-radius:15px;">
                             </div>
                           </div>
                         </div>
-                        <!-- END Percentage Change Calculator Section -->
+                        <!-- Percentage Change Calculator Section -->
+
+                        <!-- Quadratic Equation Solver - NEW -->
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingQuadratic">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                              type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuadratic"
+                              aria-expanded="false" aria-controls="collapseQuadratic">
+                              <span>📐 Quadratic Solver</span>
+                            </button>
+                          </h2>
+                          <div id="collapseQuadratic" class="accordion-collapse collapse"
+                            aria-labelledby="headingQuadratic" data-bs-parent="#converterAccordion">
+                            <div class="accordion-body">
+                              <p class="text-muted small mb-3">Solve quadratic equations in the form: ax² + bx + c = 0</p>
+                              
+                              <div class="row g-2 mb-3">
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">a</label>
+                                  <input type="number" class="form-control" id="quad-a" placeholder="1" value="1">
+                                </div>
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">b</label>
+                                  <input type="number" class="form-control" id="quad-b" placeholder="5" value="5">
+                                </div>
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">c</label>
+                                  <input type="number" class="form-control" id="quad-c" placeholder="6" value="6">
+                                </div>
+                              </div>
+
+                              <!-- Calculate Button -->
+                              <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-primary btn-sm" onclick="solveQuadratic()">
+                                  Solve Equation
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="clearQuadratic()">
+                                  Clear
+                                </button>
+                              </div>
+
+                              <!-- Result Display -->
+                              <div id="quad-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
+                                <div class="mb-2"><strong>Roots:</strong> <span id="quad-roots-value"></span></div>
+                                <div class="mb-2"><strong>Discriminant (D):</strong> <span id="quad-discriminant"></span></div>
+                                <div><strong>Description:</strong> <span id="quad-description" style="font-style: italic; color: #555;"></span></div>
+                              </div>
+
+                              <!-- Examples -->
+                              <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                <strong>Examples:</strong><br>
+                                • x² - 5x + 6 = 0 → <strong>x = 3, 2</strong><br>
+                                • x² + 2x + 1 = 0 → <strong>x = -1 (repeated)</strong><br>
+                                • x² + 1 = 0 → <strong>Complex roots</strong>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- END Quadratic Equation Solver Section -->
 
                         <!-- Solve Simulteneous Equation  -->
                         <div class="accordion-item">
