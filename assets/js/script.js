@@ -2310,3 +2310,41 @@ function clearQuadratic() {
     currentExpression = '';
     updateResult();
 }
+
+// ================= MEMORY SYSTEM =================
+
+const display = document.getElementById("result");
+let memory = 0;
+
+window.updateMemoryIndicator = function () {
+  const indicator = document.getElementById("memoryIndicator");
+  if (!indicator) return;
+  indicator.style.visibility = memory !== 0 ? "visible" : "hidden";
+};
+
+window.memoryClear = function () {
+  memory = 0;
+  updateMemoryIndicator();
+};
+
+window.memoryRecall = function () {
+  display.value = memory.toString();
+};
+
+window.memoryAdd = function () {
+  const value = parseFloat(display.value) || 0;
+  memory += value;
+  updateMemoryIndicator();
+};
+
+window.memorySubtract = function () {
+  const value = parseFloat(display.value) || 0;
+  memory -= value;
+  updateMemoryIndicator();
+};
+// Subtracts the current display value from the memory
+function memorySubtract() {
+  const value = parseFloat(display.value) || 0;
+  memory -= value;
+  updateMemoryIndicator();
+}
