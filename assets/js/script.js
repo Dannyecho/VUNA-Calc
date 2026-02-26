@@ -539,14 +539,14 @@ function convertToHex() {
   wordResult.innerHTML = displayMessage;
   wordArea.style.display = "flex";
 
-  // Update the main display to show the hex value
-  currentExpression = hexValue;
+  // Update the main display to show the hex value with 0X prefix
+  currentExpression = "0X" + hexValue;
   updateResult();
 
   // Enable the speak button for the result
   enableSpeakButton();
 
-  console.log("HEX Conversion successful:", integerNum, "->", hexValue);
+  console.log("HEX Conversion successful:", integerNum, "-> 0X" + hexValue);
 }
 
 function applyLogarithm() {
