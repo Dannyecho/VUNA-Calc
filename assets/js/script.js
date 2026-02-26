@@ -160,7 +160,10 @@ function convertUnit(type) {
 
     const sqm = value * unitConversions.area[fromUnit];
     const result = sqm / unitConversions.area[toUnit];
+
     document.getElementById("area-result").textContent = formatResult(result);
+
+    return result;
   } else if (type === "data") {
     const value = parseFloat(document.getElementById("data-value").value) || 0;
     const fromUnit = document.getElementById("from-data").value;
@@ -173,7 +176,39 @@ function convertUnit(type) {
 
     const bytes = value * unitConversions.data[fromUnit];
     const result = bytes / unitConversions.data[toUnit];
+
     document.getElementById("data-result").textContent = formatResult(result);
+
+    return result; // Important
+  }
+}
+
+function calculateArea() {
+  const result = convertUnit("area");
+  sendToCalculatorDisplay(result ?? 0);
+}
+
+function calculateData() {
+  const result = convertUnit("data");
+  sendToCalculatorDisplay(result ?? 0);
+}
+
+function sendToCalculatorDisplay(value) {
+  const display = document.getElementById("result");
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+  const speakBtn = document.getElementById("speak-btn");
+
+  if (!display) return;
+
+  display.value = formatResult(value);
+
+  if (wordResult && wordArea && typeof numberToWords === "function") {
+    wordResult.textContent = numberToWords(value); // convert number to words
+    wordArea.style.display = "flex";
+
+    // Enable speak button
+    if (speakBtn) speakBtn.disabled = false;
   }
 }
 
@@ -190,6 +225,48 @@ window.addEventListener("DOMContentLoaded", function () {
     console.warn("Converter init error:", e);
   }
 });
+
+function convertUnit(unitType) {
+  if (unitType === "area") {
+    const value = parseFloat(document.getElementById("area-value").value) || 0;
+    const from = document.getElementById("from-area").value;
+    const to = document.getElementById("to-area").value;
+
+    const conversions = {
+      sqm: 1,
+      sqkm: 1000000,
+      sqmile: 2589988.11,
+      sqyard: 0.836127,
+      sqft: 0.092903,
+      sqinch: 0.00064516,
+      hectare: 10000,
+      acre: 4046.86,
+    };
+
+    const result = (value * conversions[from]) / conversions[to];
+    return result;
+  }
+
+  if (unitType === "data") {
+    const value = parseFloat(document.getElementById("data-value").value) || 0;
+    const from = document.getElementById("from-data").value;
+    const to = document.getElementById("to-data").value;
+
+    const conversions = {
+      bit: 1,
+      byte: 8,
+      kb: 8_000,
+      mb: 8_000_000,
+      gb: 8_000_000_000,
+      tb: 8_000_000_000_000,
+    };
+
+    const result = (value * conversions[from]) / conversions[to];
+    return result;
+  }
+
+  return 0;
+}
 
 function formatResult(value) {
   return value.toFixed(4);
@@ -1434,20 +1511,23 @@ function speakResult() {
   const speakBtn = document.getElementById("speak-btn");
   const wordResultEl = document.getElementById("word-result");
 
-  const words = wordResultEl.querySelector("strong")?.innerText || "";
+  if (!wordResultEl) return;
 
+  // Use the actual text, not just <strong>
+  const words = wordResultEl.textContent.trim();
   if (!words) return;
 
+  // Stop any existing speech
   if (window.speechSynthesis.speaking) {
     window.speechSynthesis.cancel();
-    speakBtn.classList.remove("speaking");
+    speakBtn?.classList.remove("speaking");
     return;
   }
 
   const utterance = new SpeechSynthesisUtterance(words);
   utterance.rate = 0.9;
-  utterance.onstart = () => speakBtn.classList.add("speaking");
-  utterance.onend = () => speakBtn.classList.remove("speaking");
+  utterance.onstart = () => speakBtn?.classList.add("speaking");
+  utterance.onend = () => speakBtn?.classList.remove("speaking");
 
   window.speechSynthesis.speak(utterance);
 }
@@ -2247,66 +2327,67 @@ function disableRedo() {
 // ============================================
 
 function solveQuadratic() {
-    // Get input values
-    const a = parseFloat(document.getElementById('quad-a').value);
-    const b = parseFloat(document.getElementById('quad-b').value);
-    const c = parseFloat(document.getElementById('quad-c').value);
+  // Get input values
+  const a = parseFloat(document.getElementById("quad-a").value);
+  const b = parseFloat(document.getElementById("quad-b").value);
+  const c = parseFloat(document.getElementById("quad-c").value);
 
-    // Validation
-    if (isNaN(a) || isNaN(b) || isNaN(c)) {
-        alert('Please enter valid numbers for a, b, and c');
-        return;
-    }
+  // Validation
+  if (isNaN(a) || isNaN(b) || isNaN(c)) {
+    alert("Please enter valid numbers for a, b, and c");
+    return;
+  }
 
-    if (a === 0) {
-        alert(' "a" cannot be 0 in a quadratic equation (ax² + bx + c = 0)');
-        return;
-    }
+  if (a === 0) {
+    alert(' "a" cannot be 0 in a quadratic equation (ax² + bx + c = 0)');
+    return;
+  }
 
-    // Calculate discriminant (D = b² - 4ac)
-    const discriminant = (b * b) - (4 * a * c);
+  // Calculate discriminant (D = b² - 4ac)
+  const discriminant = b * b - 4 * a * c;
 
-    let roots = '';
-    let description = '';
+  let roots = "";
+  let description = "";
 
-    if (discriminant > 0) {
-        const root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
-        const root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
-        roots = `x₁ = ${root1.toFixed(4)}, x₂ = ${root2.toFixed(4)}`;
-        description = 'Two distinct real roots';
-    } else if (discriminant === 0) {
-        const root = -b / (2 * a);
-        roots = `x = ${root.toFixed(4)} (repeated)`;
-        description = 'One repeated real root';
-    } else {
-        const realPart = (-b / (2 * a)).toFixed(4);
-        const imaginaryPart = (Math.sqrt(-discriminant) / (2 * a)).toFixed(4);
-        roots = `x₁ = ${realPart} + ${imaginaryPart}i, x₂ = ${realPart} - ${imaginaryPart}i`;
-        description = 'Two complex/imaginary roots';
-    }
+  if (discriminant > 0) {
+    const root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+    const root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+    roots = `x₁ = ${root1.toFixed(4)}, x₂ = ${root2.toFixed(4)}`;
+    description = "Two distinct real roots";
+  } else if (discriminant === 0) {
+    const root = -b / (2 * a);
+    roots = `x = ${root.toFixed(4)} (repeated)`;
+    description = "One repeated real root";
+  } else {
+    const realPart = (-b / (2 * a)).toFixed(4);
+    const imaginaryPart = (Math.sqrt(-discriminant) / (2 * a)).toFixed(4);
+    roots = `x₁ = ${realPart} + ${imaginaryPart}i, x₂ = ${realPart} - ${imaginaryPart}i`;
+    description = "Two complex/imaginary roots";
+  }
 
-    // Display results
-    const resultDiv = document.getElementById('quad-result');
-    document.getElementById('quad-roots-value').textContent = roots;
-    document.getElementById('quad-discriminant').textContent = discriminant.toFixed(4);
-    document.getElementById('quad-description').textContent = description;
-    resultDiv.style.display = 'block';
+  // Display results
+  const resultDiv = document.getElementById("quad-result");
+  document.getElementById("quad-roots-value").textContent = roots;
+  document.getElementById("quad-discriminant").textContent =
+    discriminant.toFixed(4);
+  document.getElementById("quad-description").textContent = description;
+  resultDiv.style.display = "block";
 
-    // Update main calculator display with the discriminant (or root if real)
-    currentExpression = discriminant.toString();
-    updateResult();
+  // Update main calculator display with the discriminant (or root if real)
+  currentExpression = discriminant.toString();
+  updateResult();
 }
 
 function clearQuadratic() {
-    // Clear input fields
-    document.getElementById('quad-a').value = '1';
-    document.getElementById('quad-b').value = '5';
-    document.getElementById('quad-c').value = '6';
+  // Clear input fields
+  document.getElementById("quad-a").value = "1";
+  document.getElementById("quad-b").value = "5";
+  document.getElementById("quad-c").value = "6";
 
-    // Hide result
-    document.getElementById('quad-result').style.display = 'none';
+  // Hide result
+  document.getElementById("quad-result").style.display = "none";
 
-    // Clear calculator display
-    currentExpression = '';
-    updateResult();
+  // Clear calculator display
+  currentExpression = "";
+  updateResult();
 }
