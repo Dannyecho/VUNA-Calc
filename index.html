@@ -338,6 +338,33 @@
       font-weight: bold;
     }
 
+    #portuguese-btn {
+      background: #dc3545;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+    }
+
+    #portuguese-btn:hover:not(:disabled) {
+      background: #bb2d3b;
+      transform: scale(1.05);
+    }
+
+    #portuguese-btn:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      box-shadow: none;
+    }
+
     #history-list {
       display: flex;
       flex-direction: column;
@@ -506,6 +533,22 @@
       color: white;
       transform: scale(1.05);
     }
+
+    #answer-preview {
+      padding: 0 16px;
+      border-radius: 16px;
+      background: #1d1d1e !important;
+      display: block;
+      font-size: 1.2rem;
+      color: #ffffff;
+      font-style: italic;
+      letter-spacing: 0.02em;
+      transition: opacity 0.2s ease;
+    }
+
+    #answer-preview:empty {
+      opacity: 0;
+    }
   </style>
 </head>
 
@@ -539,6 +582,7 @@
                     <div id="word-result"></div>
                     <button id="hausa-btn" onclick="translateToHausa()">HA</button>
                     <button id="english-btn" onclick="backToEnglish()">EN</button>
+                    <button id="portuguese-btn" onclick="translateToPortuguese()">PT</button>
                     <button id="speak-btn" onclick="speakResult()" disabled title="Speak Result">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
                         viewBox="0 0 16 16">
@@ -552,6 +596,9 @@
                           d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
                       </svg>
                     </button>
+                  </div>
+                  <div class="preview-panel">
+                    <div id="answer-preview"></div>
                   </div>
                   <div class="diff-panel">
                     <div class="display-container my-3">
@@ -713,8 +760,10 @@ border-radius:15px;">
                     <button class="btn btn-power btn-special" onclick="calculateCube()">x³</button>
                     <button class="btn btn-special" onclick="approximateTo2SF()">≈ 2sf</button>
                     <button class="btn btn-special" onclick="cubeRootResult()">∛x</button>
-
+                    <button class="btn btn-special" onclick="calculateReciprocal()" title="Reciprocal: 1/x">1/x</button>
+                    
                     <!--  Row 7                  -->
+                    <button class="btn btn-special" onclick="calculateSquareRoot()">√</button>
                     <button class="btn btn-action" onclick="factorPrimeCheck()"
                       stylex="grid-column: span 2;">Factors</button>
 
@@ -865,6 +914,62 @@ border-radius:15px;">
                                 </div>
                                 <small class="text-muted" id="currency-timestamp"></small>
                               </div>
+                              <!-- Area Conversion -->
+                               <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Area</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="area-value" placeholder="Value"
+                                  value="1" oninput="convertUnit('area')">
+                                  <select class="form-select form-select-sm" id="from-area" onchange="convertUnit('area')">
+                                    <option value="sqm">m²</option>
+                                    <option value="sqkm">km²</option>
+                                    <option value="sqmile">mi²</option>
+                                    <option value="sqyard">yd²</option>
+                                    <option value="sqft">ft²</option>
+                                    <option value="sqinch">in²</option>
+                                    <option value="hectare">hectare</option>
+                                    <option value="acre">acre</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-area" onchange="convertUnit('area')">
+                                    <option value="sqmile">mi²</option>
+                                    <option value="sqm">m²</option>
+                                    <option value="sqkm">km²</option>
+                                    <option value="sqyard">yd²</option>
+                                    <option value="sqft">ft²</option>
+                                    <option value="sqinch">in²</option>
+                                    <option value="hectare">hectare</option>
+                                    <option value="acre">acre</option>
+                                  </select>
+                                  <span class="input-group-text" id="area-result">0</span>
+                                </div>
+                              </div>
+                              <!-- Data Storage Conversion -->
+                               <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Data Storage</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="data-value" placeholder="Value"
+                                  value="1" oninput="convertUnit('data')">
+                                  <select class="form-select form-select-sm" id="from-data" onchange="convertUnit('data')">
+                                    <option value="bit">bit</option>
+                                    <option value="byte">B</option>
+                                    <option value="kb">KB</option>
+                                    <option value="mb">MB</option>
+                                    <option value="gb">GB</option>
+                                    <option value="tb">TB</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-data" onchange="convertUnit('data')">
+                                    <option value="B">B</option>
+                                    <option value="bit">bit</option>
+                                    <option value="kb">KB</option>
+                                    <option value="mb">MB</option>
+                                    <option value="gb">GB</option>
+                                    <option value="tb">TB</option>
+                                  </select>
+                                  <span class="input-group-text" id="data-result">0</span>
+                                </div>
+                              </div>
 
                               <!-- Quick Conversion Examples -->
                               <div class="alert alert-info alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
@@ -996,7 +1101,191 @@ border-radius:15px;">
                             </div>
                           </div>
                         </div>
-                        <!-- END Percentage Change Calculator Section -->
+                        <!-- Percentage Change Calculator Section -->
+
+                        <!-- Quadratic Equation Solver - NEW -->
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingQuadratic">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                              type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuadratic"
+                              aria-expanded="false" aria-controls="collapseQuadratic">
+                              <span>📐 Quadratic Solver</span>
+                            </button>
+                          </h2>
+                          <div id="collapseQuadratic" class="accordion-collapse collapse"
+                            aria-labelledby="headingQuadratic" data-bs-parent="#converterAccordion">
+                            <div class="accordion-body">
+                              <p class="text-muted small mb-3">Solve quadratic equations in the form: ax² + bx + c = 0</p>
+                              
+                              <div class="row g-2 mb-3">
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">a</label>
+                                  <input type="number" class="form-control" id="quad-a" placeholder="1" value="1">
+                                </div>
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">b</label>
+                                  <input type="number" class="form-control" id="quad-b" placeholder="5" value="5">
+                                </div>
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">c</label>
+                                  <input type="number" class="form-control" id="quad-c" placeholder="6" value="6">
+                                </div>
+                              </div>
+
+                              <!-- Calculate Button -->
+                              <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-primary btn-sm" onclick="solveQuadratic()">
+                                  Solve Equation
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="clearQuadratic()">
+                                  Clear
+                                </button>
+                              </div>
+
+                              <!-- Result Display -->
+                              <div id="quad-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
+                                <div class="mb-2"><strong>Roots:</strong> <span id="quad-roots-value"></span></div>
+                                <div class="mb-2"><strong>Discriminant (D):</strong> <span id="quad-discriminant"></span></div>
+                                <div><strong>Description:</strong> <span id="quad-description" style="font-style: italic; color: #555;"></span></div>
+                              </div>
+
+                              <!-- Examples -->
+                              <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                <strong>Examples:</strong><br>
+                                • x² - 5x + 6 = 0 → <strong>x = 3, 2</strong><br>
+                                • x² + 2x + 1 = 0 → <strong>x = -1 (repeated)</strong><br>
+                                • x² + 1 = 0 → <strong>Complex roots</strong>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- END Quadratic Equation Solver Section -->
+
+                        <!-- Cubic Equation Solver - NEW -->
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingCubic">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                              type="button" data-bs-toggle="collapse" data-bs-target="#collapseCubic"
+                              aria-expanded="false" aria-controls="collapseCubic">
+                              <span>📊 Cubic Solver (ax³ + bx² + cx + d = 0)</span>
+                            </button>
+                          </h2>
+                          <div id="collapseCubic" class="accordion-collapse collapse"
+                            aria-labelledby="headingCubic" data-bs-parent="#converterAccordion">
+                            <div class="accordion-body">
+                              <p class="text-muted small mb-3">Solve cubic equations in the form: ax³ + bx² + cx + d = 0</p>
+                              
+                              <div class="row g-2 mb-3">
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">a</label>
+                                  <input type="number" class="form-control" id="cubic-a" placeholder="1" value="1">
+                                </div>
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">b</label>
+                                  <input type="number" class="form-control" id="cubic-b" placeholder="0" value="0">
+                                </div>
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">c</label>
+                                  <input type="number" class="form-control" id="cubic-c" placeholder="0" value="-7">
+                                </div>
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">d</label>
+                                  <input type="number" class="form-control" id="cubic-d" placeholder="0" value="6">
+                                </div>
+                              </div>
+
+                              <!-- Calculate Button -->
+                              <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-primary btn-sm" onclick="solveCubic()">
+                                  Solve Cubic Equation
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="clearCubic()">
+                                  Clear
+                                </button>
+                              </div>
+
+                              <!-- Result Display -->
+                              <div id="cubic-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
+                                <div class="mb-2"><strong>Roots:</strong> <span id="cubic-roots-value"></span></div>
+                                <div><strong>Description:</strong> <span id="cubic-description" style="font-style: italic; color: #555;"></span></div>
+                              </div>
+
+                              <!-- Examples -->
+                              <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                <strong>Examples:</strong><br>
+                                • x³ - 7x + 6 = 0 → <strong>x = 1, 2, -3</strong><br>
+                                • x³ - 6x² + 11x - 6 = 0 → <strong>x = 1, 2, 3</strong><br>
+                                • x³ + 1 = 0 → <strong>One real, two complex roots</strong>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- END Cubic Equation Solver Section -->
+
+                        <!-- Quartic Equation Solver - NEW -->
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingQuartic">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                              type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuartic"
+                              aria-expanded="false" aria-controls="collapseQuartic">
+                              <span>📈 Quartic Solver (ax⁴ + bx³ + cx² + dx + e = 0)</span>
+                            </button>
+                          </h2>
+                          <div id="collapseQuartic" class="accordion-collapse collapse"
+                            aria-labelledby="headingQuartic" data-bs-parent="#converterAccordion">
+                            <div class="accordion-body">
+                              <p class="text-muted small mb-3">Solve quartic equations: ax⁴ + bx³ + cx² + dx + e = 0</p>
+                              
+                              <div class="row g-2 mb-3">
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">a</label>
+                                  <input type="number" class="form-control" id="quartic-a" placeholder="1" value="1">
+                                </div>
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">b</label>
+                                  <input type="number" class="form-control" id="quartic-b" placeholder="0" value="0">
+                                </div>
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">c</label>
+                                  <input type="number" class="form-control" id="quartic-c" placeholder="0" value="-13">
+                                </div>
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">d</label>
+                                  <input type="number" class="form-control" id="quartic-d" placeholder="0" value="0">
+                                </div>
+                                <div class="col">
+                                  <label class="form-label small" style="font-weight: 600;">e</label>
+                                  <input type="number" class="form-control" id="quartic-e" placeholder="0" value="36">
+                                </div>
+                              </div>
+
+                              <!-- Calculate Button -->
+                              <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-primary btn-sm" onclick="solveQuartic()">
+                                  Solve Quartic Equation
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="clearQuartic()">
+                                  Clear
+                                </button>
+                              </div>
+
+                              <!-- Result Display -->
+                              <div id="quartic-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
+                                <div class="mb-2"><strong>Roots:</strong> <span id="quartic-roots-value"></span></div>
+                                <div><strong>Description:</strong> <span id="quartic-description" style="font-style: italic; color: #555;"></span></div>
+                              </div>
+
+                              <!-- Examples -->
+                              <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                <strong>Examples:</strong><br>
+                                • x⁴ - 13x² + 36 = 0 → <strong>x = ±2, ±3</strong><br>
+                                • x⁴ - 1 = 0 → <strong>x = ±1, ±i</strong><br>
+                                • x⁴ + 2x² + 1 = 0 → <strong>Complex roots (repeated)</strong>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- END Quartic Equation Solver Section -->
 
                         <!-- Solve Simulteneous Equation  -->
                         <div class="accordion-item">
