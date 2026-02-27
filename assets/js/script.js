@@ -2757,3 +2757,35 @@ function clearQuartic() {
     currentExpression = '';
     updateResult();
 }
+
+
+
+// ------------------------------
+// APPROXIMATE TO 1,2,3 SIGNIFICANT FIGURES FUNCTION
+// ------------------------------
+function approximateToSF(sf) {
+  const val = parseFloat(document.getElementById('result').value);
+  if (!isNaN(val)) {
+    document.getElementById('result').value = parseFloat(val.toPrecision(sf));
+  }
+}
+
+let currentSF = 2;
+
+document.getElementById('sfMainBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('sfDropdownMenu');
+  const isOpen = menu.style.display === 'block';
+  menu.style.display = isOpen ? 'none' : 'block';
+});
+
+document.addEventListener('click', () => {
+  document.getElementById('sfDropdownMenu').style.display = 'none';
+});
+
+function setSF(sf) {
+  currentSF = sf;
+  document.getElementById('sfLabel').textContent = sf + 'sf';
+  document.getElementById('sfDropdownMenu').style.display = 'none';
+  approximateToSF(sf);
+}
