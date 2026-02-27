@@ -506,6 +506,22 @@
       color: white;
       transform: scale(1.05);
     }
+
+    #answer-preview {
+      padding: 0 16px;
+      border-radius: 16px;
+      background: #1d1d1e !important;
+      display: block;
+      font-size: 1.2rem;
+      color: #ffffff;
+      font-style: italic;
+      letter-spacing: 0.02em;
+      transition: opacity 0.2s ease;
+    }
+
+    #answer-preview:empty {
+      opacity: 0;
+    }
   </style>
 </head>
 
@@ -552,6 +568,9 @@
                           d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
                       </svg>
                     </button>
+                  </div>
+                  <div class="preview-panel">
+                    <div id="answer-preview"></div>
                   </div>
                   <div class="diff-panel">
                     <div class="display-container my-3">

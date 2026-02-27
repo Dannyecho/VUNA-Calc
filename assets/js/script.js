@@ -1481,6 +1481,7 @@ function updateResult() {
   }
 
   enableSpeakButton();
+  updateAnswerPreview();
 }
 
 // ------------------------------
@@ -2365,4 +2366,54 @@ function clearQuadratic() {
     // Clear calculator display
     currentExpression = '';
     updateResult();
+}
+
+
+
+// ------------------------------
+// Answer Preview (live result before = is pressed)
+// ------------------------------
+function updateAnswerPreview() {
+  const previewEl = document.getElementById("answer-preview");
+  if (!previewEl) return;
+
+  const expr = currentExpression.trim();
+
+  if (!expr || expr === "Error") {
+    previewEl.textContent = "";
+    return;
+  }
+
+  try {
+    const permMatch = expr.match(/^(\d+)P(\d+)$/i);
+    const combMatch = expr.match(/^(\d+)C(\d+)$/i);
+    let result;
+
+    if (permMatch) {
+      const n = parseInt(permMatch[1]);
+      const r = parseInt(permMatch[2]);
+      if (n >= r && n >= 0 && r >= 0) {
+        result = factorial(n) / factorial(n - r);
+      }
+    } else if (combMatch) {
+      const n = parseInt(combMatch[1]);
+      const r = parseInt(combMatch[2]);
+      if (n >= r && n >= 0 && r >= 0) {
+        result = factorial(n) / (factorial(r) * factorial(n - r));
+      }
+    } else {
+      result = eval(normalizeExpression(expr));
+    }
+
+    if (result !== undefined && !isNaN(result) && isFinite(result) && expr !== result.toString()) {
+      const formatted = Math.abs(result - Math.round(result)) < 1e-10
+        ? Math.round(result).toString()
+        : parseFloat(result.toFixed(6)).toString();
+      previewEl.textContent = "ANSWER PREVIEW = " + formatted;
+    } else {
+      previewEl.textContent = "";
+    }
+  } catch (e) {
+    previewEl.textContent = "";
+  }
 }
