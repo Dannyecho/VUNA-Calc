@@ -549,6 +549,29 @@
     #answer-preview:empty {
       opacity: 0;
     }
+
+    .sf-dropdown-menu {
+  background: #e7f6ed !important;
+  border: none !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.sf-dropdown-menu li a {
+  color: #198754;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 16px;
+  display: block;
+  text-decoration: none;
+  border-radius: 10px;
+  margin: 2px 4px;
+}
+
+.sf-dropdown-menu li a:hover {
+  background: #d1f0dd;
+  color: #198754;
+}
   </style>
 </head>
 
@@ -758,6 +781,15 @@ border-radius:15px;">
 
                     <button class="btn btn-power btn-special" onclick="calculateSquare()">x²</button>
                     <button class="btn btn-power btn-special" onclick="calculateCube()">x³</button>
+                    <div class="btn btn-special" style="position:relative;" id="sfMainBtn">
+                        ≈ <span id="sfLabel">SGF</span> ▾
+                      <ul class="sf-dropdown-menu" id="sfDropdownMenu"
+                        style="display:none; position:absolute; top:100%; left:0; background:white; border:1px solid #ccc; list-style:none; padding:4px 0; margin:0; z-index:999; min-width:80px;">
+                        <li><a href="#" onclick="setSF(1); return false;">≈ 1sf</a></li>
+                        <li><a href="#" onclick="setSF(2); return false;">≈ 2sf</a></li>
+                        <li><a href="#" onclick="setSF(3); return false;">≈ 3sf</a></li>
+                      </ul>
+                    </div>
                     <button class="btn btn-special" onclick="cubeRootResult()">∛x</button>
                     <button class="btn btn-special" onclick="calculateReciprocal()" title="Reciprocal: 1/x">1/x</button>
                     
