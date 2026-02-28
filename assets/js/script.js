@@ -305,6 +305,41 @@ function clearResult() {
 }
 
 // ------------------------------
+// Square Root Function
+// ------------------------------
+function calculateSquareRoot() {
+  if (!currentExpression) return;
+
+  const num = parseFloat(currentExpression);
+
+  if (isNaN(num)) {
+    currentExpression = "Error";
+    updateResult();
+    return;
+  }
+
+  if (num < 0) {
+    currentExpression = "Error: Negative";
+    updateResult();
+    return;
+  }
+
+  const result = Math.sqrt(num);
+
+  calculationHistory?.push({
+    expression: `√${num} = ${result}`,
+    words: numberToWords(result),
+    time: new Date().toLocaleTimeString(),
+  });
+  if (calculationHistory.length > 20) calculationHistory.shift();
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  renderHistory();
+
+  currentExpression = result.toString();
+  updateResult();
+}
+
+// ------------------------------
 // Factorial Helper Function
 // ------------------------------
 function factorial(n) {
@@ -440,8 +475,8 @@ function calculateResult() {
       calculateCombination();
       return;
     }
-
-    let result = eval(currentExpression);
+    let normalizedExpression = normalizeExpression(currentExpression);
+    let result = eval(normalizedExpression);
 
     if (isNaN(result) || !isFinite(result)) {
       throw new Error();
@@ -476,6 +511,27 @@ function tenPower() {
     currentExpression = "Error";
   } else {
     currentExpression = Math.pow(10, x).toString();
+  }
+
+  updateResult();
+}
+
+// ------------------------------
+// RECIPROCAL FUNCTION (1/x)
+// ------------------------------
+function calculateReciprocal() {
+  if (!currentExpression) return;
+
+  const x = parseFloat(currentExpression);
+  
+  if (isNaN(x)) {
+    currentExpression = "Error";
+  } else if (x === 0) {
+    currentExpression = "Undefined";
+  } else {
+    const result = 1 / x;
+    // Remove trailing zeros and unnecessary decimal point
+    currentExpression = parseFloat(result.toFixed(10)).toString();
   }
 
   updateResult();
@@ -539,14 +595,14 @@ function convertToHex() {
   wordResult.innerHTML = displayMessage;
   wordArea.style.display = "flex";
 
-  // Update the main display to show the hex value with 0X prefix
-  currentExpression = "0X" + hexValue;
+  // Update the main display to show the hex value with 0x prefixing
+  currentExpression = "0x" + hexValue;
   updateResult();
 
   // Enable the speak button for the result
   enableSpeakButton();
 
-  console.log("HEX Conversion successful:", integerNum, "-> 0X" + hexValue);
+  console.log("HEX Conversion successful:", integerNum, "-> 0x" + hexValue);
 }
 
 function applyLogarithm() {
@@ -580,7 +636,6 @@ function toggleInverseMode() {
   document.getElementById("tan-btn").textContent = inverseMode
     ? "tan⁻¹"
     : "tan";
-  document.getElementById("inv-btn").classList.toggle("active", inverseMode);
 }
 
 function sinDeg(x) {
@@ -627,12 +682,11 @@ function normalizeExpression(expr) {
 }
 
 function isPrime(num) {
-  // Numbers less than 2 are not prime
-  if (num <= 1) {
-    return false;
+  if (num <= 1) return false;
+  for (let i = 2; i <= Math.sqrt(num); i++) {
+    if (num % i === 0) return false;
   }
-
-  return result;
+  return true;
 }
 
 function Parser(tokens) {
@@ -1388,11 +1442,12 @@ function numberToHausa(num) {
 
   return result.trim();
 }
+
 // translate to hausas
 function translateToHausa() {
-  if (!left || operator || right) return;
+  if (!currentExpression) return;
 
-  const hausa = numberToHausa(left);
+  const hausa = numberToHausa(currentExpression);
   const wordResult = document.getElementById("word-result");
 
   wordResult.innerHTML =
@@ -1425,6 +1480,7 @@ function updateResult() {
   }
 
   enableSpeakButton();
+  updateAnswerPreview();
 }
 
 // ------------------------------
@@ -1464,13 +1520,13 @@ function enableSpeakButton() {
 }
 
 function backToEnglish() {
-  if (!left || operator || right) return;
+  if (!currentExpression) return;
 
   const wordResult = document.getElementById("word-result");
 
   wordResult.innerHTML =
     '<span class="small-label">Result in words</span><strong>' +
-    numberToWords(left) +
+    numberToWords(currentExpression) +
     "</strong>";
 }
 
@@ -2311,6 +2367,397 @@ function clearQuadratic() {
 
     // Hide result
     document.getElementById('quad-result').style.display = 'none';
+
+    // Clear calculator display
+    currentExpression = '';
+    updateResult();
+}
+
+
+
+// ------------------------------
+// Answer Preview (live result before = is pressed)
+// ------------------------------
+function updateAnswerPreview() {
+  const previewEl = document.getElementById("answer-preview");
+  if (!previewEl) return;
+
+  const expr = currentExpression.trim();
+
+  if (!expr || expr === "Error") {
+    previewEl.textContent = "";
+    return;
+  }
+
+  try {
+    const permMatch = expr.match(/^(\d+)P(\d+)$/i);
+    const combMatch = expr.match(/^(\d+)C(\d+)$/i);
+    let result;
+
+    if (permMatch) {
+      const n = parseInt(permMatch[1]);
+      const r = parseInt(permMatch[2]);
+      if (n >= r && n >= 0 && r >= 0) {
+        result = factorial(n) / factorial(n - r);
+      }
+    } else if (combMatch) {
+      const n = parseInt(combMatch[1]);
+      const r = parseInt(combMatch[2]);
+      if (n >= r && n >= 0 && r >= 0) {
+        result = factorial(n) / (factorial(r) * factorial(n - r));
+      }
+    } else {
+      result = eval(normalizeExpression(expr));
+    }
+
+    if (result !== undefined && !isNaN(result) && isFinite(result) && expr !== result.toString()) {
+      const formatted = Math.abs(result - Math.round(result)) < 1e-10
+        ? Math.round(result).toString()
+        : parseFloat(result.toFixed(6)).toString();
+      previewEl.textContent = "ANSWER PREVIEW = " + formatted;
+    } else {
+      previewEl.textContent = "";
+    }
+  } catch (e) {
+    previewEl.textContent = "";
+  }
+}
+document.addEventListener('keydown', function(event) {
+  const key = event.key;
+
+  if (!isNaN(key)) { // Check if the key is a number
+      appendToResult(key);
+  } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+      operatorToResult(key);
+  } else if (key === 'Enter') {
+      calculateResult();
+  } else if (key === 'Backspace') {
+      backspace();
+  } else if (key === 'Escape') {
+      clearResult();
+  } else if (key === '(' || key === ')') {
+      bracketToResult(key);
+  } else if (key === '.') {
+      appendToResult(key);
+  }else if (key === 's') {
+      trigButtonPressed('sin');
+  } else if (key === 'c') {
+      trigButtonPressed('cos');
+  } else if (key === 't') {
+      trigButtonPressed('tan');
+  }
+  else if (key === 'i') {
+      toggleInverseMode();
+  }
+  else if (key === 'A') {
+      trigButtonPressed('sin');
+  }
+  else if (key === 'C') {
+      trigButtonPressed('cos');
+  }
+  else if (key === 'T') {
+      trigButtonPressed('tan');
+  }
+});
+
+// ============================================
+// PORTUGUESE LANGUAGE TRANSLATOR
+// ============================================
+
+function numberToPortuguese(num) {
+  if (num === "Error") return "Erro";
+
+  const ones = [
+    "",
+    "Um",
+    "Dois",
+    "Três",
+    "Quatro",
+    "Cinco",
+    "Seis",
+    "Sete",
+    "Oito",
+    "Nove",
+  ];
+  const tens = [
+    "",
+    "",
+    "Vinte",
+    "Trinta",
+    "Quarenta",
+    "Cinquenta",
+    "Sessenta",
+    "Setenta",
+    "Oitenta",
+    "Noventa",
+  ];
+  const teens = [
+    "Dez",
+    "Onze",
+    "Doze",
+    "Treze",
+    "Quatorze",
+    "Quinze",
+    "Dezesseis",
+    "Dezessete",
+    "Dezoito",
+    "Dezenove",
+  ];
+  const scales = ["", "Mil", "Milhão", "Bilhão", "Trilhão"];
+
+  function convertGroup(val) {
+    let res = "";
+    if (val >= 100) {
+      res += ones[Math.floor(val / 100)] + " Cento ";
+      val %= 100;
+    }
+    if (val >= 10 && val <= 19) {
+      res += teens[val - 10] + " ";
+    } else if (val >= 20) {
+      res += tens[Math.floor(val / 10)];
+      if (val % 10 !== 0) res += " e " + ones[val % 10];
+      res += " ";
+    } else if (val > 0) {
+      res += ones[val] + " ";
+    }
+    return res.trim();
+  }
+
+  let n = parseFloat(num);
+  if (isNaN(n)) return "";
+  if (n === 0) return "Zero";
+
+  let sign = n < 0 ? "Negativo " : "";
+  let absN = Math.abs(n);
+  let parts = absN.toString().split(".");
+  let integerPart = parseInt(parts[0]);
+  let decimalPart = parts[1];
+
+  let wordArr = [];
+
+  if (integerPart === 0) {
+    wordArr.push("Zero");
+  } else {
+    let scaleIdx = 0;
+    while (integerPart > 0) {
+      let chunk = integerPart % 1000;
+      if (chunk > 0) {
+        let chunkWords = convertGroup(chunk);
+        wordArr.unshift(
+          chunkWords + (scales[scaleIdx] ? " " + scales[scaleIdx] : ""),
+        );
+      }
+      integerPart = Math.floor(integerPart / 1000);
+      scaleIdx++;
+    }
+  }
+
+  let result = sign + wordArr.join(", ").trim();
+
+  if (decimalPart) {
+    result += " Vírgula";
+    for (let digit of decimalPart) {
+      result += " " + (digit === "0" ? "Zero" : ones[parseInt(digit)]);
+    }
+  }
+
+  return result.trim();
+}
+
+function translateToPortuguese() {
+  if (!currentExpression) return;
+
+  const portuguese = numberToPortuguese(currentExpression);
+  const wordResult = document.getElementById("word-result");
+
+  wordResult.innerHTML =
+    '<span class="small-label">Resultado em Português</span><strong>' +
+    portuguese +
+    "</strong>";
+}
+
+// ============================================
+// CUBIC EQUATION SOLVER FUNCTIONS
+// ============================================
+
+function solveCubic() {
+    // Get input values
+    const a = parseFloat(document.getElementById('cubic-a').value);
+    const b = parseFloat(document.getElementById('cubic-b').value);
+    const c = parseFloat(document.getElementById('cubic-c').value);
+    const d = parseFloat(document.getElementById('cubic-d').value);
+
+    // Validation
+    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d)) {
+        alert('Please enter valid numbers for a, b, c, and d');
+        return;
+    }
+
+    if (a === 0) {
+        alert('"a" cannot be 0 in a cubic equation (ax³ + bx² + cx + d = 0)');
+        return;
+    }
+
+    // Normalize the equation: convert to form t³ + pt + q = 0
+    const a2 = b / a, a3 = c / a, a4 = d / a;
+    const p = a3 - (a2 * a2) / 3;
+    const q = a4 + (2 * a2 * a2 * a2) / 27 - (a2 * a3) / 3;
+
+    // Cardano's formula
+    const discriminant = -(4 * p * p * p + 27 * q * q);
+    const innerVal = (q / 2) ** 2 + (p / 3) ** 3;
+
+    let roots = [];
+    let description = '';
+
+    if (Math.abs(innerVal) < 1e-10) {
+        // Multiple roots case
+        if (Math.abs(p) < 1e-10 && Math.abs(q) < 1e-10) {
+            // Triple root
+            roots = [(-a2 / 3).toFixed(4)];
+            description = 'One triple real root';
+        } else {
+            // One single and one double root
+            const root1 = (3 * q / p - a2 / 3).toFixed(4);
+            const root2 = (-3 * q / (2 * p) - a2 / 3).toFixed(4);
+            roots = [root1, root2, root2];
+            description = 'One single and one double real root';
+        }
+    } else if (innerVal > 0) {
+        // One real root, two complex
+        const sqrtInner = Math.sqrt(innerVal);
+        const cbrtVal1 = Math.cbrt(-q / 2 + sqrtInner);
+        const cbrtVal2 = Math.cbrt(-q / 2 - sqrtInner);
+        const realRoot = (cbrtVal1 + cbrtVal2 - a2 / 3).toFixed(4);
+        
+        roots = [realRoot];
+        description = 'One real root and two complex conjugate roots';
+    } else {
+        // Three distinct real roots (trigonometric solution)
+        const m = 2 * Math.sqrt(-p / 3);
+        const theta = (1 / 3) * Math.acos((3 * q) / (p * m));
+        const offset = a2 / 3;
+
+        const root1 = (m * Math.cos(theta) - offset).toFixed(4);
+        const root2 = (m * Math.cos(theta + (2 * Math.PI) / 3) - offset).toFixed(4);
+        const root3 = (m * Math.cos(theta + (4 * Math.PI) / 3) - offset).toFixed(4);
+
+        roots = [root1, root2, root3];
+        description = 'Three distinct real roots';
+    }
+
+    // Display results
+    const resultDiv = document.getElementById('cubic-result');
+    document.getElementById('cubic-roots-value').textContent = roots.join(', ');
+    document.getElementById('cubic-description').textContent = description;
+    resultDiv.style.display = 'block';
+
+    // Update main calculator display
+    currentExpression = roots[0];
+    updateResult();
+}
+
+function clearCubic() {
+    // Clear input fields
+    document.getElementById('cubic-a').value = '1';
+    document.getElementById('cubic-b').value = '0';
+    document.getElementById('cubic-c').value = '-7';
+    document.getElementById('cubic-d').value = '6';
+
+    // Hide result
+    document.getElementById('cubic-result').style.display = 'none';
+
+    // Clear calculator display
+    currentExpression = '';
+    updateResult();
+}
+
+// ============================================
+// QUARTIC EQUATION SOLVER FUNCTIONS
+// ============================================
+
+function solveQuartic() {
+    // Get input values
+    const a = parseFloat(document.getElementById('quartic-a').value);
+    const b = parseFloat(document.getElementById('quartic-b').value);
+    const c = parseFloat(document.getElementById('quartic-c').value);
+    const d = parseFloat(document.getElementById('quartic-d').value);
+    const e = parseFloat(document.getElementById('quartic-e').value);
+
+    // Validation
+    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d) || isNaN(e)) {
+        alert('Please enter valid numbers for a, b, c, d, and e');
+        return;
+    }
+
+    if (a === 0) {
+        alert('"a" cannot be 0 in a quartic equation (ax⁴ + bx³ + cx² + dx + e = 0)');
+        return;
+    }
+
+    // Using Ferrari's method - convert to depressed quartic
+    const p = c / a;
+    const q = d / a;
+    const r = e / a;
+    const bOverA = b / a;
+
+    // Calculate resolvent cubic coefficients
+    const p2 = p * p;
+    const resolventA = 1;
+    const resolventB = -p;
+    const resolventC = q * q - 4 * r;
+    const resolventD = 4 * p * r - q * q - bOverA * bOverA;
+
+    // Solve cubic to get y
+    let y;
+    const discriminant = -(4 * (resolventC ** 3) + 27 * (resolventD ** 2));
+
+    // Simple cubic solver for resolvent
+    const innerVal = (resolventD / 2) ** 2 + (resolventC / 3) ** 3;
+    
+    if (innerVal >= 0) {
+        const sqrtInner = Math.sqrt(innerVal);
+        const cbrt1 = Math.cbrt(-resolventD / 2 + sqrtInner);
+        const cbrt2 = Math.cbrt(-resolventD / 2 - sqrtInner);
+        const yVal = cbrt1 + cbrt2 - resolventB / 3;
+        y = yVal >= 0 ? yVal : 0;
+    } else {
+        y = Math.abs(resolventC) / 3;
+    }
+
+    // Calculate roots using y
+    const sqrt_y = Math.sqrt(Math.max(0, y));
+    const sqrt_term = Math.sqrt(Math.max(0, p + 2 * y - q / (2 * sqrt_y + 1e-10)));
+
+    const root1 = (-bOverA / 4 + sqrt_y / 2 + sqrt_term / 2).toFixed(4);
+    const root2 = (-bOverA / 4 + sqrt_y / 2 - sqrt_term / 2).toFixed(4);
+    const root3 = (-bOverA / 4 - sqrt_y / 2 + Math.sqrt(Math.max(0, p + 2 * y + q / (2 * sqrt_y + 1e-10))) / 2).toFixed(4);
+    const root4 = (-bOverA / 4 - sqrt_y / 2 - Math.sqrt(Math.max(0, p + 2 * y + q / (2 * sqrt_y + 1e-10))) / 2).toFixed(4);
+
+    const roots = [root1, root2, root3, root4];
+    const description = 'Four potential roots (may include complex values)';
+
+    // Display results
+    const resultDiv = document.getElementById('quartic-result');
+    document.getElementById('quartic-roots-value').textContent = roots.join(', ');
+    document.getElementById('quartic-description').textContent = description;
+    resultDiv.style.display = 'block';
+
+    // Update main calculator display
+    currentExpression = root1;
+    updateResult();
+}
+
+function clearQuartic() {
+    // Clear input fields
+    document.getElementById('quartic-a').value = '1';
+    document.getElementById('quartic-b').value = '0';
+    document.getElementById('quartic-c').value = '-13';
+    document.getElementById('quartic-d').value = '0';
+    document.getElementById('quartic-e').value = '36';
+
+    // Hide result
+    document.getElementById('quartic-result').style.display = 'none';
 
     // Clear calculator display
     currentExpression = '';
