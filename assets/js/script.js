@@ -1532,35 +1532,41 @@ function backToEnglish() {
 
 // Factor Finder & Prime Checker
 // Get factors of a number
-function factors(num) {
-  let result = [];
-  for (let i = 1; i <= num; i++) {
-    if (num % i === 0) result.push(i);
+function factors() {
+  // ensure we have a numeric value
+  num = Number(currentExpression);
+  // zero has infinitely many divisors, return empty array to avoid confusion
+  if (num === 0 || !Number.isFinite(num)) return [];
+
+  // only integer factors make sense
+  if (!Number.isInteger(num)) return [];
+
+  const absNum = Math.abs(num);
+  const result = [];
+
+  // loop up to square root for efficiency
+  for (let i = 1; i <= Math.sqrt(absNum); i++) {
+    if (absNum % i === 0) {
+      result.push(i);
+      const pair = absNum / i;
+      if (pair !== i) {
+        result.push(pair);
+      }
+    }
   }
-  return result;
-}
 
-// Main function to handle factor finding and prime checking
-function factorPrimeCheck() {
-  const numStr = left || right; // use current number or result
-  const num = parseInt(numStr);
+  // sort numerical order
+  result.sort((a, b) => a - b);
 
-  if (isNaN(num)) {
-    alert("Please enter a valid number first!");
-    return;
+  // include negative factors if original number was negative
+  if (num < 0) {
+    const negatives = result.map((v) => -v);
+    result.push(...negatives);
+    result.sort((a, b) => a - b);
   }
 
-  const factorList = factors(num);
-  const primeCheck = isPrime(num);
-  // Prepare message
-  let message = `Factors of ${num}: ${factorList.join(", ")}\n`;
-  message += `Is ${num} prime? ${primeCheck ? "Yes" : "No"}`;
-
-  // Push to steps and keep max 6
-  steps.push(message);
-  if (steps.length > 6) steps.shift();
-
-  updateStepsDisplay();
+  currentExpression = result.toString();
+  updateResult();
 }
 
 function updateStepsDisplay() {
