@@ -1358,6 +1358,53 @@ border-radius:15px;">
                           </div>
                         </div>
                         <!-- END Probability Calculator Section -->
+
+                        <!-- BMI CALCULATOR SECTION -->
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingBMI">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                              type="button" data-bs-toggle="collapse" data-bs-target="#collapseBMI"
+                              aria-expanded="false" aria-controls="collapseBMI">
+                              <span>⚖️ BMI Calculator</span>
+                            </button>
+                          </h2>
+                          <div id="collapseBMI" class="accordion-collapse collapse"
+                            aria-labelledby="headingBMI" data-bs-parent="#converterAccordion">
+                            <div class="accordion-body">
+                              <p class="text-muted small mb-3">Calculate your Body Mass Index (BMI)</p>
+
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Weight (kg)</label>
+                                <input type="number" class="form-control form-control-sm" id="bmi-weight"
+                                  placeholder="e.g., 70" step="0.1" min="1">
+                              </div>
+
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Height (cm)</label>
+                                <input type="number" class="form-control form-control-sm" id="bmi-height"
+                                  placeholder="e.g., 175" step="0.1" min="1">
+                              </div>
+
+                              <!-- Calculate Button -->
+                              <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-primary btn-sm" onclick="calculateBMI()">
+                                  Calculate BMI
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="clearBMICalculator()">
+                                  Clear
+                                </button>
+                              </div>
+
+                              <!-- Result Display -->
+                              <div id="bmi-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
+                                <div class="mb-2"><strong>BMI:</strong> <span id="bmi-value"></span></div>
+                                <div class="mb-2"><strong>Category:</strong> <span id="bmi-category"></span></div>
+                                <div><strong>Health Note:</strong> <span id="bmi-note" style="font-style: italic;"></span></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- END BMI Calculator Section -->
                       </div>
                     </div>
                   </div>
