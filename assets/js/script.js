@@ -2262,7 +2262,7 @@ function calculatePercentageChange() {
   document.getElementById("pc-change-value").textContent =
     percentageChange.toFixed(2);
   document.getElementById("pc-absolute-change").textContent =
-    absoluteChange.toFixed(2);
+    Math.abs(absoluteChange).toFixed(2);
   document.getElementById("pc-description").textContent =
     `From ${original} to ${newValue} is ${description}`;
   resultDiv.style.display = "block";
