@@ -1582,6 +1582,147 @@
                               </div>
                             </div>
                             <!-- END GCD & LCM Calculator Section -->
+
+                            <!-- BASE CONVERTER SECTION (Binary, Hex, Octal) -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingBaseConverter">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseBaseConverter"
+                                  aria-expanded="false" aria-controls="collapseBaseConverter">
+                                  <span>💻 Base Converter (Binary • Hex • Octal)</span>
+                                </button>
+                              </h2>
+                              <div id="collapseBaseConverter" class="accordion-collapse collapse"
+                                aria-labelledby="headingBaseConverter" data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Convert between decimal, binary, hexadecimal, and octal bases. Perfect for Computer Science!</p>
+
+                                  <!-- Input Section -->
+                                  <div class="mb-3">
+                                    <label class="form-label small" style="font-weight: 600;">Enter Decimal Number</label>
+                                    <input type="number" class="form-control" id="decimal-input" 
+                                      placeholder="e.g., 255" oninput="convertDecimal()">
+                                  </div>
+
+                                  <!-- Conversion Results -->
+                                  <div class="row mb-3">
+                                    <div class="col-md-6">
+                                      <div class="alert alert-light border py-2 px-3 mb-2">
+                                        <small class="text-muted d-block mb-1"><strong>Binary (Base 2)</strong></small>
+                                        <div id="binary-result" class="font-monospace fw-bold" style="font-size: 0.95rem; word-break: break-all;">0</div>
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <div class="alert alert-light border py-2 px-3 mb-2">
+                                        <small class="text-muted d-block mb-1"><strong>Hexadecimal (Base 16)</strong></small>
+                                        <div id="hex-result" class="font-monospace fw-bold" style="font-size: 0.95rem;">0x0</div>
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <div class="alert alert-light border py-2 px-3 mb-2">
+                                        <small class="text-muted d-block mb-1"><strong>Octal (Base 8)</strong></small>
+                                        <div id="octal-result" class="font-monospace fw-bold" style="font-size: 0.95rem;">0</div>
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <div class="alert alert-light border py-2 px-3 mb-2">
+                                        <small class="text-muted d-block mb-1"><strong>Decimal (Base 10)</strong></small>
+                                        <div id="decimal-result" class="font-monospace fw-bold" style="font-size: 0.95rem;">0</div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Conversion From Other Bases -->
+                                  <hr class="my-3">
+                                  <h6 class="mb-3">Convert From Other Bases to Decimal</h6>
+
+                                  <div class="row mb-2">
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Binary Input</label>
+                                      <input type="text" class="form-control form-control-sm" id="binary-input" 
+                                        placeholder="e.g., 11111111" oninput="convertFromBinary()">
+                                    </div>
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal Result</label>
+                                      <div class="form-control form-control-sm bg-light" id="binary-to-decimal">0</div>
+                                    </div>
+                                  </div>
+
+                                  <div class="row mb-2">
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Hex Input</label>
+                                      <input type="text" class="form-control form-control-sm" id="hex-input" 
+                                        placeholder="e.g., FF" oninput="convertFromHex()">
+                                    </div>
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal Result</label>
+                                      <div class="form-control form-control-sm bg-light" id="hex-to-decimal">0</div>
+                                    </div>
+                                  </div>
+
+                                  <div class="row mb-3">
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Octal Input</label>
+                                      <input type="text" class="form-control form-control-sm" id="octal-input" 
+                                        placeholder="e.g., 377" oninput="convertFromOctal()">
+                                    </div>
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal Result</label>
+                                      <div class="form-control form-control-sm bg-light" id="octal-to-decimal">0</div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Bitwise Operations -->
+                                  <hr class="my-3">
+                                  <h6 class="mb-3">Bitwise Operations</h6>
+                                  <p class="text-muted small mb-2">Perform logical operations on the binary representations</p>
+
+                                  <div class="mb-3">
+                                    <label class="form-label small mb-1" style="font-weight: 600;">First Number</label>
+                                    <input type="number" class="form-control form-control-sm" id="bitwise-num1" 
+                                      placeholder="e.g., 5" value="5">
+                                  </div>
+
+                                  <div class="mb-3">
+                                    <label class="form-label small mb-1" style="font-weight: 600;">Second Number</label>
+                                    <input type="number" class="form-control form-control-sm" id="bitwise-num2" 
+                                      placeholder="e.g., 3" value="3">
+                                  </div>
+
+                                  <div class="row">
+                                    <div class="col-6">
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="bitwiseAND()">AND (&)</button>
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="bitwiseOR()">OR (|)</button>
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="bitwiseXOR()">XOR (^)</button>
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="bitwiseNOT()">NOT (~)</button>
+                                    </div>
+                                    <div class="col-6">
+                                      <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="leftShift()">Left Shift (&lt;&lt;)</button>
+                                      <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="rightShift()">Right Shift (&gt;&gt;)</button>
+                                      <button class="btn btn-outline-secondary btn-sm w-100 mb-2" onclick="clearBitwise()">Clear</button>
+                                    </div>
+                                  </div>
+
+                                  <!-- Bitwise Result Display -->
+                                  <div id="bitwise-result" class="alert alert-info py-2 px-3 mt-3 mb-0" style="display: none;">
+                                    <div class="mb-2"><strong>Operation:</strong> <span id="bitwise-op"></span></div>
+                                    <div class="mb-2"><strong>Result (Decimal):</strong> <span id="bitwise-decimal"></span></div>
+                                    <div><strong>Result (Binary):</strong> <code id="bitwise-binary"></code></div>
+                                  </div>
+
+                                  <!-- Examples -->
+                                  <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                    <strong>📌 Examples:</strong><br>
+                                    • <strong>Decimal 255 =</strong> Binary: 11111111, Hex: FF, Octal: 377<br>
+                                    • <strong>Bitwise AND:</strong> 5 (101) & 3 (011) = 1 (001)<br>
+                                    • <strong>Bitwise OR:</strong> 5 (101) | 3 (011) = 7 (111)<br>
+                                    • <strong>Bitwise XOR:</strong> 5 (101) ^ 3 (011) = 6 (110)
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- END Base Converter Section -->
                           </div>
                         </div>
                       </div>
