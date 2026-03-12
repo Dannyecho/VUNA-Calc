@@ -2323,40 +2323,48 @@ function calculateMatrix() {
 
 function redoCalculation() {
   var calcHistory = localStorage.getItem("calcHistory");
-  var History = JSON.parse(calcHistory);
-
-  var lastIn = History[History.length - 1];
-  console.log(lastIn);
-  if (lastIn) {
-    // Restore the entire calculation with result
-    const tokenizer = /(-?\d*\.?\d+|[()+\-*/%^])/g;
-
-    const match = lastIn.expression.match(tokenizer);
-    console.log(match);
-    if (match) {
-      var left = match[0];
-      var operator = match[1];
-      var right = match[2];
-
-      // Show the full expression first
-      document.getElementById("result").value =
-        match.join("") + "=" + lastIn.answer;
-
-      // Then restore to just the result
-
-      // Disable redo button after use
-      // disableRedo();
-    }
+  if (!calcHistory) return;
+  var History;
+  try { History = JSON.parse(calcHistory); } catch(e) { return; }
+  if (!History || History.length === 0) return;
+  // Cap at last 5 entries; cycle through on repeated presses
+  var maxSteps = Math.min(5, History.length);
+  redoIndex = (redoIndex + 1) % maxSteps;
+  var entry = History[History.length - 1 - redoIndex];
+  if (!entry) return;
+  var displayExpr = entry.expression || "";
+  var displayAnswer = (entry.answer !== undefined && entry.answer !== null) ? entry.answer : "";
+  // Show full expression = answer (preserves sin/cos/tan/sqrt/! etc.)
+  var resultDisplay = document.getElementById("result");
+  if (resultDisplay) {
+    resultDisplay.value = displayAnswer !== "" ? displayExpr + " = " + displayAnswer : displayExpr;
   }
+  // Update the English word display area
+  if (entry.words) {
+    var wordResult = document.getElementById("word-result");
+    var wordArea = document.getElementById("word-area");
+    if (wordResult) wordResult.innerHTML = entry.words;
+    if (wordArea) wordArea.style.display = "flex";
+  }
+  // Update button label with current step indicator
+  var redoBtn = document.getElementById("redoBtn");
 }
+
+// Reset redo pointer when a new calculation is made
+function resetRedoIndex() {
+  redoIndex = -1;
+  var redoBtn = document.getElementById("redoBtn");
+  if (redoBtn) redoBtn.value = "↻ REDO";
+}
+
 function enableRedo() {
   const redoBtn = document.getElementById("redoBtn");
-  redoBtn.disabled = false;
+  if (redoBtn) redoBtn.disabled = false;
 }
 
 function disableRedo() {
   const redoBtn = document.getElementById("redoBtn");
-  redoBtn.disabled = true;
+  if (redoBtn) redoBtn.disabled = true;
 }
 
 // ============================================

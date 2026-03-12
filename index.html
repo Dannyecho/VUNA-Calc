@@ -641,54 +641,55 @@
 
                   <div class="btn-grid">
                     <!-- Row 1 -->
+                    <button class="btn btn-info" onclick="redoCalculation()" id="redoBtn">↻ REDO</button>
                     <button class="btn btn-light" onclick="bracketToResult('(')">(</button>
                     <button class="btn btn-light" onclick="bracketToResult(')')">)</button>
                     <button class="btn btn-light" onclick="backspace()">←</button>
-                    <button class="btn btn-action" onclick="clearResult()">AC</button>
-
+                    
                     <!-- Row trig -->
+                    <button class="btn btn-action" onclick="clearResult()">AC</button>
                     <button id="sin-btn" class="btn btn-light" onclick="trigButtonPressed('sin')">sin</button>
                     <button id="cos-btn" class="btn btn-light" onclick="trigButtonPressed('cos')">cos</button>
                     <button id="tan-btn" class="btn btn-light" onclick="trigButtonPressed('tan')">tan</button>
-                    <button id="" class="btn btn-operator" onclick="toggleInverseMode()">2nd</button>
-
+                    
                     <!-- Row 2 -->
+                    <button id="" class="btn btn-operator" onclick="toggleInverseMode()">2nd</button>
                     <button class="btn btn-light" onclick="appendToResult(7)">7</button>
                     <button class="btn btn-light" onclick="appendToResult(8)">8</button>
                     <button class="btn btn-light" onclick="appendToResult(9)">9</button>
-                    <button class="btn btn-operator" onclick="operatorToResult('/')">÷</button>
-
+                    
                     <!-- Row 3 -->
+                    <button class="btn btn-operator" onclick="operatorToResult('/')">÷</button>
                     <button class="btn btn-light" onclick="appendToResult(4)">4</button>
                     <button class="btn btn-light" onclick="appendToResult(5)">5</button>
                     <button class="btn btn-light" onclick="appendToResult(6)">6</button>
-                    <button class="btn btn-operator" onclick="operatorToResult('*')">×</button>
-
+                    
                     <!-- Row 4 -->
+                    <button class="btn btn-operator" onclick="operatorToResult('*')">×</button>
                     <button class="btn btn-light" onclick="appendToResult(1)">1</button>
                     <button class="btn btn-light" onclick="appendToResult(2)">2</button>
                     <button class="btn btn-light" onclick="appendToResult(3)">3</button>
-                    <button class="btn btn-operator" onclick="operatorToResult('+')">+</button>
-
+                    
                     <!-- Row 5 -->
+                    <button class="btn btn-operator" onclick="operatorToResult('+')">+</button>
                     <button class="btn btn-light" onclick="appendToResult('.')">.</button>
                     <button class="btn btn-light" onclick="appendToResult(0)">0</button>
                     <button class="btn btn-operator" onclick="operatorToResult('-')">−</button>
-                    <button class="btn btn-operator" onclick="percentToResult('%')">%</button>
-
+                    
                     <!-- Row 6 -->
+                    <button class="btn btn-operator" onclick="percentToResult('%')">%</button>
                     <button class="btn btn-special" onclick="operatorToResult('^')">x^y</button>
                     <button class="btn btn-special" onclick="checkPrime()">Prime?</button>
                     <button class="btn btn-power btn-special" onclick="calculateSquare()">x²</button>
                     <button class="btn btn-power btn-special" onclick="calculateCube()">x³</button>
                     <button class="btn btn-special" onclick="cubeRootResult()">∛x</button>
-                    <button class="btn btn-special" onclick="calculateReciprocal()" title="Reciprocal: 1/x">1/x</button>
-
+                    
                     <!-- Row 7 -->
+                    <button class="btn btn-special" onclick="calculateReciprocal()" title="Reciprocal: 1/x">1/x</button>
                     <button class="btn btn-special" onclick="calculateSquareRoot()">√</button>
-                    <button class="btn btn-action" onclick="factors()" stylex="grid-column: span 2;">Factors</button>
-
+                    
                     <!-- Row 7 - Permutation & Combination -->
+                    <button class="btn btn-action" onclick="factors()" stylex="grid-column: span 2;">Factors</button>
                     <button class="btn btn-special" onclick="calculatePermutation()"
                       title="Permutation: nPr = n!/(n-r)!">nPr</button>
                     <button class="btn btn-special" onclick="calculateCombination()"
@@ -721,7 +722,6 @@
                     <button class="btn btn-operator" onclick="convertToHex()">HEX</button>
                     <button class="btn btn-operator" onclick="openGeometry()">📐 Geo</button>
                     <!-- Row 9 -->
-                    <button class="btn btn-info" onclick="redoCalculation()" id="redoBtn">↻ REDO</button>
                     <button class="btn btn-equals" onclick="calculateResult()" stylex="grid-column: span 3;">=</button>
                   </div>
 
