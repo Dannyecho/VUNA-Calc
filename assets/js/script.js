@@ -3275,12 +3275,12 @@ function clearStatistics() {
 // ------------------------------
 let currentDP = 2;
 
-document.getElementById('dpMainBtn').addEventListener('click', function(e) {
-  e.stopPropagation();
-  const menu = document.getElementById('dpDropdownMenu');
-  const isOpen = menu.style.display === 'block';
-  menu.style.display = isOpen ? 'none' : 'block';
-});
+// document.getElementById('dpMainBtn').addEventListener('click', function(e) {
+//   e.stopPropagation();
+//   const menu = document.getElementById('dpDropdownMenu');
+//   const isOpen = menu.style.display === 'block';
+//   menu.style.display = isOpen ? 'none' : 'block';
+// });
 
 function setDP(dp) {
   currentDP = dp;
@@ -3462,6 +3462,46 @@ function clearGCDLCM() {
   document.getElementById('gcd-num1').value = '';
   document.getElementById('gcd-num2').value = '';
   document.getElementById('gcd-lcm-result').style.display = 'none';
+}
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("pi-btn").addEventListener("click", appendPi);
+});
+function appendPi() {
+  const piDisplay = "π";      // what the user sees
+  const piEval = "Math.PI";   // what eval() will use
+
+  // Reference to your display input
+  const displayEl = document.getElementById("result");
+
+  // Determine last character in the display
+  const lastChar = displayEl.value.slice(-1);
+
+  // If display is empty or ends with an operator → just append π
+  if ( /[+\-×*/^]$/.test(lastChar)) {
+    currentExpression += piEval;
+    displayEl.value += piDisplay;
+  } 
+  else if (!displayEl.value){
+    currentExpression = piEval;
+    displayEl.value += piDisplay;
+  }
+  else {
+    // Otherwise assume multiplication between number and π
+    currentExpression += "*" + piEval;
+    displayEl.value += "×" + piDisplay;
+  }
+
+  // Optional: update word-area preview if you have it
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+
+  if (wordResult && wordArea) {
+    wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + numberToWords(Math.PI) + '</strong>';
+    wordArea.style.display = "flex";
+  }
 }
 
 // ===============================
@@ -3657,4 +3697,5 @@ function clearBitwise() {
   document.getElementById('bitwise-num2').value = '3';
   document.getElementById('bitwise-result').style.display = 'none';
 }
+
 
