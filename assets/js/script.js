@@ -604,17 +604,17 @@ function convertToHex() {
 }
 
 function applyLogarithm() {
-  if (left.length === 0) return;
+  if (currentExpression.length === 0) return;
 
-  const num = parseFloat(left);
+  const num = parseFloat(currentExpression);
   if (num <= 0) {
-    left = "Error";
+    currentExpression = "Error";
   } else {
     const result = Math.log10(num);
     if (steps.length < MAX_STEPS) {
       steps.push(`Step ${steps.length + 1}: log10(${num}) = ${result}`);
     }
-    left = result.toString();
+    currentExpression = result.toString();
   }
 
   right = "";
