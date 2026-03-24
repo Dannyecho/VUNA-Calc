@@ -1,919 +1,1066 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calculator</title>
+  <title>VUNA Calculator</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="vuna.css" />
+  <script src="/assets/js/script.js"></script>
   <style>
-    :root {
-      --primary-color: #0d6efd;
-      --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      --card-bg: rgba(255, 255, 255, 0.9);
-      --btn-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      --btn-hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    body {
-      background: var(--bg-gradient);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    .calculator-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 24px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      transition: transform 0.3s ease;
-    }
-
-    .calculator-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .display-container {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 16px;
-      margin-bottom: 20px;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-      height: 100px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-    }
-
-    #result {
-      text-align: right;
-      font-size: 38px;
-      font-weight: 600;
-      height: auto;
-      border: none;
-      background: transparent;
-      padding: 0;
-      color: #212529;
-      box-shadow: none;
-      width: 100%;
-    }
-
-    .word-display-area {
-      margin-top: 15px;
-      background: rgba(255, 255, 255, 0.6);
-      border-radius: 16px;
-      padding: 12px 18px;
-      border: 1px dashed rgba(13, 110, 253, 0.2);
-      display: none;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-      animation: slideUp 0.3s ease-out;
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    #word-result {
-      font-size: 14px;
-      color: #495057;
-      font-weight: 400;
-      line-height: 1.4;
-      word-wrap: break-word;
-      flex-grow: 1;
-    }
-
-    #word-result strong {
-      color: var(--primary-color);
-      font-weight: 600;
-    }
-
-    .small-label {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #adb5bd;
-      font-weight: 700;
-      display: block;
-      margin-bottom: 2px;
-    }
-
-    #speak-btn {
-      background: var(--primary-color);
-      border: none;
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      flex-shrink: 0;
-      box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
-    }
-
-    #speak-btn:hover:not(:disabled) {
-      transform: scale(1.05);
-      background: #0b5ed7;
-    }
-
-    #speak-btn:disabled {
-      background: #e9ecef;
-      color: #adb5bd;
-      box-shadow: none;
-    }
-
-    #speak-btn.speaking {
-      background: #fa5252;
-      animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-      0% {
-        box-shadow: 0 0 0 0 rgba(250, 82, 82, 0.4);
-      }
-
-      70% {
-        box-shadow: 0 0 0 10px rgba(250, 82, 82, 0);
-      }
-
-      100% {
-        box-shadow: 0 0 0 0 rgba(250, 82, 82, 0);
-      }
-    }
-
-    .btn-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
-
-    .calculator .btn {
-      height: 60px;
-      border-radius: 14px;
-      font-size: 18px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      border: none;
-      box-shadow: var(--btn-shadow);
-    }
-
-    .calculator .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--btn-hover-shadow);
-    }
-
-    .calculator .btn:active {
-      transform: translateY(0);
-    }
-
-    .btn-light {
-      background: #ffffff;
-      color: #495057;
-    }
-
-    .btn-light:hover {
-      background: #f1f3f5;
-    }
-
-    .btn-operator {
-      background: #e7f1ff;
-      color: var(--primary-color);
-    }
-
-    .btn-operator:hover {
-      background: #cfe2ff;
-    }
-
-    .btn-action {
-      background: #fff5f5;
-      color: #fa5252;
-    }
-
-    .btn-action:hover {
-      background: #ffe3e3;
-    }
-
-    .btn-equals {
-      background: var(--primary-color);
-      color: white;
-      grid-column: span 1;
-    }
-
-    .btn-equals:hover {
-      background: #0b5ed7;
-      color: white;
-    }
-
-    .btn-special {
-      background: #e7f6ed;
-      color: #198754;
-      font-size: 16px;
-    }
-
-    .btn-special:hover {
-      background: #d1f0dd;
-    }
-
-    .group-header {
-      color: #495057;
-      font-weight: 700;
-      letter-spacing: 2px;
-      margin-bottom: 20px;
-      text-transform: uppercase;
-      font-size: 1.2rem;
-    }
-
-    .theme-toggle-btn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1000;
-    }
-
-    body.dark-mode {
-      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-      color: #e0e0e0;
-    }
-
-    body.dark-mode .calculator-card {
-      background: rgba(45, 45, 45, 0.9);
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    body.dark-mode .display-container {
-      background: #333333;
-      color: #e0e0e0;
-    }
-
-    body.dark-mode #result {
-      color: #e0e0e0;
-    }
-
-    body.dark-mode .btn-light {
-      background: #444444;
-      color: #e0e0e0;
-    }
-
-    body.dark-mode .btn-light:hover {
-      background: #555555;
-    }
-
-    body.dark-mode .accordion-button {
-      background-color: #444444;
-      color: #e0e0e0;
-    }
-
-    body.dark-mode .accordion-button:not(.collapsed) {
-      background-color: #555555;
-      color: #e0e0e0;
-    }
-
-    body.dark-mode .form-control,
-    body.dark-mode .form-select {
-      background-color: #444444;
-      color: #e0e0e0;
-      border-color: #555555;
-    }
-
-    body.dark-mode .form-control:focus,
-    body.dark-mode .form-select:focus {
-      background-color: #555555;
-      color: #e0e0e0;
-      border-color: #0d6efd;
-    }
-
-    #hausa-btn {
-      background: #198754;
-      border: none;
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
-    }
-
-    #hausa-btn:hover:not(:disabled) {
-      background: #157347;
-      transform: scale(1.05);
-    }
-
-    #hausa-btn:disabled {
-      background: #e9ecef;
-      color: #adb5bd;
-      box-shadow: none;
-    }
-
-    #english-btn {
-      background: #0d6efd;
-      border: none;
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    #portuguese-btn {
-      background: #dc3545;
-      border: none;
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
-    }
-
-    #portuguese-btn:hover:not(:disabled) {
-      background: #bb2d3b;
-      transform: scale(1.05);
-    }
-
-    #portuguese-btn:disabled {
-      background: #e9ecef;
-      color: #adb5bd;
-      box-shadow: none;
-    }
-
-    #history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    .history-item {
-      background: rgba(255, 255, 255, 0.85);
-      border-radius: 12px;
-      padding: 12px 16px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.5s ease;
-      opacity: 0;
-    }
-
-    .history-item.show {
-      opacity: 1;
-    }
-
-    .history-item:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
-    }
-
-    .history-item-expression {
-      font-weight: 600;
-      color: #212529;
-      font-size: 16px;
-    }
-
-    .history-item-words {
-      font-style: italic;
-      color: #495057;
-      font-size: 14px;
-      margin-top: 4px;
-    }
-
-    .history-item-time {
-      font-size: 12px;
-      color: #6c757d;
-      margin-top: 2px;
-      text-align: right;
-    }
-
-    #clear-history-btn {
-      text-align: center;
-      font-size: 14px;
-      font-weight: 600;
-      color: white;
-      background: var(--primary-color);
-      border: none;
-      border-radius: 12px;
-      padding: 6px 0;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease;
-    }
-
-    #clear-history-btn:hover {
-      background: #0b5ed7;
-      transform: translateY(-2px);
-    }
-
-    #clear-history-btn:active {
-      transform: translateY(0);
-    }
-
-    .history-actions {
-      display: none;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .history-item:hover .history-actions {
-      display: flex;
-    }
-
-    .history-action-btn {
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-delete {
-      background: #ffe3e3;
-      color: #fa5252;
-    }
-
-    .btn-delete:hover {
-      background: #ffc9c9;
-    }
-
-    .btn-remark {
-      background: #e7f1ff;
-      color: #0d6efd;
-    }
-
-    .btn-remark:hover {
-      background: #cfe2ff;
-    }
-
-    .remark-box {
-      margin-top: 8px;
-      display: flex;
-      gap: 6px;
-    }
-
-    .remark-box input {
-      flex: 1;
-      border-radius: 12px;
-      border: 1px solid #ced4da;
-      padding: 4px 10px;
-      font-size: 12px;
-    }
-
-    .remark-text {
-      font-size: 13px;
-      color: #6c757d;
-      font-style: italic;
-      margin-top: 4px;
-    }
-
-    #scroll-to-calculator {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 46px;
-      height: 46px;
-      border-radius: 14px;
-      background: rgba(13, 110, 253, 0.15);
-      color: var(--primary-color);
-      border: none;
-      font-size: 22px;
-      font-weight: 700;
-      cursor: pointer;
-      opacity: 0.15;
-      transform: translateY(10px);
-      pointer-events: none;
-      transition: all 0.3s ease;
-      box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
-      backdrop-filter: blur(6px);
-      z-index: 999;
-    }
-
-    body:hover #scroll-to-calculator {
-      opacity: 0.6;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-
-    #scroll-to-calculator:hover {
-      opacity: 1;
-      background: var(--primary-color);
-      color: white;
-      transform: scale(1.05);
-    }
-
-    #answer-preview {
-      padding: 0 16px;
-      border-radius: 16px;
-      background: #1d1d1e !important;
-      display: block;
-      font-size: 1.2rem;
-      color: #ffffff;
-      font-style: italic;
-      letter-spacing: 0.02em;
-      transition: opacity 0.2s ease;
-    }
-
-    #answer-preview:empty {
-      opacity: 0;
-    }
+
+/* ── Google Font ── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@400;600;700;800&display=swap');
+
+/* ── CSS Variables ── */
+:root {
+  --primary:    #0d6efd;
+  --primary-dk: #0b5ed7;
+  --shift:      #e6a817;
+  --alpha:      #28a745;
+  --hyp:        #9b59b6;
+  --trig:       #17a2b8;
+  --danger:     #fa5252;
+  --success:    #198754;
+  --bg:         linear-gradient(135deg, #eef2f7 0%, #cdd8ea 100%);
+  --card-bg:    rgba(255,255,255,0.96);
+  --shadow-sm:  0 2px 6px rgba(0,0,0,0.06);
+  --shadow-md:  0 6px 18px rgba(0,0,0,0.10);
+  --shadow-lg:  0 16px 40px rgba(0,0,0,0.13);
+  --radius:     14px;
+  --gap:        9px;
+  --font:       'Nunito', sans-serif;
+  --mono:       'DM Mono', monospace;
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  min-height: 100vh;
+  font-family: var(--font);
+  color: #2c3e50;
+  padding-bottom: 40px;
+}
+
+/* ── Page wrapper ── */
+.page-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 20px 0;
+}
+
+/* ── Header ── */
+.calc-header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+.calc-title {
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: #1a2744;
+  margin: 0;
+}
+.calc-subtitle {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin: 4px 0 0;
+  font-style: italic;
+}
+
+/* ── Two-column layout ── */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 22px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .main-layout { grid-template-columns: 1fr; }
+}
+
+/* ── Calculator card ── */
+.calculator-card {
+  background: var(--card-bg);
+  border-radius: 22px;
+  box-shadow: var(--shadow-lg);
+  padding: 22px;
+  border: 1px solid rgba(255,255,255,0.5);
+}
+
+/* ── Display ── */
+.display-box {
+  background: #1a1f2e;
+  border-radius: 16px;
+  padding: 14px 18px 12px;
+  margin-bottom: 10px;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+}
+.mode-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 22px;
+  margin-bottom: 4px;
+}
+.badge-pill {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: #fff;
+  text-transform: uppercase;
+}
+.badge-shift { background: var(--shift); }
+.badge-alpha { background: var(--alpha); }
+.badge-hyp   { background: var(--hyp); }
+.angle-display {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #8a9bc4;
+  font-family: var(--mono);
+}
+.display-input {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #e8eaf6;
+  font-size: 2.4rem;
+  font-weight: 500;
+  text-align: right;
+  font-family: var(--mono);
+  padding: 0;
+  width: 100%;
+  flex: 1;
+}
+.display-input:disabled { opacity: 1; }
+
+.answer-preview {
+  font-size: 0.8rem;
+  font-family: var(--mono);
+  color: #4a5568;
+  text-align: right;
+  min-height: 18px;
+  margin-top: 2px;
+  background: #111827;
+  border-radius: 8px;
+  padding: 3px 10px;
+  font-style: italic;
+}
+.answer-preview:empty { display: none; }
+
+/* ── Memory indicator ── */
+.memory-indicator {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(13,110,253,0.1);
+  border-radius: 6px;
+  padding: 2px 8px;
+  visibility: hidden;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+/* ── Word result area ── */
+.word-area {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  background: rgba(13,110,253,0.04);
+  border: 1px dashed rgba(13,110,253,0.18);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.word-text {
+  flex: 1;
+  font-size: 13px;
+  color: #3d4b6b;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+.word-text .small-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #adb5bd;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 2px;
+}
+.word-text strong { color: var(--primary); font-weight: 700; }
+.word-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+
+.lang-btn {
+  border: none; border-radius: 8px;
+  width: 36px; height: 36px;
+  font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+  color: #fff;
+}
+.lang-btn.hausa      { background: var(--success); }
+.lang-btn.hausa:hover { background: #157347; }
+.lang-btn.english    { background: var(--primary); }
+.lang-btn.english:hover { background: var(--primary-dk); }
+.lang-btn.portuguese { background: #dc3545; }
+.lang-btn.portuguese:hover { background: #bb2d3b; }
+
+.speak-btn {
+  background: var(--primary); border: none; color: #fff;
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 3px 8px rgba(13,110,253,0.25);
+}
+.speak-btn:hover:not(:disabled) { background: var(--primary-dk); transform: scale(1.05); }
+.speak-btn:disabled { background: #e9ecef; color: #adb5bd; box-shadow: none; cursor: not-allowed; }
+.speak-btn.speaking { background: var(--danger); animation: pulse 1s infinite; }
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(250,82,82,0.4); }
+  70%  { box-shadow: 0 0 0 10px rgba(250,82,82,0); }
+  100% { box-shadow: 0 0 0 0   rgba(250,82,82,0); }
+}
+
+/* ── Diff panel ── */
+.diff-panel {
+  background: #f4f6fb;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.diff-label { font-size: 13px; font-weight: 700; color: var(--primary); white-space: nowrap; font-family: var(--mono); }
+.diff-input { flex: 1; min-width: 120px; border-radius: 10px; border: 1px solid #dee2e6; padding: 6px 10px; font-size: 13px; }
+.diff-btn { background: var(--primary); color: #fff; border: none; border-radius: 10px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.diff-btn:hover { background: var(--primary-dk); }
+.diff-output { width: 100%; font-size: 13px; color: #3d4b6b; font-family: var(--mono); word-break: break-word; }
+
+/* ═══════════════════════════════════════════════════════════
+   MODE BAR (SHIFT / ALPHA / HYP / n/d / π / e / ANS / DEG / RAD)
+═══════════════════════════════════════════════════════════ */
+.mode-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(0,0,0,0.03);
+  border-radius: 14px;
+  margin-bottom: 10px;
+}
+.mbar-btn {
+  height: 38px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0 11px;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-sm);
+}
+.mbar-btn:hover   { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.mbar-btn:active  { transform: translateY(0); }
+
+.shift-btn  { background: #fff8e6; color: var(--shift);   border-color: var(--shift); }
+.shift-btn.active { background: var(--shift) !important; color: #fff !important; box-shadow: 0 0 12px rgba(230,168,23,0.45); }
+
+.alpha-btn  { background: #eafaf1; color: var(--alpha);   border-color: var(--alpha); }
+.alpha-btn.active { background: var(--alpha) !important; color: #fff !important; box-shadow: 0 0 12px rgba(40,167,69,0.45); }
+
+.hyp-btn    { background: #f3e8ff; color: var(--hyp);     border-color: var(--hyp); }
+.hyp-btn.active   { background: var(--hyp) !important;   color: #fff !important; box-shadow: 0 0 12px rgba(155,89,182,0.45); }
+
+.frac-btn   { background: #e8f8f9; color: var(--trig);    border-color: var(--trig); }
+.frac-btn:hover { background: #d1f2f5; }
+
+.const-btn  { background: #f8f0ff; color: #6f42c1;        border-color: #d0b4f7; font-family: var(--mono); }
+.const-btn:hover { background: #ecdeff; }
+
+.angle-btn  { background: #e9ecef; color: #495057;         border-color: #dee2e6; }
+.angle-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 3px 10px rgba(13,110,253,0.3); }
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTON GRID
+═══════════════════════════════════════════════════════════ */
+.btn-grid {
+  display: grid;
+  gap: var(--gap);
+  margin-bottom: var(--gap);
+}
+
+/* Smart trig row: 4 columns */
+.trig-row {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Main grid: 5 columns */
+.main-grid {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+/* ── Common button base ── */
+.cbtn {
+  height: 54px;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-sm);
+  padding: 0 4px;
+  line-height: 1.15;
+  user-select: none;
+}
+.cbtn:hover  { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.cbtn:active { transform: translateY(0); box-shadow: var(--shadow-sm); }
+
+/* Button colour variants */
+.btn-light-c   { background: #ffffff; color: #3d4b6b; }
+.btn-light-c:hover { background: #f4f6fb; }
+
+.btn-op-c      { background: #e7f1ff; color: var(--primary); }
+.btn-op-c:hover { background: #cfe2ff; }
+
+.btn-danger-c  { background: #fff0f0; color: var(--danger); }
+.btn-danger-c:hover { background: #ffe0e0; }
+
+.btn-equals-c  { background: var(--primary); color: #fff; font-size: 20px; }
+.btn-equals-c:hover { background: var(--primary-dk); }
+
+.btn-special-c { background: #f0fff4; color: var(--success); }
+.btn-special-c:hover { background: #d8f5e4; }
+
+.btn-mem-c     { background: #fffbf0; color: #b07d00; border: 1px solid #f0d080; }
+.btn-mem-c:hover { background: #fff3d0; }
+
+.btn-info-c    { background: #e8f4fd; color: #0d6efd; }
+.btn-info-c:hover { background: #d0e8fa; }
+
+.btn-trig-c    { background: #e8f8f9; color: var(--trig); font-family: var(--mono); font-size: 14px; }
+.btn-trig-c:hover { background: #d1f2f5; }
+
+.btn-empty     { background: transparent; box-shadow: none; cursor: default; }
+.btn-empty:hover { transform: none; box-shadow: none; }
+
+/* Smart trig cell */
+.trig-btn {
+  background: #e8f8f9;
+  color: var(--trig);
+}
+.trig-btn:hover { background: #d1f2f5; }
+
+.btn-sublabel {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--shift);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: block;
+  line-height: 1;
+}
+.btn-mainlabel {
+  font-size: 16px;
+  font-weight: 700;
+  display: block;
+  font-family: var(--mono);
+}
+
+/* Trig hint cell */
+.trig-hint {
+  height: 54px;
+  border-radius: var(--radius);
+  background: rgba(0,0,0,0.03);
+  font-size: 9px;
+  color: #adb5bd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4px;
+  line-height: 1.35;
+}
+
+/* dp dropdown */
+.dp-wrap { padding: 0; overflow: visible; }
+.dp-main-btn { width: 100%; height: 100%; background: transparent; border: none; font-weight: 700; font-size: 13px; color: var(--success); cursor: pointer; }
+.dp-menu { list-style: none; padding: 4px 0; margin: 0; position: absolute; top: 100%; left: 0; z-index: 999; background: #fff; border-radius: 10px; box-shadow: var(--shadow-md); min-width: 80px; }
+.dp-menu li a { display: block; padding: 6px 14px; font-size: 13px; font-weight: 600; color: var(--success); text-decoration: none; }
+.dp-menu li a:hover { background: #f0fff4; }
+
+/* ═══════════════════════════════════════════════════════════
+   HISTORY PANEL
+═══════════════════════════════════════════════════════════ */
+.history-panel { position: sticky; top: 20px; }
+.history-card { background: rgba(255,255,255,0.9); border-radius: 18px; box-shadow: var(--shadow-md); overflow: hidden; }
+.history-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; border-bottom: 1px solid #f0f0f0; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: #6c757d; text-transform: uppercase; }
+.clear-hist-btn { background: none; border: none; color: var(--danger); font-size: 12px; font-weight: 700; cursor: pointer; }
+.clear-hist-btn:hover { text-decoration: underline; }
+
+#history-list { padding: 10px; display: flex; flex-direction: column; gap: 8px; max-height: 70vh; overflow-y: auto; }
+
+.history-item { background: #fff; border-radius: 12px; padding: 10px 14px; box-shadow: var(--shadow-sm); cursor: pointer; transition: all 0.2s; opacity: 0; border-left: 3px solid var(--primary); }
+.history-item.show { opacity: 1; }
+.history-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.history-item-expression { font-weight: 700; color: #1a2744; font-size: 15px; }
+.history-item-words { font-style: italic; color: #6c757d; font-size: 12px; margin-top: 2px; }
+.history-item-time { font-size: 11px; color: #adb5bd; text-align: right; margin-top: 4px; }
+.remark-text { font-size: 12px; color: #6c757d; font-style: italic; margin-top: 3px; }
+
+.history-actions { display: none; gap: 6px; margin-top: 6px; }
+.history-item:hover .history-actions { display: flex; }
+.history-action-btn { font-size: 11px; padding: 3px 8px; border-radius: 20px; border: none; cursor: pointer; transition: all 0.15s; }
+.btn-delete { background: #ffe3e3; color: var(--danger); }
+.btn-delete:hover { background: #ffc9c9; }
+.btn-remark { background: #e7f1ff; color: var(--primary); }
+.btn-remark:hover { background: #cfe2ff; }
+
+.remark-box { margin-top: 6px; display: flex; gap: 4px; }
+.remark-box input { flex: 1; border-radius: 10px; border: 1px solid #dee2e6; padding: 3px 8px; font-size: 12px; }
+
+/* ═══════════════════════════════════════════════════════════
+   GEOMETRY MODAL
+═══════════════════════════════════════════════════════════ */
+.geo-modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.geo-modal-box {
+  background: #fff; padding: 24px; width: 300px; border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL TO TOP BUTTON
+═══════════════════════════════════════════════════════════ */
+#scroll-to-calculator {
+  position: fixed; bottom: 24px; right: 24px;
+  width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(13,110,253,0.12); color: var(--primary);
+  border: none; font-size: 20px; font-weight: 700;
+  cursor: pointer; opacity: 0.15; transform: translateY(10px);
+  pointer-events: none; transition: all 0.3s ease;
+  box-shadow: var(--shadow-md); backdrop-filter: blur(6px); z-index: 999;
+}
+body:hover #scroll-to-calculator { opacity: 0.6; transform: translateY(0); pointer-events: auto; }
+#scroll-to-calculator:hover { opacity: 1; background: var(--primary); color: #fff; transform: scale(1.05); }
+
+/* ── Theme toggle ── */
+.theme-toggle-btn { position: fixed; top: 18px; right: 18px; z-index: 1000; border-radius: 12px; }
+
+/* ═══════════════════════════════════════════════════════════
+   DARK MODE
+═══════════════════════════════════════════════════════════ */
+body.dark-mode {
+  background: linear-gradient(135deg, #0f1117 0%, #1a2035 100%);
+  color: #d0d8e8;
+}
+body.dark-mode .calculator-card { background: rgba(30,38,55,0.97); }
+body.dark-mode .display-box { background: #0a0e1a; }
+body.dark-mode .display-input { color: #c8d5f0; }
+body.dark-mode .answer-preview { background: #050810; color: #3a5080; }
+body.dark-mode .mode-bar { background: rgba(255,255,255,0.04); }
+body.dark-mode .diff-panel { background: #1a2035; }
+body.dark-mode .diff-input { background: #0f1425; color: #c8d5f0; border-color: #2a3a55; }
+body.dark-mode .word-area { background: rgba(13,110,253,0.08); border-color: rgba(13,110,253,0.2); }
+body.dark-mode .word-text { color: #9ab0d0; }
+
+body.dark-mode .cbtn { box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+body.dark-mode .btn-light-c  { background: #1e2a40; color: #c8d5f0; }
+body.dark-mode .btn-light-c:hover { background: #253347; }
+body.dark-mode .btn-op-c     { background: #132040; color: #6ea8fe; }
+body.dark-mode .btn-op-c:hover { background: #1a2d55; }
+body.dark-mode .btn-danger-c { background: #2d1a1a; color: #ff7070; }
+body.dark-mode .btn-special-c { background: #0f2018; color: #5dd08f; }
+body.dark-mode .btn-mem-c    { background: #2a2010; color: #d4a030; border-color: #4a3810; }
+body.dark-mode .btn-info-c   { background: #0f1e38; color: #6ea8fe; }
+body.dark-mode .btn-trig-c   { background: #0f2028; color: #3dd4e0; }
+body.dark-mode .trig-btn     { background: #0f2028; color: #3dd4e0; }
+body.dark-mode .trig-hint    { background: rgba(255,255,255,0.04); }
+body.dark-mode .btn-equals-c { background: #1a4fd6; }
+
+body.dark-mode .history-card { background: rgba(25,32,50,0.97); }
+body.dark-mode .history-header { border-color: #1e2a40; color: #4a6080; }
+body.dark-mode .history-item { background: #1a2235; border-color: #2a5fd6; }
+body.dark-mode .history-item-expression { color: #c8d5f0; }
+
+body.dark-mode .accordion-button { background: #1a2035; color: #c8d5f0; }
+body.dark-mode .accordion-button:not(.collapsed) { background: #1e2845; color: #c8d5f0; }
+body.dark-mode .accordion-item { background: #151d30; border-color: #1e2845; }
+body.dark-mode .accordion-body { background: #151d30; color: #a0b0cc; }
+body.dark-mode .form-control,
+body.dark-mode .form-select { background: #1a2035; color: #c8d5f0; border-color: #2a3a55; }
+body.dark-mode .input-group-text { background: #1e2845; color: #7090b0; border-color: #2a3a55; }
+
+body.dark-mode .geo-modal-box { background: #1a2235; color: #c8d5f0; }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 700px) {
+  .main-grid { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .trig-row  { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .cbtn { height: 48px; font-size: 13px; }
+  .display-input { font-size: 1.8rem; }
+  .mode-bar { gap: 4px; }
+  .mbar-btn { height: 34px; font-size: 10px; padding: 0 8px; }
+}
+@media (max-width: 480px) {
+  .page-wrapper { padding: 12px 10px 0; }
+  .calculator-card { padding: 14px; }
+  .main-grid { grid-template-columns: repeat(5, 1fr); gap: 5px; }
+  .cbtn { height: 44px; font-size: 12px; border-radius: 10px; }
+}
   </style>
 </head>
-
 <body>
-  <!-- Theme Toggle Button -->
-  <button class="btn btn-outline-secondary theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()"
-    title="Toggle dark/light mode">
-    🌙
-  </button>
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-10 col-md-10 col-sm-8">
-        <div class="border border-dotted border-3 rounded-3 p-3 mb-4 bg-white bg-opacity-50">
-          <h4 class="text-center group-header mb-0">VUNA CALCULATOR</h4>
-          <p class="text-center text-small text-muted">
-            <i>Created by set 2025/26 Software Engineering</i>
-          </p>
+
+  <button class="theme-toggle-btn btn btn-outline-secondary" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">🌙</button>
+
+  <div class="page-wrapper">
+    <div class="calc-header">
+      <h1 class="calc-title">VUNA CALCULATOR</h1>
+      <p class="calc-subtitle">Created by set 2025/26 Software Engineering</p>
+    </div>
+
+    <div class="main-layout">
+
+      <!-- ══════════════════ LEFT: CALCULATOR ══════════════════ -->
+      <div class="calc-panel">
+        <div class="calculator-card">
+
+          <!-- Display -->
+          <div class="display-box">
+            <div class="mode-badges" id="mode-badges">
+              <span class="badge-pill badge-shift" id="sa-ind-shift" style="display:none;">SHIFT</span>
+              <span class="badge-pill badge-alpha" id="sa-ind-alpha" style="display:none;">ALPHA</span>
+              <span class="badge-pill badge-hyp"   id="sa-ind-hyp"   style="display:none;">HYP</span>
+              <span class="angle-display" id="angle-display">DEG</span>
+            </div>
+            <input type="text" id="result" class="display-input" placeholder="0" disabled />
+            <div id="answer-preview" class="answer-preview"></div>
+          </div>
+
+          <!-- Memory indicator -->
+          <div id="memoryIndicator" class="memory-indicator">M</div>
+
+          <!-- Word result -->
+          <div class="word-area" id="word-area">
+            <div id="word-result" class="word-text"></div>
+            <div class="word-actions">
+              <button id="hausa-btn"      class="lang-btn hausa"    onclick="translateToHausa()">HA</button>
+              <button id="english-btn"    class="lang-btn english"  onclick="backToEnglish()">EN</button>
+              <button id="portuguese-btn" class="lang-btn portuguese" onclick="translateToPortuguese()">PT</button>
+              <button id="speak-btn" class="speak-btn" onclick="speakResult()" disabled title="Speak Result">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/>
+                  <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z"/>
+                  <path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182l-.707.707A3.489 3.489 0 0 1 9.025 8a3.489 3.489 0 0 1-1.025 2.475l.707.707z"/>
+                  <path d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Differentiate panel -->
+          <div class="diff-panel">
+            <span class="diff-label">d/dx</span>
+            <input type="text" class="diff-input" id="diff-input" placeholder="e.g., x^3 + 4x or sin(x)" />
+            <button class="diff-btn" onclick="differentiateExpression()">Differentiate</button>
+            <div id="diff-output" class="diff-output"></div>
+          </div>
+
+          <!-- ── SHIFT / ALPHA / HYP mode bar ── -->
+          <div class="mode-bar">
+            <button class="mbar-btn shift-btn"  id="sa-shift-btn" onclick="saToggleShift()" title="Inverse trig when pressed before sin/cos/tan">SHIFT</button>
+            <button class="mbar-btn alpha-btn"  id="sa-alpha-btn" onclick="saToggleAlpha()" title="Then press π, e or ANS">ALPHA</button>
+            <button class="mbar-btn hyp-btn"    id="sa-hyp-btn"   onclick="saToggleHyp()"   title="Hyperbolic; SHIFT+HYP = inverse hyp">HYP</button>
+            <button class="mbar-btn frac-btn"   onclick="saInsertFraction()" title="Fraction input">n/d</button>
+            <button class="mbar-btn const-btn"  onclick="saAlphaInsert('pi')"  title="Insert π">π</button>
+            <button class="mbar-btn const-btn"  onclick="saAlphaInsert('e')"   title="Insert e">e</button>
+            <button class="mbar-btn const-btn"  onclick="saAlphaInsert('ans')" title="Insert last answer">ANS</button>
+            <button class="mbar-btn angle-btn active" id="sa-deg-btn" onclick="saSetAngle('deg')">DEG</button>
+            <button class="mbar-btn angle-btn"        id="sa-rad-btn" onclick="saSetAngle('rad')">RAD</button>
+          </div>
+
+          <!-- ── Smart trig row (SHIFT/HYP aware) ── -->
+          <div class="btn-grid trig-row">
+            <button class="cbtn trig-btn" id="sa-sin-btn" onclick="saPressSin()">
+              <span class="btn-sublabel">sin⁻¹ / sinh</span>
+              <span class="btn-mainlabel sa-main-label">sin</span>
+            </button>
+            <button class="cbtn trig-btn" id="sa-cos-btn" onclick="saPressCos()">
+              <span class="btn-sublabel">cos⁻¹ / cosh</span>
+              <span class="btn-mainlabel sa-main-label">cos</span>
+            </button>
+            <button class="cbtn trig-btn" id="sa-tan-btn" onclick="saPressTan()">
+              <span class="btn-sublabel">tan⁻¹ / tanh</span>
+              <span class="btn-mainlabel sa-main-label">tan</span>
+            </button>
+            <!-- hint cell -->
+            <div class="trig-hint">SHIFT+trig=inverse<br>HYP+trig=hyperbolic<br>SHIFT+HYP=inv.hyp</div>
+          </div>
+
+          <!-- ── Main button grid ── -->
+          <div class="btn-grid main-grid">
+
+            <!-- Row 1: redo ( ) ← AC -->
+            <button class="cbtn btn-info-c"    onclick="redoCalculation()" id="redoBtn">↻ REDO</button>
+            <button class="cbtn btn-light-c"   onclick="bracketToResult('(')">(</button>
+            <button class="cbtn btn-light-c"   onclick="bracketToResult(')')">)</button>
+            <button class="cbtn btn-light-c"   onclick="backspace()">←</button>
+            <button class="cbtn btn-danger-c"  onclick="clearResult()">AC</button>
+
+            <!-- Row 2: old trig + 2nd -->
+            <button class="cbtn btn-op-c"      onclick="toggleInverseMode()">2nd</button>
+            <button class="cbtn btn-trig-c"    id="sin-btn" onclick="trigButtonPressed('sin')">sin</button>
+            <button class="cbtn btn-trig-c"    id="cos-btn" onclick="trigButtonPressed('cos')">cos</button>
+            <button class="cbtn btn-trig-c"    id="tan-btn" onclick="trigButtonPressed('tan')">tan</button>
+            <button class="cbtn btn-special-c" onclick="applyLogarithm()">log</button>
+
+            <!-- Row 3: 7 8 9 / x^y Prime -->
+            <button class="cbtn btn-light-c"   onclick="appendToResult(7)">7</button>
+            <button class="cbtn btn-light-c"   onclick="appendToResult(8)">8</button>
+            <button class="cbtn btn-light-c"   onclick="appendToResult(9)">9</button>
+            <button class="cbtn btn-op-c"      onclick="operatorToResult('/')">÷</button>
+            <button class="cbtn btn-special-c" onclick="operatorToResult('^')">xʸ</button>
+
+            <!-- Row 4: 4 5 6 * x² x³ -->
+            <button class="cbtn btn-light-c"   onclick="appendToResult(4)">4</button>
+            <button class="cbtn btn-light-c"   onclick="appendToResult(5)">5</button>
+            <button class="cbtn btn-light-c"   onclick="appendToResult(6)">6</button>
+            <button class="cbtn btn-op-c"      onclick="operatorToResult('*')">×</button>
+            <button class="cbtn btn-special-c" onclick="calculateSquare()">x²</button>
+
+            <!-- Row 5: 1 2 3 + x³ √ -->
+            <button class="cbtn btn-light-c"   onclick="appendToResult(1)">1</button>
+            <button class="cbtn btn-light-c"   onclick="appendToResult(2)">2</button>
+            <button class="cbtn btn-light-c"   onclick="appendToResult(3)">3</button>
+            <button class="cbtn btn-op-c"      onclick="operatorToResult('+')">+</button>
+            <button class="cbtn btn-special-c" onclick="calculateCube()">x³</button>
+
+            <!-- Row 6: . 0 - % √ ∛ -->
+            <button class="cbtn btn-light-c"   onclick="appendToResult('.')">.</button>
+            <button class="cbtn btn-light-c"   onclick="appendToResult(0)">0</button>
+            <button class="cbtn btn-op-c"      onclick="operatorToResult('-')">−</button>
+            <button class="cbtn btn-op-c"      onclick="percentToResult('%')">%</button>
+            <button class="cbtn btn-special-c" onclick="calculateSquareRoot()">√x</button>
+
+            <!-- Row 7: Prime 1/x ∛ nPr nCr -->
+            <button class="cbtn btn-special-c" onclick="checkPrime()">Prime?</button>
+            <button class="cbtn btn-special-c" onclick="calculateReciprocal()" title="1/x">1/x</button>
+            <button class="cbtn btn-special-c" onclick="cubeRootResult()">∛x</button>
+            <button class="cbtn btn-special-c" onclick="calculatePermutation()" title="nPr">nPr</button>
+            <button class="cbtn btn-special-c" onclick="calculateCombination()" title="nCr">nCr</button>
+
+            <!-- Row 8: n! Factors 10^x HEX Geo -->
+            <button class="cbtn btn-special-c" onclick="calculateFactorial()" title="n!">n!</button>
+            <button class="cbtn btn-danger-c"  onclick="factors()">Factors</button>
+            <button class="cbtn btn-special-c" onclick="tenPower()">10ˣ</button>
+            <button class="cbtn btn-op-c"      onclick="convertToHex()">HEX</button>
+            <button class="cbtn btn-op-c"      onclick="openGeometry()">📐 Geo</button>
+
+            <!-- Row 9: Memory MC MR M+ M- -->
+            <button class="cbtn btn-mem-c"     onclick="memoryClear()">MC</button>
+            <button class="cbtn btn-mem-c"     onclick="memoryRecall()">MR</button>
+            <button class="cbtn btn-mem-c"     onclick="memoryAdd()">M+</button>
+            <button class="cbtn btn-mem-c"     onclick="memorySubtract()">M−</button>
+            <button class="cbtn btn-special-c" id="voice-input-btn" onclick="startVoiceInput()" aria-label="Voice input">🎙️</button>
+
+            <!-- Row 10: dp DP  =  -->
+            <div class="cbtn btn-special-c dp-wrap" style="position:relative;">
+              <button class="dp-main-btn" id="dpMainBtn" onclick="toggleDpMenu(event)">⌃ <span id="dpLabel">2dp</span> ▾</button>
+              <ul id="dpDropdownMenu" class="dp-menu" style="display:none;">
+                <li><a href="#" onclick="setDP(1);return false;">⌃ 1dp</a></li>
+                <li><a href="#" onclick="setDP(2);return false;">⌃ 2dp</a></li>
+                <li><a href="#" onclick="setDP(3);return false;">⌃ 3dp</a></li>
+              </ul>
+            </div>
+            <!-- empty spacers to keep grid alignment -->
+            <div class="cbtn btn-empty"></div>
+            <div class="cbtn btn-empty"></div>
+            <div class="cbtn btn-empty"></div>
+            <button class="cbtn btn-equals-c" onclick="calculateResult()">=</button>
+
+          </div><!-- end main-grid -->
+
+          <!-- Accordions -->
+          <div class="accordion mt-4" id="converterAccordion">
+
+            <!-- Unit Converter -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConverter">🔄 Unit Converter</button>
+              </h2>
+              <div id="collapseConverter" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <!-- Length -->
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold">Length</label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control" id="length-value" value="1" oninput="convertUnit('length')">
+                      <select class="form-select" id="from-length" onchange="convertUnit('length')"><option value="km">km</option><option value="m">m</option><option value="mile">miles</option><option value="yard">yards</option><option value="ft">feet</option><option value="inch">inches</option></select>
+                      <span class="input-group-text">→</span>
+                      <select class="form-select" id="to-length" onchange="convertUnit('length')"><option value="mile">miles</option><option value="km">km</option><option value="m">m</option><option value="yard">yards</option><option value="ft">feet</option><option value="inch">inches</option></select>
+                      <span class="input-group-text" id="length-result">0</span>
+                    </div>
+                  </div>
+                  <!-- Weight -->
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold">Weight</label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control" id="weight-value" value="1" oninput="convertUnit('weight')">
+                      <select class="form-select" id="from-weight" onchange="convertUnit('weight')"><option value="kg">kg</option><option value="g">g</option><option value="lb">pounds</option><option value="oz">ounces</option></select>
+                      <span class="input-group-text">→</span>
+                      <select class="form-select" id="to-weight" onchange="convertUnit('weight')"><option value="lb">pounds</option><option value="kg">kg</option><option value="g">g</option><option value="oz">ounces</option></select>
+                      <span class="input-group-text" id="weight-result">0</span>
+                    </div>
+                  </div>
+                  <!-- Temperature -->
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold">Temperature</label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control" id="temp-value" value="0" oninput="convertUnit('temperature')">
+                      <select class="form-select" id="from-temp" onchange="convertUnit('temperature')"><option value="C">°C</option><option value="F">°F</option><option value="K">K</option></select>
+                      <span class="input-group-text">→</span>
+                      <select class="form-select" id="to-temp" onchange="convertUnit('temperature')"><option value="F">°F</option><option value="C">°C</option><option value="K">K</option></select>
+                      <span class="input-group-text" id="temp-result">0</span>
+                    </div>
+                  </div>
+                  <!-- Currency -->
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold">Currency</label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control" id="currency-value" value="1" oninput="convertUnit('currency')">
+                      <select class="form-select" id="from-currency" onchange="convertUnit('currency')"><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="JPY">JPY</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="NGN">NGN</option></select>
+                      <span class="input-group-text">→</span>
+                      <select class="form-select" id="to-currency" onchange="convertUnit('currency')"><option value="EUR">EUR</option><option value="USD">USD</option><option value="GBP">GBP</option><option value="JPY">JPY</option><option value="CAD">CAD</option><option value="AUD">AUD</option><option value="NGN">NGN</option></select>
+                      <span class="input-group-text" id="currency-result">0</span>
+                      <button class="btn btn-sm btn-outline-info" onclick="fetchCurrencyRates()" title="Refresh">🔄</button>
+                    </div>
+                    <small class="text-muted" id="currency-timestamp"></small>
+                  </div>
+                  <!-- Area -->
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold">Area</label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control" id="area-value" value="1" oninput="convertUnit('area')">
+                      <select class="form-select" id="from-area" onchange="convertUnit('area')"><option value="sqm">m²</option><option value="sqkm">km²</option><option value="sqmile">mi²</option><option value="sqyard">yd²</option><option value="sqft">ft²</option><option value="sqinch">in²</option><option value="hectare">hectare</option><option value="acre">acre</option></select>
+                      <span class="input-group-text">→</span>
+                      <select class="form-select" id="to-area" onchange="convertUnit('area')"><option value="sqmile">mi²</option><option value="sqm">m²</option><option value="sqkm">km²</option><option value="sqyard">yd²</option><option value="sqft">ft²</option><option value="sqinch">in²</option><option value="hectare">hectare</option><option value="acre">acre</option></select>
+                      <span class="input-group-text" id="area-result">0</span>
+                    </div>
+                  </div>
+                  <!-- Data -->
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold">Data Storage</label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" class="form-control" id="data-value" value="1" oninput="convertUnit('data')">
+                      <select class="form-select" id="from-data" onchange="convertUnit('data')"><option value="bit">bit</option><option value="byte">B</option><option value="kb">KB</option><option value="mb">MB</option><option value="gb">GB</option><option value="tb">TB</option></select>
+                      <span class="input-group-text">→</span>
+                      <select class="form-select" id="to-data" onchange="convertUnit('data')"><option value="B">B</option><option value="bit">bit</option><option value="kb">KB</option><option value="mb">MB</option><option value="gb">GB</option><option value="tb">TB</option></select>
+                      <span class="input-group-text" id="data-result">0</span>
+                    </div>
+                  </div>
+                  <div class="alert alert-info py-2 px-3 mb-0" style="font-size:.85rem;"><strong>Example:</strong> 5 km → <span id="example-result">3.11</span> miles | +10 → <span id="example-add">13.11</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Formula Calculator -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFormula">🎯 Formula Calculator</button>
+              </h2>
+              <div id="collapseFormula" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <select class="form-select mb-2" id="formulaCategory"><option value="">Select Category</option><option value="geometry">Geometry</option><option value="finance">Finance</option><option value="algebra">Algebra</option></select>
+                  <select class="form-select mb-2" id="formulaSelect"><option value="">Select Formula</option></select>
+                  <div id="formulaInputs" class="mb-2"></div>
+                  <button class="btn btn-primary w-100" onclick="calculateFormula()">Calculate</button>
+                  <div id="formula-result"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Physics -->
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePhysics">⚛️ Physics Calculator</button>
+              </h2>
+              <div id="collapsePhysics" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="mb-3"><label class="form-label small fw-bold">Category</label><select class="form-select form-select-sm" id="physics-category" onchange="updatePhysicsFormulas()"><option value="">-- Select --</option><option value="mechanics">Mechanics</option><option value="electricity">Electricity</option><option value="thermodynamics">Thermodynamics</option><option value="waves">Waves</option></select></div>
+                  <div class="mb-3"><label class="form-label small fw-bold">Formula</label><select class="form-select form-select-sm" id="physics-formula" onchange="updatePhysicsInputs()"><option value="">-- Select --</option></select></div>
+                  <div id="physics-inputs-container"></div>
+                  <div class="d-grid gap-2 mb-3"><button class="btn btn-primary btn-sm" onclick="calculatePhysics()">Calculate</button><button class="btn btn-outline-secondary btn-sm" onclick="clearPhysicsCalculator()">Clear</button></div>
+                  <div id="physics-result"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Percentage Change -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePercentageChange">📊 Percentage Change</button></h2>
+              <div id="collapsePercentageChange" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="mb-3"><label class="form-label small fw-bold">Original Value</label><input type="number" class="form-control" id="pc-original" value="100"></div>
+                  <div class="mb-3"><label class="form-label small fw-bold">New Value</label><input type="number" class="form-control" id="pc-new" value="150"></div>
+                  <div class="d-grid gap-2 mb-3"><button class="btn btn-primary btn-sm" onclick="calculatePercentageChange()">Calculate</button><button class="btn btn-outline-secondary btn-sm" onclick="clearPercentageChange()">Clear</button></div>
+                  <div id="pc-result" class="alert alert-info py-2 px-3 mb-0" style="display:none;"><div class="mb-2"><strong>Change:</strong> <span id="pc-change-value">0</span>%</div><div class="mb-2"><strong>Absolute:</strong> <span id="pc-absolute-change">0</span></div><div><strong>Note:</strong> <span id="pc-description" style="font-style:italic;"></span></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quadratic -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuadratic">📐 Quadratic Solver</button></h2>
+              <div id="collapseQuadratic" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="row g-2 mb-3"><div class="col"><label class="form-label small fw-bold">a</label><input type="number" class="form-control" id="quad-a" value="1"></div><div class="col"><label class="form-label small fw-bold">b</label><input type="number" class="form-control" id="quad-b" value="5"></div><div class="col"><label class="form-label small fw-bold">c</label><input type="number" class="form-control" id="quad-c" value="6"></div></div>
+                  <div class="d-grid gap-2 mb-3"><button class="btn btn-primary btn-sm" onclick="solveQuadratic()">Solve</button><button class="btn btn-outline-secondary btn-sm" onclick="clearQuadratic()">Clear</button></div>
+                  <div id="quad-result" class="alert alert-info py-2 px-3 mb-0" style="display:none;"><div class="mb-2"><strong>Roots:</strong> <span id="quad-roots-value"></span></div><div class="mb-2"><strong>Discriminant:</strong> <span id="quad-discriminant"></span></div><div><span id="quad-description" style="font-style:italic;"></span></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cubic -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCubic">📊 Cubic Solver</button></h2>
+              <div id="collapseCubic" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="row g-2 mb-3"><div class="col"><label class="form-label small fw-bold">a</label><input type="number" class="form-control" id="cubic-a" value="1"></div><div class="col"><label class="form-label small fw-bold">b</label><input type="number" class="form-control" id="cubic-b" value="0"></div><div class="col"><label class="form-label small fw-bold">c</label><input type="number" class="form-control" id="cubic-c" value="-7"></div><div class="col"><label class="form-label small fw-bold">d</label><input type="number" class="form-control" id="cubic-d" value="6"></div></div>
+                  <div class="d-grid gap-2 mb-3"><button class="btn btn-primary btn-sm" onclick="solveCubic()">Solve</button><button class="btn btn-outline-secondary btn-sm" onclick="clearCubic()">Clear</button></div>
+                  <div id="cubic-result" class="alert alert-info py-2 px-3 mb-0" style="display:none;"><div class="mb-2"><strong>Roots:</strong> <span id="cubic-roots-value"></span></div><div><span id="cubic-description" style="font-style:italic;"></span></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quartic -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuartic">📈 Quartic Solver</button></h2>
+              <div id="collapseQuartic" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="row g-2 mb-3"><div class="col"><label class="form-label small fw-bold">a</label><input type="number" class="form-control" id="quartic-a" value="1"></div><div class="col"><label class="form-label small fw-bold">b</label><input type="number" class="form-control" id="quartic-b" value="0"></div><div class="col"><label class="form-label small fw-bold">c</label><input type="number" class="form-control" id="quartic-c" value="-13"></div><div class="col"><label class="form-label small fw-bold">d</label><input type="number" class="form-control" id="quartic-d" value="0"></div><div class="col"><label class="form-label small fw-bold">e</label><input type="number" class="form-control" id="quartic-e" value="36"></div></div>
+                  <div class="d-grid gap-2 mb-3"><button class="btn btn-primary btn-sm" onclick="solveQuartic()">Solve</button><button class="btn btn-outline-secondary btn-sm" onclick="clearQuartic()">Clear</button></div>
+                  <div id="quartic-result" class="alert alert-info py-2 px-3 mb-0" style="display:none;"><div class="mb-2"><strong>Roots:</strong> <span id="quartic-roots-value"></span></div><div><span id="quartic-description" style="font-style:italic;"></span></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Simultaneous -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSimultaneous">🔢 Simultaneous Equations</button></h2>
+              <div id="collapseSimultaneous" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="mb-2"><label class="form-label small fw-bold">Equation 1 (e.g. 2x+3y=6)</label><input type="text" class="form-control" id="eq1" placeholder="2x + 3y = 6"></div>
+                  <div class="mb-2"><label class="form-label small fw-bold">Equation 2 (e.g. x-y=1)</label><input type="text" class="form-control" id="eq2" placeholder="x - y = 1"></div>
+                  <button class="btn btn-primary w-100" onclick="solveSimultaneous()">Solve</button>
+                  <div id="sim-result" class="mt-2"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Matrix -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMatrix">🧮 2×2 Matrix Determinant</button></h2>
+              <div id="collapseMatrix" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <p class="text-muted small mb-3">|A| = ad − bc</p>
+                  <div class="row g-2 mb-3"><div class="col-6"><input type="number" id="m11" class="form-control form-control-lg text-center" placeholder="a"></div><div class="col-6"><input type="number" id="m12" class="form-control form-control-lg text-center" placeholder="b"></div><div class="col-6"><input type="number" id="m21" class="form-control form-control-lg text-center" placeholder="c"></div><div class="col-6"><input type="number" id="m22" class="form-control form-control-lg text-center" placeholder="d"></div></div>
+                  <button class="btn btn-primary w-100 mb-3" onclick="calculateMatrix()">Calculate Determinant</button>
+                  <div class="bg-light p-3 rounded-3 text-center"><span class="small d-block mb-1 text-muted text-uppercase" style="letter-spacing:1px;">Determinant</span><h4 class="mb-0 fw-bold" id="matrix-result">0</h4></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Probability -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProbability">🎲 Probability Calculator</button></h2>
+              <div id="collapseProbability" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="mb-3"><label class="form-label small fw-bold">Type</label><select class="form-select form-select-sm" id="probability-type" onchange="updateProbabilityInputs()"><option value="">-- Select --</option><option value="single">Single Event</option><option value="and">P(A and B)</option><option value="or">P(A or B)</option><option value="conditional">Conditional P(A|B)</option><option value="binomial">Binomial</option><option value="complement">Complement</option></select></div>
+                  <div id="probability-inputs-container"></div>
+                  <div class="d-grid gap-2 mb-3"><button class="btn btn-primary btn-sm" onclick="calculateProbability()">Calculate</button><button class="btn btn-outline-secondary btn-sm" onclick="clearProbabilityCalculator()">Clear</button></div>
+                  <div id="probability-result" class="alert alert-info py-2 px-3 mb-0" style="display:none;"><div class="mb-2"><strong>Result:</strong> <span id="probability-value"></span></div><div class="mb-2"><strong>Formula:</strong> <span id="probability-formula"></span></div><div><span id="probability-explanation" style="font-style:italic;"></span></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStatistics">📈 Statistics</button></h2>
+              <div id="collapseStatistics" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="mb-3"><label class="form-label small fw-bold">Data (comma-separated)</label><textarea class="form-control" id="stats-data-input" placeholder="e.g., 10, 20, 30, 40, 50" rows="3"></textarea></div>
+                  <div class="d-grid gap-2 mb-3"><button class="btn btn-primary btn-sm" onclick="calculateStatistics()">Calculate</button><button class="btn btn-outline-secondary btn-sm" onclick="clearStatistics()">Clear</button></div>
+                  <div id="stats-result" class="alert alert-info py-3 px-3 mb-0" style="display:none;font-size:.9rem;"><div class="row"><div class="col-6"><div><strong>Count:</strong> <span id="stat-count">0</span></div><div><strong>Sum:</strong> <span id="stat-sum">0</span></div><div><strong>Mean:</strong> <span id="stat-mean">0</span></div><div><strong>Median:</strong> <span id="stat-median">0</span></div></div><div class="col-6"><div><strong>Mode:</strong> <span id="stat-mode">N/A</span></div><div><strong>Min:</strong> <span id="stat-min">0</span></div><div><strong>Max:</strong> <span id="stat-max">0</span></div><div><strong>Std Dev:</strong> <span id="stat-stddev">0</span></div></div></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- BMI -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBMI">⚖️ BMI Calculator</button></h2>
+              <div id="collapseBMI" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="mb-3"><label class="form-label small fw-bold">Weight (kg)</label><input type="number" class="form-control form-control-sm" id="bmi-weight" placeholder="e.g., 70" step="0.1" min="1"></div>
+                  <div class="mb-3"><label class="form-label small fw-bold">Height (cm)</label><input type="number" class="form-control form-control-sm" id="bmi-height" placeholder="e.g., 175" step="0.1" min="1"></div>
+                  <div class="d-grid gap-2 mb-3"><button class="btn btn-primary btn-sm" onclick="calculateBMI()">Calculate</button><button class="btn btn-outline-secondary btn-sm" onclick="clearBMICalculator()">Clear</button></div>
+                  <div id="bmi-result" class="alert alert-info py-2 px-3 mb-0" style="display:none;"><div class="mb-2"><strong>BMI:</strong> <span id="bmi-value"></span></div><div class="mb-2"><strong>Category:</strong> <span id="bmi-category"></span></div><div><span id="bmi-note" style="font-style:italic;"></span></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- GCD & LCM -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGCDLCM">🔢 GCD &amp; LCM</button></h2>
+              <div id="collapseGCDLCM" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="mb-3"><label class="form-label small fw-bold">First Number</label><input type="number" class="form-control form-control-sm" id="gcd-num1" placeholder="e.g., 48" min="1"></div>
+                  <div class="mb-3"><label class="form-label small fw-bold">Second Number</label><input type="number" class="form-control form-control-sm" id="gcd-num2" placeholder="e.g., 18" min="1"></div>
+                  <div class="d-grid gap-2 mb-3"><button class="btn btn-primary btn-sm" onclick="calculateGCDLCM()">Calculate</button><button class="btn btn-outline-secondary btn-sm" onclick="clearGCDLCM()">Clear</button></div>
+                  <div id="gcd-lcm-result" class="alert alert-info py-2 px-3 mb-0" style="display:none;"><div class="mb-2"><strong>GCD:</strong> <span id="gcd-value"></span></div><div><strong>LCM:</strong> <span id="lcm-value"></span></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fibonacci -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFibonacci">🔀 Fibonacci</button></h2>
+              <div id="collapseFibonacci" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="mb-3"><label class="form-label small fw-bold">Number of Terms (max 50)</label><input type="number" class="form-control form-control-sm" id="fib-terms" placeholder="e.g., 10" min="1" max="50"></div>
+                  <button class="btn btn-primary btn-sm w-100 mb-2" onclick="calculateFibonacci()">Generate</button>
+                  <div id="fib-result" class="alert alert-info py-2 px-3 mb-0" style="display:none;"><div class="mb-2"><strong>Sequence:</strong> <span id="fib-sequence" style="word-break:break-all;"></span></div><div class="mb-2"><strong>Sum:</strong> <span id="fib-sum"></span></div><div class="mb-2"><strong>Count:</strong> <span id="fib-count"></span></div><div><strong>Last:</strong> <span id="fib-last"></span></div></div>
+                  <div class="mt-3 mb-3"><label class="form-label small fw-bold">Find Nth Term (max 80)</label><input type="number" class="form-control form-control-sm mb-2" id="fib-nth-input" placeholder="e.g., 10" min="0" max="80"><button class="btn btn-info btn-sm w-100" onclick="findNthFibonacci()">Find Nth</button><div id="fib-nth-result" class="alert alert-success py-2 px-3 mt-2 mb-0" style="display:none;"><strong>F(n) =</strong> <span id="fib-nth-value" style="font-size:1.1em;font-weight:bold;"></span></div></div>
+                  <div class="mb-2"><label class="form-label small fw-bold">Check if Fibonacci</label><input type="number" class="form-control form-control-sm mb-2" id="fib-check-input" placeholder="e.g., 13" min="0"><div class="d-grid gap-2"><button class="btn btn-warning btn-sm" onclick="checkFibonacciNumber()">Check</button><button class="btn btn-outline-secondary btn-sm" onclick="clearFibonacci()">Clear All</button></div><div id="fib-check-result" class="alert py-2 px-3 mt-2 mb-0" style="display:none;border-left:4px solid #0d6efd;"><div><strong>Is Fibonacci?</strong> <span id="fib-check-answer" style="font-weight:bold;"></span></div></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Base Converter -->
+            <div class="accordion-item">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBase">💻 Base Converter &amp; Bitwise</button></h2>
+              <div id="collapseBase" class="accordion-collapse collapse" data-bs-parent="#converterAccordion">
+                <div class="accordion-body">
+                  <div class="mb-3"><label class="form-label small fw-bold">Decimal Input</label><input type="number" class="form-control" id="decimal-input" placeholder="e.g., 255" oninput="convertDecimal()"></div>
+                  <div class="row mb-3">
+                    <div class="col-6"><div class="alert alert-light border py-2 px-3 mb-2"><small class="text-muted d-block"><strong>Binary</strong></small><div id="binary-result" class="font-monospace fw-bold" style="word-break:break-all;">0</div></div></div>
+                    <div class="col-6"><div class="alert alert-light border py-2 px-3 mb-2"><small class="text-muted d-block"><strong>Hex</strong></small><div id="hex-result" class="font-monospace fw-bold">0x0</div></div></div>
+                    <div class="col-6"><div class="alert alert-light border py-2 px-3 mb-2"><small class="text-muted d-block"><strong>Octal</strong></small><div id="octal-result" class="font-monospace fw-bold">0</div></div></div>
+                    <div class="col-6"><div class="alert alert-light border py-2 px-3 mb-2"><small class="text-muted d-block"><strong>Decimal</strong></small><div id="decimal-result" class="font-monospace fw-bold">0</div></div></div>
+                  </div>
+                  <hr><h6>Convert to Decimal</h6>
+                  <div class="row mb-2"><div class="col-6"><label class="form-label small fw-bold">Binary</label><input type="text" class="form-control form-control-sm" id="binary-input" placeholder="e.g., 11111111" oninput="convertFromBinary()"></div><div class="col-6"><label class="form-label small fw-bold">Result</label><div class="form-control form-control-sm bg-light" id="binary-to-decimal">0</div></div></div>
+                  <div class="row mb-2"><div class="col-6"><label class="form-label small fw-bold">Hex</label><input type="text" class="form-control form-control-sm" id="hex-input" placeholder="e.g., FF" oninput="convertFromHex()"></div><div class="col-6"><label class="form-label small fw-bold">Result</label><div class="form-control form-control-sm bg-light" id="hex-to-decimal">0</div></div></div>
+                  <div class="row mb-3"><div class="col-6"><label class="form-label small fw-bold">Octal</label><input type="text" class="form-control form-control-sm" id="octal-input" placeholder="e.g., 377" oninput="convertFromOctal()"></div><div class="col-6"><label class="form-label small fw-bold">Result</label><div class="form-control form-control-sm bg-light" id="octal-to-decimal">0</div></div></div>
+                  <hr><h6>Bitwise</h6>
+                  <div class="mb-2"><input type="number" class="form-control form-control-sm" id="bitwise-num1" value="5"><input type="number" class="form-control form-control-sm mt-2" id="bitwise-num2" value="3"></div>
+                  <div class="row g-1 mt-2"><div class="col-6"><button class="btn btn-outline-primary btn-sm w-100 mb-1" onclick="bitwiseAND()">AND</button></div><div class="col-6"><button class="btn btn-outline-primary btn-sm w-100 mb-1" onclick="bitwiseOR()">OR</button></div><div class="col-6"><button class="btn btn-outline-primary btn-sm w-100 mb-1" onclick="bitwiseXOR()">XOR</button></div><div class="col-6"><button class="btn btn-outline-primary btn-sm w-100 mb-1" onclick="bitwiseNOT()">NOT</button></div><div class="col-6"><button class="btn btn-outline-info btn-sm w-100 mb-1" onclick="leftShift()">&lt;&lt;</button></div><div class="col-6"><button class="btn btn-outline-info btn-sm w-100 mb-1" onclick="rightShift()">&gt;&gt;</button></div><div class="col-12"><button class="btn btn-outline-secondary btn-sm w-100" onclick="clearBitwise()">Clear</button></div></div>
+                  <div id="bitwise-result" class="alert alert-info py-2 px-3 mt-3 mb-0" style="display:none;"><div><strong>Op:</strong> <span id="bitwise-op"></span></div><div><strong>Dec:</strong> <span id="bitwise-decimal"></span></div><div><strong>Bin:</strong> <code id="bitwise-binary"></code></div></div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- end accordion -->
+        </div><!-- end calculator-card -->
+      </div><!-- end calc-panel -->
+
+      <!-- ══════════════════ RIGHT: HISTORY ══════════════════ -->
+      <div class="history-panel">
+        <button class="btn btn-primary w-100 mb-3" id="toggle-history-btn" onclick="toggleHistory()">Show History</button>
+        <div id="history-column" class="d-none">
+          <div class="history-card">
+            <div class="history-header">
+              <span>CALCULATION HISTORY</span>
+              <button onclick="clearHistory()" class="clear-hist-btn">Clear All</button>
+            </div>
+            <div id="history-list"></div>
+          </div>
         </div>
-        <div class="row">
-          <div class="col-md-8">
-            <div class="card calculator-card">
-              <div class="card-body p-4">
-                <div class="calculator">
-                  <div class="display-container">
-                    <input type="text" class="form-control" id="result" placeholder="0" disabled />
-                    <span class="input-group-text" id="copy-icon" style="cursor:pointer;"
-                      onclick="copyResult()">📋</span>
-                  </div>
-                  <div id="memoryIndicator" style="font-weight:bold; visibility:hidden; margin:5px 10px;">
-                    M
-                  </div>
-                  <div class="word-display-area" id="word-area">
-                    <div id="word-result"></div>
-                    <button id="hausa-btn" onclick="translateToHausa()">HA</button>
-                    <button id="english-btn" onclick="backToEnglish()">EN</button>
-                    <button id="portuguese-btn" onclick="translateToPortuguese()">PT</button>
-                    <button id="speak-btn" onclick="speakResult()" disabled title="Speak Result">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                        viewBox="0 0 16 16">
-                        <path
-                          d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z" />
-                        <path
-                          d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z" />
-                        <path
-                          d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182l-.707.707A3.489 3.489 0 0 1 9.025 8a3.489 3.489 0 0 1-1.025 2.475l.707.707z" />
-                        <path
-                          d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div class="preview-panel">
-                    <div id="answer-preview"></div>
-                  </div>
-                  <div class="diff-panel">
-                    <div class="display-container my-3">
-                      <div class="col-md-12">
-                        <h4 class="group-header mb-0">Differentiate</h4>
-                        <div class="diff-controls row align-items-end">
-                          <div class="col-9">
-                            <input type="text" class="form-control diff-input" id="diff-input"
-                              placeholder="e.g., x^3 + 4x or sin(x)" />
-                          </div>
-                          <div class="col">
-                            <a class="btn btn-block btn-operator diff-btn" onclick="differentiateExpression()">
-                              d/dx
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div id="diff-output" class="diff-outputx"></div>
-                  </div>
+        <template id="history-empty-template">
+          <div class="text-center text-muted py-5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-clock-history mb-2 opacity-25" viewBox="0 0 16 16"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432z"/><path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/><path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/></svg>
+            <p class="mb-0">No calculations yet</p>
+          </div>
+        </template>
+        <template id="history-item-template">
+          <div class="history-item">
+            <div class="history-item-expression"></div>
+            <div class="history-item-words"></div>
+            <div class="remark-text"></div>
+            <div class="history-actions">
+              <button class="history-action-btn btn-delete">🗑 Delete</button>
+              <button class="history-action-btn btn-remark">📝 Comment</button>
+            </div>
+            <div class="remark-box d-none">
+              <input type="text" placeholder="Add remark..." />
+              <button class="btn btn-sm btn-primary">Set</button>
+              <button class="btn btn-sm btn-outline-secondary">✕</button>
+            </div>
+            <div class="history-item-time"></div>
+          </div>
+        </template>
+      </div>
 
-                  <!-- Geometry Modal -->
-                  <div id="geometryModal"
-                    style="display:none;position:fixed;top:0; left:0;width:100%; height:100%;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
-                    <div style="background:white;padding:20px;width:300px;border-radius:15px;">
-                      <h5 class="text-center mb-3">Geometry Formulas</h5>
-                      <select id="shapeSelect" class="form-control mb-2" onchange="updateGeometryInputs()">
-                        <option value="">Select Formula</option>
-                        <option value="rectangle">Area of Rectangle</option>
-                        <option value="triangle">Area of Triangle</option>
-                        <option value="circle">Area of Circle</option>
-                        <option value="square">Area of Square</option>
-                        <option value="perimeterSquare">Perimeter of Square</option>
-                        <option value="perimeterRectangle">Perimeter of Rectangle</option>
-                        <option value="cubeVolume">Volume of Cube</option>
-                        <option value="cylinderVolume">Volume of Cylinder</option>
-                      </select>
-                      <input type="number" id="input1" class="form-control mb-2" placeholder="Value 1">
-                      <input type="number" id="input2" class="form-control mb-2" placeholder="Value 2">
-                      <button class="btn btn-primary w-100 mb-2" onclick="calculateGeometry()">Calculate</button>
-                      <button class="btn btn-secondary w-100" onclick="closeGeometry()">Close</button>
-                    </div>
-                  </div>
+    </div><!-- end main-layout -->
+  </div><!-- end page-wrapper -->
 
-                  <div class="btn-grid">
-                    <!-- Row 1 -->
-                    <button class="btn btn-info" onclick="redoCalculation()" id="redoBtn">↻ REDO</button>
-                    <button class="btn btn-light" onclick="bracketToResult('(')">(</button>
-                    <button class="btn btn-light" onclick="bracketToResult(')')">)</button>
-                    <button class="btn btn-light" onclick="backspace()">←</button>
-                    
-                    <!-- Row trig -->
-                    <button class="btn btn-action" onclick="clearResult()">AC</button>
-                    <button id="sin-btn" class="btn btn-light" onclick="trigButtonPressed('sin')">sin</button>
-                    <button id="cos-btn" class="btn btn-light" onclick="trigButtonPressed('cos')">cos</button>
-                    <button id="tan-btn" class="btn btn-light" onclick="trigButtonPressed('tan')">tan</button>
-                    
-                    <!-- Row 2 -->
-                    <button id="" class="btn btn-operator" onclick="toggleInverseMode()">2nd</button>
-                    <button class="btn btn-light" onclick="appendToResult(7)">7</button>
-                    <button class="btn btn-light" onclick="appendToResult(8)">8</button>
-                    <button class="btn btn-light" onclick="appendToResult(9)">9</button>
-                    
-                    <!-- Row 3 -->
-                    <button class="btn btn-operator" onclick="operatorToResult('/')">÷</button>
-                    <button class="btn btn-light" onclick="appendToResult(4)">4</button>
-                    <button class="btn btn-light" onclick="appendToResult(5)">5</button>
-                    <button class="btn btn-light" onclick="appendToResult(6)">6</button>
-                    
-                    <!-- Row 4 -->
-                    <button class="btn btn-operator" onclick="operatorToResult('*')">×</button>
-                    <button class="btn btn-light" onclick="appendToResult(1)">1</button>
-                    <button class="btn btn-light" onclick="appendToResult(2)">2</button>
-                    <button class="btn btn-light" onclick="appendToResult(3)">3</button>
-                    
-                    <!-- Row 5 -->
-                    <button class="btn btn-operator" onclick="operatorToResult('+')">+</button>
-                    <button class="btn btn-light" onclick="appendToResult('.')">.</button>
-                    <button class="btn btn-light" onclick="appendToResult(0)">0</button>
-                    <button class="btn btn-operator" onclick="operatorToResult('-')">−</button>
-                    
-                    <!-- Row 6 -->
-                    <button class="btn btn-operator" onclick="percentToResult('%')">%</button>
-                    <button class="btn btn-special" onclick="operatorToResult('^')">x^y</button>
-                    <button class="btn btn-special" onclick="checkPrime()">Prime?</button>
-                    <button class="btn btn-power btn-special" onclick="calculateSquare()">x²</button>
-                    <button class="btn btn-power btn-special" onclick="calculateCube()">x³</button>
-                    <button class="btn btn-special" onclick="cubeRootResult()">∛x</button>
-                    
-                    <!-- Row 7 -->
-                    <button class="btn btn-special" onclick="calculateReciprocal()" title="Reciprocal: 1/x">1/x</button>
-                    <button class="btn btn-special" onclick="calculateSquareRoot()">√</button>
-                    
-                    <!-- Row 7 - Permutation & Combination -->
-                    <button class="btn btn-action" onclick="factors()" stylex="grid-column: span 2;">Factors</button>
-                    <button class="btn btn-special" onclick="calculatePermutation()"
-                      title="Permutation: nPr = n!/(n-r)!">nPr</button>
-                    <button class="btn btn-special" onclick="calculateCombination()"
-                      title="Combination: nCr = n!/r!(n-r)!">nCr</button>
-                    <button class="btn btn-special" onclick="calculateFactorial()" title="Factorial: n!">n!</button>
-                    <button class="btn btn-action" onclick="applyLogarithm()">log</button>
+  <!-- Geometry Modal -->
+  <div id="geometryModal" class="geo-modal-overlay" style="display:none;">
+    <div class="geo-modal-box">
+      <h5 class="text-center mb-3">Geometry Formulas</h5>
+      <select id="shapeSelect" class="form-control mb-2" onchange="updateGeometryInputs()">
+        <option value="">Select Formula</option>
+        <option value="rectangle">Area of Rectangle</option>
+        <option value="triangle">Area of Triangle</option>
+        <option value="circle">Area of Circle</option>
+        <option value="square">Area of Square</option>
+        <option value="perimeterSquare">Perimeter of Square</option>
+        <option value="perimeterRectangle">Perimeter of Rectangle</option>
+        <option value="cubeVolume">Volume of Cube</option>
+        <option value="cylinderVolume">Volume of Cylinder</option>
+      </select>
+      <input type="number" id="input1" class="form-control mb-2" placeholder="Value 1">
+      <input type="number" id="input2" class="form-control mb-2" placeholder="Value 2">
+      <button class="btn btn-primary w-100 mb-2" onclick="calculateGeometry()">Calculate</button>
+      <button class="btn btn-secondary w-100" onclick="closeGeometry()">Close</button>
+    </div>
+  </div>
 
-                    <!-- MEMORY CONTROLS -->
-                    <button class="btn btn-special" onclick="memoryClear()">MC</button>
-                    <button class="btn btn-special" onclick="memoryRecall()">MR</button>
-                    <button class="btn btn-special" onclick="memoryAdd()">M+</button>
-                    <button class="btn btn-special" onclick="memorySubtract()">M-</button>
+  <button id="scroll-to-calculator" title="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
-                    <!--  Row 8                  -->
-                    <div class="btn-group" role="" style="position:relative;">
-                      <button class="btn btn-special" id="dpMainBtn">
-                        ⌃ <span id="dpLabel">2dp</span> ▾
-                      </button>
-
-                      <ul id="dpDropdownMenu"
-                        style="display:none; position:absolute; top:100%; left:0; list-style:none; padding:4px 0; margin:0; z-index:999; min-width:80px;">
-                        <li class="btn btn-special"><a href="#" onclick="setDP(1); return false;">⌃ 1dp</a></li>
-                        <li class="btn btn-special"><a href="#" onclick="setDP(2); return false;">⌃ 2dp</a></li>
-                        <li class="btn btn-special"><a href="#" onclick="setDP(3); return false;">⌃ 3dp</a></li>
-                      </ul>
-                    </div>
-                    <button class="btn btn-special" onclick="tenPower()">10<sup>x</sup></button>
-                    <button id="voice-input-btn" class="btn btn-special" aria-label="Speak calculation input"
-                      onclick="startVoiceInput()">🎙️</button>
-                    <button class="btn btn-operator" onclick="convertToHex()">HEX</button>
-                    <button class="btn btn-operator" onclick="openGeometry()">📐 Geo</button>
-                    <!-- Row 9 -->
-                    <button class="btn btn-equals" onclick="calculateResult()" stylex="grid-column: span 3;">=</button>
-                  </div>
-
-                  <div class="row">
-                    <div class="col-md-12">
-                      <!-- Unit Converter Accordion -->
-                      <div class="accordion mt-4" id="converterAccordion">
-                        <!-- Unit Converter Item -->
-                        <div class="accordion-item">
-                          <h2 class="accordion-header" id="headingConverter">
-                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
-                              type="button" data-bs-toggle="collapse" data-bs-target="#collapseConverter"
-                              aria-expanded="false" aria-controls="collapseConverter">
-                              <span>🔄 Unit Converter</span>
-                            </button>
-                          </h2>
-                          <div id="collapseConverter" class="accordion-collapse collapse"
-                            aria-labelledby="headingConverter" data-bs-parent="#converterAccordion">
-                            <div class="accordion-body">
-                              <!-- Length Conversion -->
-                              <div class="mb-3">
-                                <label class="form-label small" style="font-weight: 600;">Length</label>
-                                <div class="input-group input-group-sm">
-                                  <input type="number" class="form-control" id="length-value" placeholder="Value"
-                                    value="1" oninput="convertUnit('length')">
-                                  <select class="form-select form-select-sm" id="from-length"
-                                    onchange="convertUnit('length')">
-                                    <option value="km">km</option>
-                                    <option value="m">m</option>
-                                    <option value="mile">miles</option>
-                                    <option value="yard">yards</option>
-                                    <option value="ft">feet</option>
-                                    <option value="inch">inches</option>
-                                  </select>
-                                  <span class="input-group-text">→</span>
-                                  <select class="form-select form-select-sm" id="to-length"
-                                    onchange="convertUnit('length')">
-                                    <option value="mile">miles</option>
-                                    <option value="km">km</option>
-                                    <option value="m">m</option>
-                                    <option value="yard">yards</option>
-                                    <option value="ft">feet</option>
-                                    <option value="inch">inches</option>
-                                  </select>
-                                  <span class="input-group-text" id="length-result">0</span>
-                                </div>
-                              </div>
-
-                              <!-- Weight Conversion -->
-                              <div class="mb-3">
-                                <label class="form-label small" style="font-weight: 600;">Weight</label>
-                                <div class="input-group input-group-sm">
-                                  <input type="number" class="form-control" id="weight-value" placeholder="Value"
-                                    value="1" oninput="convertUnit('weight')">
-                                  <select class="form-select form-select-sm" id="from-weight"
-                                    onchange="convertUnit('weight')">
-                                    <option value="kg">kg</option>
-                                    <option value="g">g</option>
-                                    <option value="lb">pounds</option>
-                                    <option value="oz">ounces</option>
-                                  </select>
-                                  <span class="input-group-text">→</span>
-                                  <select class="form-select form-select-sm" id="to-weight"
-                                    onchange="convertUnit('weight')">
-                                    <option value="lb">pounds</option>
-                                    <option value="kg">kg</option>
-                                    <option value="g">g</option>
-                                    <option value="oz">ounces</option>
-                                  </select>
-                                  <span class="input-group-text" id="weight-result">0</span>
-                                </div>
-                              </div>
-
-                              <!-- Temperature Conversion -->
-                              <div class="mb-3">
-                                <label class="form-label small" style="font-weight: 600;">Temperature</label>
-                                <div class="input-group input-group-sm">
-                                  <input type="number" class="form-control" id="temp-value" placeholder="Value"
-                                    value="0" oninput="convertUnit('temperature')">
-                                  <select class="form-select form-select-sm" id="from-temp"
-                                    onchange="convertUnit('temperature')">
-                                    <option value="C">°C</option>
-                                    <option value="F">°F</option>
-                                    <option value="K">K</option>
-                                  </select>
-                                  <span class="input-group-text">→</span>
-                                  <select class="form-select form-select-sm" id="to-temp"
-                                    onchange="convertUnit('temperature')">
-                                    <option value="F">°F</option>
-                                    <option value="C">°C</option>
-                                    <option value="K">K</option>
-                                  </select>
-                                  <span class="input-group-text" id="temp-result">0</span>
-                                </div>
-                              </div>
-
-                              <!-- Currency Conversion -->
-                              <div class="mb-3">
-                                <label class="form-label small" style="font-weight: 600;">Currency</label>
-                                <div class="input-group input-group-sm">
-                                  <input type="number" class="form-control" id="currency-value" placeholder="Amount"
-                                    value="1" oninput="convertUnit('currency')">
-                                  <select class="form-select form-select-sm" id="from-currency"
-                                    onchange="convertUnit('currency')">
-                                    <option value="USD">USD</option>
-                                    <option value="EUR">EUR</option>
-                                    <option value="GBP">GBP</option>
-                                    <option value="JPY">JPY</option>
-                                    <option value="CAD">CAD</option>
-                                    <option value="AUD">AUD</option>
-                                    <option value="NGN">NGN</option>
-                                  </select>
-                                  <span class="input-group-text">→</span>
-                                  <select class="form-select form-select-sm" id="to-currency"
-                                    onchange="convertUnit('currency')">
-                                    <option value="EUR">EUR</option>
-                                    <option value="USD">USD</option>
-                                    <option value="GBP">GBP</option>
-                                    <option value="JPY">JPY</option>
-                                    <option value="CAD">CAD</option>
-                                    <option value="AUD">AUD</option>
-                                    <option value="NGN">NGN</option>
-                                  </select>
-                                  <span class="input-group-text" id="currency-result">0</span>
-                                  <button id="currency-refresh-btn" class="btn btn-sm btn-outline-info"
-                                    onclick="fetchCurrencyRates()" title="Refresh rates">🔄</button>
-                                </div>
-                                <small class="text-muted" id="currency-timestamp"></small>
-                              </div>
-                              <!-- Area Conversion -->
-                              <div class="mb-3">
-                                <label class="form-label small" style="font-weight: 600;">Area</label>
-                                <div class="input-group input-group-sm">
-                                  <input type="number" class="form-control" id="area-value" placeholder="Value"
-                                    value="1" oninput="convertUnit('area')">
-                                  <select class="form-select form-select-sm" id="from-area"
-                                    onchange="convertUnit('area')">
-                                    <option value="sqm">m²</option>
-                                    <option value="sqkm">km²</option>
-                                    <option value="sqmile">mi²</option>
-                                    <option value="sqyard">yd²</option>
-                                    <option value="sqft">ft²</option>
-                                    <option value="sqinch">in²</option>
-                                    <option value="hectare">hectare</option>
-                                    <option value="acre">acre</option>
-                                  </select>
-                                  <span class="input-group-text">→</span>
-                                  <select class="form-select form-select-sm" id="to-area"
-                                    onchange="convertUnit('area')">
-                                    <option value="sqmile">mi²</option>
-                                    <option value="sqm">m²</option>
-                                    <option value="sqkm">km²</option>
-                                    <option value="sqyard">yd²</option>
-                                    <option value="sqft">ft²</option>
-                                    <option value="sqinch">in²</option>
-                                    <option value="hectare">hectare</option>
-                                    <option value="acre">acre</option>
-                                  </select>
-                                  <span class="input-group-text" id="area-result">0</span>
-                                </div>
-                              </div>
-                              <!-- Data Storage Conversion -->
-                              <div class="mb-3">
-                                <label class="form-label small" style="font-weight: 600;">Data Storage</label>
-                                <div class="input-group input-group-sm">
-                                  <input type="number" class="form-control" id="data-value" placeholder="Value"
-                                    value="1" oninput="convertUnit('data')">
-                                  <select class="form-select form-select-sm" id="from-data"
-                                    onchange="convertUnit('data')">
-                                    <option value="bit">bit</option>
-                                    <option value="byte">B</option>
-                                    <option value="kb">KB</option>
-                                    <option value="mb">MB</option>
-                                    <option value="gb">GB</option>
-                                    <option value="tb">TB</option>
-                                  </select>
-                                  <span class="input-group-text">→</span>
-                                  <select class="form-select form-select-sm" id="to-data"
-                                    onchange="convertUnit('data')">
-                                    <option value="B">B</option>
-                                    <option value="bit">bit</option>
-                                    <option value="kb">KB</option>
-                                    <option value="mb">MB</option>
-                                    <option value="gb">GB</option>
-                                    <option value="tb">TB</option>
-                                  </select>
-                                  <span class="input-group-text" id="data-result">0</span>
-                                </div>
-                              </div>
-
-                              <!-- Quick Conversion Examples -->
-                              <div class="alert alert-info alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="vuna_script.js"></script>
+</body>
+</html>alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
                                 <strong>Examples:</strong> "5 km to miles" → <span id="example-result">3.11</span> | Add
                                 10 → <span id="example-add">13.11</span>
                               </div>
@@ -1869,6 +2016,5 @@
         </div>
       </div>
 </body>
-
 
 </html>
