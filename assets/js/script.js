@@ -618,9 +618,6 @@ function applyLogarithm() {
   }
 
   right = "";
-
-  updateStepsDisplay();
-  updateResult();
 }
 
 function toggleInverseMode() {
