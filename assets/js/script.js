@@ -3275,13 +3275,6 @@ function clearStatistics() {
 // ------------------------------
 let currentDP = 2;
 
-// document.getElementById('dpMainBtn').addEventListener('click', function(e) {
-//   e.stopPropagation();
-//   const menu = document.getElementById('dpDropdownMenu');
-//   const isOpen = menu.style.display === 'block';
-//   menu.style.display = isOpen ? 'none' : 'block';
-// });
-
 function setDP(dp) {
   currentDP = dp;
   document.getElementById('dpLabel').textContent = dp + 'dp';
@@ -3295,6 +3288,18 @@ function roundToDecimal(dp) {
   document.getElementById('result').value = val.toFixed(dp);
 
 }
+
+function toggleDPDropdown(event) {
+  event.stopPropagation();
+  const menu = document.getElementById('dpDropdownMenu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+// Close when clicking anywhere outside the dropdown
+document.addEventListener('click', function () {
+  const menu = document.getElementById('dpDropdownMenu');
+  if (menu) menu.style.display = 'none';
+});
 
 // ========================================================
 // ================= FORMULA CALCULATOR ===================
