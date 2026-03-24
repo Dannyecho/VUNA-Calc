@@ -4006,3 +4006,56 @@ function clearRomanConverter() {
   document.getElementById('roman-breakdown').style.display = 'none';
   document.getElementById('roman-error').style.display     = 'none';
 }
+// ===============================
+// 🌍 IGBO TRANSLATION FEATURE
+// ===============================
+
+function translateToIgbo() {
+  const display = document.getElementById("result").value;
+
+  if (!display || isNaN(display)) return;
+
+  const number = parseInt(display);
+
+  const igboNumbers = {
+    0: "efu",
+    1: "otu",
+    2: "abụọ",
+    3: "atọ",
+    4: "anọ",
+    5: "ise",
+    6: "isii",
+    7: "asaa",
+    8: "asatọ",
+    9: "itoolu",
+    10: "iri",
+    11: "iri na otu",
+    12: "iri na abụọ",
+    13: "iri na atọ",
+    14: "iri na anọ",
+    15: "iri na ise",
+    16: "iri na isii",
+    17: "iri na asaa",
+    18: "iri na asatọ",
+    19: "iri na itoolu",
+    20: "iri abụọ"
+  };
+
+  let resultText = "";
+
+  if (igboNumbers[number] !== undefined) {
+    resultText = igboNumbers[number];
+  } else {
+    resultText = "Nọmba a dị elu (Igbo support limited)";
+  }
+
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+
+  wordResult.innerHTML =
+    '<span class="small-label">Igbo Translation</span><strong>' +
+    resultText +
+    "</strong>";
+
+  wordArea.style.display = "flex";
+}

@@ -543,6 +543,36 @@
     #answer-preview:empty {
       opacity: 0;
     }
+
+    .currency-panel {
+  margin-top: 20px;
+    }
+  #igbo-btn {
+  background: #6f42c1;
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(111, 66, 193, 0.2);
+}
+
+#igbo-btn:hover:not(:disabled) {
+  background: #5a32a3;
+  transform: scale(1.05);
+}
+
+#igbo-btn:disabled {
+  background: #e9ecef;
+  color: #adb5bd;
+  box-shadow: none;
+}
   </style>
 </head>
 
@@ -579,6 +609,7 @@
                     <button id="hausa-btn" onclick="translateToHausa()">HA</button>
                     <button id="english-btn" onclick="backToEnglish()">EN</button>
                     <button id="portuguese-btn" onclick="translateToPortuguese()">PT</button>
+                    <button id="igbo-btn" onclick="translateToIgbo()">IG</button>
                     <button id="speak-btn" onclick="speakResult()" disabled title="Speak Result">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
                         viewBox="0 0 16 16">
@@ -1665,6 +1696,55 @@
                               </div>
                             </div>
                             <!-- END FIBONACCI Calculator Section -->
+                             <!-- 💰 CURRENCY CONVERTER -->
+<div class="currency-panel">
+  <div class="display-container my-3">
+    <div class="col-md-12">
+      <h4 class="group-header mb-0">Currency Converter</h4>
+
+      <div class="row g-2 mt-2">
+        <div class="col-4">
+          <input type="number" id="currency-value" class="form-control" placeholder="Amount" />
+        </div>
+
+        <div class="col-4">
+          <select id="from-currency" class="form-select">
+            <option value="USD">USD</option>
+            <option value="NGN">NGN</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+
+        <div class="col-4">
+          <select id="to-currency" class="form-select">
+            <option value="NGN">NGN</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn btn-success w-100 mt-2" onclick="convertUnit('currency')">
+        Convert
+      </button>
+
+      <div class="mt-2 text-center">
+        <strong id="currency-result">0</strong>
+      </div>
+
+      <div class="text-center mt-2">
+        <button class="btn btn-sm btn-primary" id="currency-refresh-btn" onclick="fetchCurrencyRates()">
+          🔄 Refresh Rates
+        </button>
+        <div id="currency-timestamp" class="small text-muted mt-1"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+                             
                              
                             <!-- BASE CONVERTER SECTION (Binary, Hex, Octal) -->
                             <div class="accordion-item">
