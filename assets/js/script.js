@@ -3885,3 +3885,122 @@ function displayBitwiseResult(operation, result) {
 }
 
 
+
+// ============================================
+// 🏛️ ROMAN NUMERAL CONVERTER
+// ============================================
+
+const romanNumeralMap = [
+  { value: 1000, symbol: 'M'  },
+  { value:  900, symbol: 'CM' },
+  { value:  500, symbol: 'D'  },
+  { value:  400, symbol: 'CD' },
+  { value:  100, symbol: 'C'  },
+  { value:   90, symbol: 'XC' },
+  { value:   50, symbol: 'L'  },
+  { value:   40, symbol: 'XL' },
+  { value:   10, symbol: 'X'  },
+  { value:    9, symbol: 'IX' },
+  { value:    5, symbol: 'V'  },
+  { value:    4, symbol: 'IV' },
+  { value:    1, symbol: 'I'  },
+];
+
+function arabicToRoman(num) {
+  if (!Number.isInteger(num) || num < 1 || num > 3999) {
+    throw new RangeError('Number must be an integer between 1 and 3,999.');
+  }
+  let remaining = num;
+  let roman = '';
+  const parts = [];
+  for (const { value, symbol } of romanNumeralMap) {
+    while (remaining >= value) {
+      roman += symbol;
+      parts.push(symbol + ' (' + value + ')');
+      remaining -= value;
+    }
+  }
+  return { roman, breakdown: parts.join(' + ') + ' = ' + num };
+}
+
+function romanToArabic(str) {
+  const input = str.trim().toUpperCase();
+  if (!input) throw new Error('Please enter a Roman numeral.');
+  if (!/^[IVXLCDM]+$/.test(input)) {
+    throw new Error('Invalid character. Only I, V, X, L, C, D, M are allowed.');
+  }
+  const symbolValues = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+  let total = 0;
+  for (let i = 0; i < input.length; i++) {
+    const curr = symbolValues[input[i]];
+    const next = symbolValues[input[i + 1]] || 0;
+    total += curr < next ? -curr : curr;
+  }
+  if (total < 1 || total > 3999) {
+    throw new RangeError('Result out of range (1–3,999). Check your input.');
+  }
+  const { roman } = arabicToRoman(total);
+  if (roman !== input) {
+    throw new Error('"' + input + '" is not a standard Roman numeral. Did you mean "' + roman + '"?');
+  }
+  return total;
+}
+
+function convertArabicToRoman() {
+  const raw = document.getElementById('arabic-input').value.trim();
+  const outputEl    = document.getElementById('roman-output');
+  const breakdownEl = document.getElementById('roman-breakdown');
+  if (!raw) { outputEl.value = ''; breakdownEl.style.display = 'none'; return; }
+  const num = parseInt(raw, 10);
+  try {
+    const { roman, breakdown } = arabicToRoman(num);
+    outputEl.value = roman;
+    breakdownEl.innerHTML = '<strong>Breakdown:</strong> ' + breakdown;
+    breakdownEl.style.display = 'block';
+    breakdownEl.className = 'alert alert-info py-2 px-3 mb-0 small';
+  } catch (e) {
+    outputEl.value = '';
+    breakdownEl.innerHTML = '⚠️ ' + e.message;
+    breakdownEl.style.display = 'block';
+    breakdownEl.className = 'alert alert-warning py-2 px-3 mb-0 small';
+  }
+}
+
+function convertRomanToArabic() {
+  const raw      = document.getElementById('roman-input').value;
+  const outputEl = document.getElementById('arabic-output');
+  const errorEl  = document.getElementById('roman-error');
+  if (!raw.trim()) { outputEl.value = ''; errorEl.style.display = 'none'; return; }
+  try {
+    const result = romanToArabic(raw);
+    outputEl.value = result.toLocaleString();
+    errorEl.style.display = 'none';
+  } catch (e) {
+    outputEl.value = '';
+    errorEl.textContent = '⚠️ ' + e.message;
+    errorEl.style.display = 'block';
+  }
+}
+
+function useCalcResultForRoman() {
+  const resultEl = document.getElementById('result');
+  const val = parseFloat(resultEl.value);
+  if (isNaN(val)) { alert('No valid number in the calculator display.'); return; }
+  const intVal = Math.trunc(val);
+  document.getElementById('arabic-input').value = intVal;
+  convertArabicToRoman();
+  const collapseEl = document.getElementById('collapseRoman');
+  if (collapseEl && !collapseEl.classList.contains('show')) {
+    new bootstrap.Collapse(collapseEl, { toggle: true });
+  }
+  collapseEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearRomanConverter() {
+  document.getElementById('arabic-input').value  = '';
+  document.getElementById('roman-output').value  = '';
+  document.getElementById('roman-input').value   = '';
+  document.getElementById('arabic-output').value = '';
+  document.getElementById('roman-breakdown').style.display = 'none';
+  document.getElementById('roman-error').style.display     = 'none';
+}
