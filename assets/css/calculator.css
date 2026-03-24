@@ -283,3 +283,15 @@ body {
 .operator-active {
   box-shadow: 0 0 20px var(--accent-color);
 }
+.math-insight-box {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.05);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.dark-mode .math-insight-box {
+  background: rgba(255,255,255,0.08);
+}

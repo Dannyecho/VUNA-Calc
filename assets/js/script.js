@@ -1,3 +1,8 @@
+// ===============================
+// 🧠 SMART RESULT MEMORY FEATURE
+// ===============================
+
+let LAST_RESULT = 0;
 // ------------------------------
 // Theme Toggle Logic
 // ------------------------------
@@ -213,7 +218,6 @@ function fetchCurrencyRates() {
       if (data.rates) {
         alert("Currency rates fetched successfully.");
         console.log("Fetched currency rates:", data);
-        // API returns rates relative to USD (1 USD = data.rates[currency])
         currencyRates["EUR"] = data.rates.EUR || currencyRates["EUR"];
         currencyRates["GBP"] = data.rates.GBP || currencyRates["GBP"];
         currencyRates["JPY"] = data.rates.JPY || currencyRates["JPY"];
@@ -355,7 +359,6 @@ function factorial(n) {
 // Permutation: nPr = n! / (n-r)!
 // ------------------------------
 function calculatePermutation() {
-  // Parse expression like "5P2" or just use the current number with a prompt
   const match = currentExpression.match(/^(\d+)P(\d+)$/i);
 
   if (match) {
@@ -367,7 +370,7 @@ function calculatePermutation() {
       currentExpression = result.toString();
 
       calculationHistory?.push({
-        expression: `${n}P${r} = ${result}`,
+        expression: `${n}P${r}`,
         words: numberToWords(result),
         answer: result,
         time: new Date().toLocaleTimeString(),
@@ -375,11 +378,11 @@ function calculatePermutation() {
       if (calculationHistory.length > 20) calculationHistory.shift();
       localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
       renderHistory();
+      resetRedoIndex();
     } else {
       currentExpression = "Error";
     }
   } else {
-    // If no P in expression, add it for user to complete
     currentExpression += "P";
   }
   updateResult();
@@ -389,7 +392,6 @@ function calculatePermutation() {
 // Combination: nCr = n! / (r! * (n-r)!)
 // ------------------------------
 function calculateCombination() {
-  // Parse expression like "5C2"
   const match = currentExpression.match(/^(\d+)C(\d+)$/i);
 
   if (match) {
@@ -401,7 +403,7 @@ function calculateCombination() {
       currentExpression = result.toString();
 
       calculationHistory?.push({
-        expression: `${n}C${r} = ${result}`,
+        expression: `${n}C${r}`,
         words: numberToWords(result),
         answer: result,
         time: new Date().toLocaleTimeString(),
@@ -409,11 +411,11 @@ function calculateCombination() {
       if (calculationHistory.length > 20) calculationHistory.shift();
       localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
       renderHistory();
+      resetRedoIndex();
     } else {
       currentExpression = "Error";
     }
   } else {
-    // If no C in expression, add it for user to complete
     currentExpression += "C";
   }
   updateResult();
@@ -442,7 +444,7 @@ function calculateFactorial() {
   const result = factorial(n);
 
   calculationHistory?.push({
-    expression: `${n}! = ${result}`,
+    expression: `${n}!`,
     words: numberToWords(result),
     answer: result,
     time: new Date().toLocaleTimeString(),
@@ -450,6 +452,7 @@ function calculateFactorial() {
   if (calculationHistory.length > 20) calculationHistory.shift();
   localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
   renderHistory();
+  resetRedoIndex();
 
   currentExpression = result.toString();
   updateResult();
@@ -476,7 +479,18 @@ function calculateResult() {
       return;
     }
     let normalizedExpression = normalizeExpression(currentExpression);
+
+// 🧠 Replace "ans" with last result automatically
+    normalizedExpression = normalizedExpression.replace(/\bans\b/gi, LAST_RESULT);
+
+// Calculate result
     let result = eval(normalizedExpression);
+
+// Save result for future expressions
+    LAST_RESULT = result;
+
+// Display normally
+    display.value = result;
 
     if (isNaN(result) || !isFinite(result)) {
       throw new Error();
@@ -540,49 +554,35 @@ function calculateReciprocal() {
 // ------------------------------
 // HEXADECIMAL CONVERSION FEATURE
 // ------------------------------
-/**
- * Converts the current decimal number to hexadecimal format
- * Displays the result in the word-result area with proper formatting
- */
 function convertToHex() {
-  // Check if there's a value to convert
   if (currentExpression.length === 0 || currentExpression === "0") {
     alert("Please enter a number first");
     return;
   }
 
-  // Parse the current expression as a number
   const num = parseFloat(currentExpression);
 
-  // Validate the input
   if (isNaN(num)) {
     alert("Invalid number. Please enter a valid decimal number.");
     return;
   }
 
-  // Check if the number is an integer (hexadecimal conversion works best with integers)
   if (!Number.isInteger(num)) {
     alert(
       "Hexadecimal conversion works with whole numbers only. Your number will be rounded.",
     );
   }
 
-  // Convert to integer (rounds if decimal)
   const integerNum = Math.floor(Math.abs(num));
-
-  // Perform the conversion to hexadecimal
   const hexValue = integerNum.toString(16).toUpperCase();
 
-  // Get references to display elements
   const wordResult = document.getElementById("word-result");
   const wordArea = document.getElementById("word-area");
 
-  // Create formatted display message
   let displayMessage =
     '<span class="small-label">Hexadecimal Conversion</span>';
   displayMessage += "<strong>";
 
-  // Add negative sign if original number was negative
   if (num < 0) {
     displayMessage += "Decimal: -" + integerNum + " = Hex: -0x" + hexValue;
   } else {
@@ -591,7 +591,6 @@ function convertToHex() {
 
   displayMessage += "</strong>";
 
-  // Display the result
   wordResult.innerHTML = displayMessage;
   wordArea.style.display = "flex";
 
@@ -599,7 +598,6 @@ function convertToHex() {
   currentExpression = "0x" + hexValue;
   updateResult();
 
-  // Enable the speak button for the result
   enableSpeakButton();
 
   console.log("HEX Conversion successful:", integerNum, "-> 0x" + hexValue);
@@ -878,7 +876,6 @@ function convertToFraction() {
   const value = Number(display.value);
   if (isNaN(value)) return;
 
-  // Handle integers
   if (Number.isInteger(value)) {
     display.value = value + "/1";
     currentExpression = display.value;
@@ -1340,7 +1337,6 @@ function numberToWords(num) {
 }
 
 // hausa language
-
 function numberToHausa(num) {
   if (num === "Error") return "Kuskure";
 
@@ -1361,12 +1357,12 @@ function numberToHausa(num) {
     "",
     "Ashirin",
     "Talatin",
-    "Arba’in",
+    "Arba'in",
     "Hamsin",
     "Sittin",
-    "Sab’in",
+    "Sab'in",
     "Tamanin",
-    "Tis’in",
+    "Tis'in",
   ];
   const teens = [
     "Goma",
@@ -1462,7 +1458,6 @@ function updateResult() {
   const wordResult = document.getElementById("word-result");
   const wordArea = document.getElementById("word-area");
 
-  // Check if currentExpression is a valid number
   const num = parseFloat(currentExpression);
   if (
     !isNaN(num) &&
@@ -1570,8 +1565,7 @@ function factors() {
 }
 
 function updateStepsDisplay() {
-  // This function might be used elsewhere in your code
-  // Keeping it here for compatibility
+  // Keeping for compatibility
 }
 
 fetchCurrencyRates();
@@ -1586,6 +1580,47 @@ function copyResult() {
     .catch(() => alert("Failed to copy"));
 }
 
+function percentToResult() {
+
+    if (!currentExpression) return;
+
+    const match = currentExpression.match(/(.+?)(\*\*|[+\-*/^])([0-9.]*)$/);
+
+    if (!match) {
+
+        const num = parseFloat(currentExpression);
+        if (isNaN(num)) return;
+
+        currentExpression = (num / 100).toString();
+
+    } else {
+
+        const leftPart = match[1];
+        const rightPart = match[3];
+
+        if (!rightPart) return;
+
+        let leftVal;
+
+        try {
+            leftVal = eval(leftPart);
+        } catch (e) {
+            leftVal = parseFloat(leftPart);
+        }
+
+        const rightVal = parseFloat(rightPart);
+        if (isNaN(leftVal) || isNaN(rightVal)) return;
+
+        const percentVal = (leftVal * rightVal) / 100;
+
+        currentExpression = percentVal.toString();
+    }
+
+    // 🔥 ADD THIS LINE
+    currentExpression += "*";
+
+    updateResult();
+}
 function startVoiceInput() {
   clearResult();
   const SpeechRecognition =
@@ -1658,7 +1693,6 @@ function normalizeSpeech(text) {
 
   normalized = normalized.replace(/([\+\-\*\/])/g, " $1 ");
 
-  // Split into tokens
   return normalized.split(" ").filter((t) => t.trim() !== "");
 }
 
@@ -1678,16 +1712,17 @@ function toggleHistory() {
     btn.classList.replace("btn-primary", "btn-outline-primary");
   }
 }
+
 function saveHistoryToStorage() {
   localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
 }
+
 function renderHistory() {
   const list = document.getElementById("history-list");
   if (!list) return;
 
   list.innerHTML = "";
 
-  // Empty state
   if (calculationHistory.length === 0) {
     const emptyTemplate = document.getElementById("history-empty-template");
     if (emptyTemplate) {
@@ -1695,7 +1730,7 @@ function renderHistory() {
     }
     return;
   }
-  // Render items latest first
+
   calculationHistory
     .slice()
     .reverse()
@@ -1723,14 +1758,13 @@ function renderHistory() {
         saveHistoryToStorage();
         renderHistory();
       };
-      // SHOW REMARK INPUT
+
       tpl.querySelector(".btn-remark").onclick = (e) => {
         e.stopPropagation();
         remarkBox.classList.remove("d-none");
         remarkInput.focus();
       };
 
-      // SET REMARK
       remarkBox.querySelector(".btn-primary").onclick = (e) => {
         e.stopPropagation();
         item.remark = remarkInput.value.trim();
@@ -1738,12 +1772,11 @@ function renderHistory() {
         renderHistory();
       };
 
-      // CANCEL REMARK
       remarkBox.querySelector(".btn-outline-secondary").onclick = (e) => {
         e.stopPropagation();
         remarkBox.classList.add("d-none");
       };
-      // Click to restore calculation
+
       itemEl.addEventListener("click", () => {
         currentExpression = item.expression;
         updateResult();
@@ -1752,16 +1785,17 @@ function renderHistory() {
 
       list.appendChild(tpl);
 
-      // Trigger fade-in
       setTimeout(() => {
         itemEl.classList.add("show");
-      }, index * 50); // staggered fade-in
+      }, index * 50);
     });
 }
+
 function loadHistoryFromStorage() {
   const stored = localStorage.getItem("calcHistory");
   if (stored) calculationHistory = JSON.parse(stored);
 }
+
 function clearHistory() {
   if (!confirm("Are you sure you want to clear all calculation history?"))
     return;
@@ -1775,25 +1809,68 @@ document.addEventListener("DOMContentLoaded", function () {
   if (scrollBtn) {
     scrollBtn.addEventListener("click", () => {
       const calculatorTop = document.querySelector(".calculator-card");
-
       if (calculatorTop) {
-        calculatorTop.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+        calculatorTop.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
   }
 });
 
-// ============================================
-// PHYSICS CALCULATOR FUNCTIONALITY - NEW CODE
-// ============================================
+// ------------------------------
+// Redo Functionality
+// ------------------------------
+var redoIndex = -1;
 
-/**
- * Physics formulas database
- * Contains common physics equations organized by category
- */
+function redoCalculation() {
+  var calcHistory = localStorage.getItem("calcHistory");
+  if (!calcHistory) return;
+  var History;
+  try { History = JSON.parse(calcHistory); } catch(e) { return; }
+  if (!History || History.length === 0) return;
+
+  // Only cycle through the last 5 (or fewer) calculations
+  var maxSteps = Math.min(5, History.length);
+  redoIndex = (redoIndex + 1) % maxSteps;
+
+  var entry = History[History.length - 1 - redoIndex];
+  if (!entry) return;
+
+  var displayExpr = entry.expression || "";
+  var displayAnswer = (entry.answer !== undefined && entry.answer !== null) ? entry.answer : "";
+
+  // Show full expression = answer (preserves sin/cos/tan/sqrt/! etc.)
+  var resultDisplay = document.getElementById("result");
+  if (resultDisplay) {
+    resultDisplay.value = displayAnswer !== "" ? displayExpr + " = " + displayAnswer : displayExpr;
+  }
+
+  // Update the English word area
+  if (entry.words) {
+    var wordResult = document.getElementById("word-result");
+    var wordArea = document.getElementById("word-area");
+    if (wordResult) wordResult.innerHTML = entry.words;
+    if (wordArea) wordArea.style.display = "flex";
+  }
+}
+
+// Resets the redo pointer whenever a new calculation is made
+function resetRedoIndex() {
+  redoIndex = -1;
+}
+
+function enableRedo() {
+  const redoBtn = document.getElementById("redoBtn");
+  if (redoBtn) redoBtn.disabled = false;
+}
+
+function disableRedo() {
+  const redoBtn = document.getElementById("redoBtn");
+  if (redoBtn) redoBtn.disabled = true;
+}
+
+// ============================================
+// PHYSICS CALCULATOR FUNCTIONALITY
+// ============================================
 const physicsFormulas = {
   mechanics: {
     velocity: {
@@ -1942,9 +2019,6 @@ const physicsFormulas = {
   },
 };
 
-/**
- * Calculate physics formula based on selected category and formula
- */
 function calculatePhysics() {
   const category = document.getElementById("physics-category").value;
   const formulaKey = document.getElementById("physics-formula").value;
@@ -1959,7 +2033,6 @@ function calculatePhysics() {
   const formula = physicsFormulas[category][formulaKey];
   const inputs = [];
 
-  // Get all input values
   for (let i = 1; i <= 3; i++) {
     const input = document.getElementById(`physics-input-${i}`);
     if (input && input.style.display !== "none") {
@@ -1982,7 +2055,6 @@ function calculatePhysics() {
       return;
     }
 
-    // Display result with formula
     let resultHTML = '<div class="alert alert-success py-2 px-3">';
     resultHTML += `<strong>${formula.name}</strong><br>`;
     resultHTML += `Formula: ${formula.formula}<br>`;
@@ -1998,23 +2070,18 @@ function calculatePhysics() {
   }
 }
 
-/**
- * Update formula dropdown when category changes
- */
 function updatePhysicsFormulas() {
   const category = document.getElementById("physics-category").value;
   const formulaSelect = document.getElementById("physics-formula");
   const inputsContainer = document.getElementById("physics-inputs-container");
   const resultDiv = document.getElementById("physics-result");
 
-  // Clear previous selections
   formulaSelect.innerHTML = '<option value="">-- Select Formula --</option>';
   inputsContainer.innerHTML = "";
   resultDiv.innerHTML = "";
 
   if (!category) return;
 
-  // Populate formulas for selected category
   const formulas = physicsFormulas[category];
   for (const [key, formula] of Object.entries(formulas)) {
     const option = document.createElement("option");
@@ -2024,16 +2091,12 @@ function updatePhysicsFormulas() {
   }
 }
 
-/**
- * Update input fields when formula changes
- */
 function updatePhysicsInputs() {
   const category = document.getElementById("physics-category").value;
   const formulaKey = document.getElementById("physics-formula").value;
   const inputsContainer = document.getElementById("physics-inputs-container");
   const resultDiv = document.getElementById("physics-result");
 
-  // Clear previous inputs and results
   inputsContainer.innerHTML = "";
   resultDiv.innerHTML = "";
 
@@ -2041,15 +2104,13 @@ function updatePhysicsInputs() {
 
   const formula = physicsFormulas[category][formulaKey];
 
-  // Display formula description
   let inputsHTML = `<div class="alert alert-info py-2 px-3 mb-2"><small>${formula.description}</small></div>`;
 
-  // Create input fields
   formula.inputs.forEach((inputLabel, index) => {
     inputsHTML += `
       <div class="mb-2">
         <label class="form-label small">${inputLabel}</label>
-        <input type="number" class="form-control form-control-sm" id="physics-input-${index + 1}" 
+        <input type="number" class="form-control form-control-sm" id="physics-input-${index + 1}"
                placeholder="Enter ${inputLabel}" step="any">
       </div>
     `;
@@ -2058,9 +2119,6 @@ function updatePhysicsInputs() {
   inputsContainer.innerHTML = inputsHTML;
 }
 
-/**
- * Clear all physics calculator inputs and results
- */
 function clearPhysicsCalculator() {
   document.getElementById("physics-category").value = "";
   document.getElementById("physics-formula").innerHTML =
@@ -2072,6 +2130,7 @@ function clearPhysicsCalculator() {
 // ============================================
 // END OF PHYSICS CALCULATOR FUNCTIONALITY
 // ============================================
+
 function openGeometry() {
   document.getElementById("geometryModal").style.display = "flex";
 }
@@ -2096,38 +2155,30 @@ function calculateGeometry() {
       if (isNaN(v2)) return alert("Enter Value 2");
       result = v1 * v2;
       break;
-
     case "triangle":
       if (isNaN(v2)) return alert("Enter Value 2");
       result = 0.5 * v1 * v2;
       break;
-
     case "circle":
       result = Math.PI * v1 * v1;
       break;
-
     case "square":
       result = v1 * v1;
       break;
-
     case "perimeterSquare":
       result = 4 * v1;
       break;
-
     case "perimeterRectangle":
       if (isNaN(v2)) return alert("Enter Value 2");
       result = 2 * (v1 + v2);
       break;
-
     case "cubeVolume":
       result = v1 * v1 * v1;
       break;
-
     case "cylinderVolume":
       if (isNaN(v2)) return alert("Enter Height");
       result = Math.PI * v1 * v1 * v2;
       break;
-
     default:
       alert("Select a shape");
       return;
@@ -2137,7 +2188,6 @@ function calculateGeometry() {
   operator = "";
   right = "";
   currentExpression = left;
-  // updateResult();
   calculateResult();
   closeGeometry();
 }
@@ -2177,7 +2227,6 @@ function cubeRootResult() {
 // ============================================
 // PERCENTAGE CHANGE CALCULATOR FUNCTIONS
 // ============================================
-
 function calculatePercentageChange() {
   // Get input values
   const original = parseFloat(document.getElementById("pc-original").value);
@@ -2213,7 +2262,7 @@ function calculatePercentageChange() {
   document.getElementById("pc-change-value").textContent =
     percentageChange.toFixed(2);
   document.getElementById("pc-absolute-change").textContent =
-    absoluteChange.toFixed(2);
+    Math.abs(absoluteChange).toFixed(2);
   document.getElementById("pc-description").textContent =
     `From ${original} to ${newValue} is ${description}`;
   resultDiv.style.display = "block";
@@ -2274,40 +2323,48 @@ function calculateMatrix() {
 
 function redoCalculation() {
   var calcHistory = localStorage.getItem("calcHistory");
-  var History = JSON.parse(calcHistory);
-
-  var lastIn = History[History.length - 1];
-  console.log(lastIn);
-  if (lastIn) {
-    // Restore the entire calculation with result
-    const tokenizer = /(-?\d*\.?\d+|[()+\-*/%^])/g;
-
-    const match = lastIn.expression.match(tokenizer);
-    console.log(match);
-    if (match) {
-      var left = match[0];
-      var operator = match[1];
-      var right = match[2];
-
-      // Show the full expression first
-      document.getElementById("result").value =
-        match.join("") + "=" + lastIn.answer;
-
-      // Then restore to just the result
-
-      // Disable redo button after use
-      // disableRedo();
-    }
+  if (!calcHistory) return;
+  var History;
+  try { History = JSON.parse(calcHistory); } catch(e) { return; }
+  if (!History || History.length === 0) return;
+  // Cap at last 5 entries; cycle through on repeated presses
+  var maxSteps = Math.min(5, History.length);
+  redoIndex = (redoIndex + 1) % maxSteps;
+  var entry = History[History.length - 1 - redoIndex];
+  if (!entry) return;
+  var displayExpr = entry.expression || "";
+  var displayAnswer = (entry.answer !== undefined && entry.answer !== null) ? entry.answer : "";
+  // Show full expression = answer (preserves sin/cos/tan/sqrt/! etc.)
+  var resultDisplay = document.getElementById("result");
+  if (resultDisplay) {
+    resultDisplay.value = displayAnswer !== "" ? displayExpr + " = " + displayAnswer : displayExpr;
   }
+  // Update the English word display area
+  if (entry.words) {
+    var wordResult = document.getElementById("word-result");
+    var wordArea = document.getElementById("word-area");
+    if (wordResult) wordResult.innerHTML = entry.words;
+    if (wordArea) wordArea.style.display = "flex";
+  }
+  // Update button label with current step indicator
+  var redoBtn = document.getElementById("redoBtn");
 }
+
+// Reset redo pointer when a new calculation is made
+function resetRedoIndex() {
+  redoIndex = -1;
+  var redoBtn = document.getElementById("redoBtn");
+  if (redoBtn) redoBtn.value = "↻ REDO";
+}
+
 function enableRedo() {
   const redoBtn = document.getElementById("redoBtn");
-  redoBtn.disabled = false;
+  if (redoBtn) redoBtn.disabled = false;
 }
 
 function disableRedo() {
   const redoBtn = document.getElementById("redoBtn");
-  redoBtn.disabled = true;
+  if (redoBtn) redoBtn.disabled = true;
 }
 
 // ============================================
@@ -3059,6 +3116,7 @@ function clearProbabilityCalculator() {
     document.getElementById('probability-inputs-container').innerHTML = '';
     document.getElementById('probability-result').style.display = 'none';
 }
+
 // ============================================
 // BMI CALCULATOR FUNCTIONS
 // ============================================
@@ -3122,22 +3180,107 @@ function clearBMICalculator() {
 }
 
 
+// ============================================
+// STATISTICAL CALCULATOR FUNCTIONS
+// ============================================
+function calculateStatistics() {
+  const input = document.getElementById('stats-data-input').value.trim();
+
+  if (!input) {
+    alert('Please enter data values');
+    return;
+  }
+
+  const dataArray = input.split(',').map(val => {
+    const num = parseFloat(val.trim());
+    return isNaN(num) ? null : num;
+  }).filter(val => val !== null);
+
+  if (dataArray.length === 0) {
+    alert('No valid numbers found. Please enter comma-separated numbers.');
+    return;
+  }
+
+  const stats = {
+    count: dataArray.length,
+    sum: dataArray.reduce((a, b) => a + b, 0),
+    min: Math.min(...dataArray),
+    max: Math.max(...dataArray),
+    mean: 0,
+    median: 0,
+    mode: 'N/A',
+    stddev: 0
+  };
+
+  stats.mean = stats.sum / stats.count;
+
+  const sorted = [...dataArray].sort((a, b) => a - b);
+  if (stats.count % 2 === 0) {
+    stats.median = (sorted[stats.count / 2 - 1] + sorted[stats.count / 2]) / 2;
+  } else {
+    stats.median = sorted[Math.floor(stats.count / 2)];
+  }
+
+  const frequency = {};
+  let maxFreq = 0;
+  let modes = [];
+
+  dataArray.forEach(num => {
+    frequency[num] = (frequency[num] || 0) + 1;
+    if (frequency[num] > maxFreq) {
+      maxFreq = frequency[num];
+    }
+  });
+
+  Object.keys(frequency).forEach(key => {
+    if (frequency[key] === maxFreq) {
+      modes.push(parseFloat(key));
+    }
+  });
+
+  if (modes.length === dataArray.length) {
+    stats.mode = 'No mode';
+  } else if (modes.length === 1) {
+    stats.mode = modes[0].toFixed(4);
+  } else {
+    stats.mode = modes.map(m => m.toFixed(4)).join(', ');
+  }
+
+  const variance = dataArray.reduce((sum, val) => sum + Math.pow(val - stats.mean, 2), 0) / stats.count;
+  stats.stddev = Math.sqrt(variance);
+
+  displayStatisticsResults(stats);
+}
+
+function displayStatisticsResults(stats) {
+  const resultDiv = document.getElementById('stats-result');
+  document.getElementById('stat-count').textContent = stats.count;
+  document.getElementById('stat-sum').textContent = stats.sum.toFixed(2);
+  document.getElementById('stat-mean').textContent = stats.mean.toFixed(4);
+  document.getElementById('stat-median').textContent = stats.median.toFixed(4);
+  document.getElementById('stat-mode').textContent = stats.mode;
+  document.getElementById('stat-min').textContent = stats.min.toFixed(2);
+  document.getElementById('stat-max').textContent = stats.max.toFixed(2);
+  document.getElementById('stat-stddev').textContent = stats.stddev.toFixed(4);
+  resultDiv.style.display = 'block';
+}
+
+function clearStatistics() {
+  document.getElementById('stats-data-input').value = '';
+  document.getElementById('stats-result').style.display = 'none';
+}
+
 // ------------------------------
 // ROUND UP TO DECIMAL PLACES
 // ------------------------------
 let currentDP = 2;
 
-function toggleDPDropdown(event) {
-  event.stopPropagation();
-  const menu = document.getElementById('dpDropdownMenu');
-  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-}
-
-// Close when clicking anywhere outside the dropdown
-document.addEventListener('click', function () {
-  const menu = document.getElementById('dpDropdownMenu');
-  if (menu) menu.style.display = 'none';
-});
+// document.getElementById('dpMainBtn').addEventListener('click', function(e) {
+//   e.stopPropagation();
+//   const menu = document.getElementById('dpDropdownMenu');
+//   const isOpen = menu.style.display === 'block';
+//   menu.style.display = isOpen ? 'none' : 'block';
+// });
 
 function setDP(dp) {
   currentDP = dp;
@@ -3152,3 +3295,593 @@ function roundToDecimal(dp) {
   document.getElementById('result').value = val.toFixed(dp);
 
 }
+
+// ========================================================
+// ================= FORMULA CALCULATOR ===================
+// ========================================================
+
+const formulas={
+  geometry:{
+    circleArea:{name:"Area of Circle",inputs:["Radius"],calc:v=>Math.PI*v[0]*v[0]},
+    circleCircumference:{name:"Circumference of Circle",inputs:["Radius"],calc:v=>2*Math.PI*v[0]},
+    triangleArea:{name:"Area of Triangle",inputs:["Base","Height"],calc:v=>0.5*v[0]*v[1]},
+    rectangleArea:{name:"Area of Rectangle",inputs:["Length","Width"],calc:v=>v[0]*v[1]},
+    squareArea:{name:"Area of Square",inputs:["Side"],calc:v=>v[0]*v[0]},
+    cubeVolume:{name:"Volume of Cube",inputs:["Side"],calc:v=>v[0]**3},
+    sphereVolume:{name:"Volume of Sphere",inputs:["Radius"],calc:v=>(4/3)*Math.PI*v[0]**3},
+    cylinderVolume:{name:"Volume of Cylinder",inputs:["Radius","Height"],calc:v=>Math.PI*v[0]**2*v[1]},
+    pythagoras:{name:"Pythagorean Theorem",inputs:["a","b"],calc:v=>Math.sqrt(v[0]**2+v[1]**2)},
+    sphereSurface:{name:"Surface Area of Sphere",inputs:["Radius"],calc:v=>4*Math.PI*v[0]**2}
+  },
+  finance:{
+    simpleInterest:{name:"Simple Interest",inputs:["Principal","Rate","Time"],calc:v=>(v[0]*v[1]*v[2])/100},
+    compoundInterest:{name:"Compound Interest",inputs:["Principal","Rate","Time","n"],calc:v=>v[0]*(1+v[1]/100/v[3])**(v[3]*v[2])},
+    percentage:{name:"Percentage",inputs:["Value","Total"],calc:v=>(v[0]/v[1])*100},
+    discount:{name:"Discount Price",inputs:["Original Price","Discount %"],calc:v=>v[0]-(v[1]/100)*v[0]},
+    profit:{name:"Profit/Loss",inputs:["Selling Price","Cost Price"],calc:v=>v[0]-v[1]}
+  },
+  algebra:{
+    slope:{name:"Slope of Line",inputs:["x1","y1","x2","y2"],calc:v=>(v[3]-v[1])/(v[2]-v[0])},
+    distance:{name:"Distance Between Points",inputs:["x1","y1","x2","y2"],calc:v=>Math.sqrt((v[2]-v[0])**2+(v[3]-v[1])**2)},
+    average:{name:"Average",inputs:["Sum","Count"],calc:v=>v[0]/v[1]},
+    speed:{name:"Speed",inputs:["Distance","Time"],calc:v=>v[0]/v[1]},
+    quadratic:{name:"Quadratic Formula",inputs:["a","b","c"],calc:v=>(-v[1]+Math.sqrt(v[1]**2-4*v[0]*v[2]))/(2*v[0])}
+  }
+};
+
+// Populate formulas
+document.addEventListener("DOMContentLoaded",()=>{
+
+  const category=document.getElementById("formulaCategory");
+  const select=document.getElementById("formulaSelect");
+  const container=document.getElementById("formulaInputs");
+
+  if(!category) return;
+
+  category.addEventListener("change",()=>{
+    select.innerHTML='<option value="">Select Formula</option>';
+    container.innerHTML='';
+    if(!category.value) return;
+
+    Object.entries(formulas[category.value]).forEach(([key,f])=>{
+      select.innerHTML+=`<option value="${key}">${f.name}</option>`;
+    });
+  });
+
+  select.addEventListener("change",()=>{
+    container.innerHTML='';
+    const f=formulas[category.value]?.[select.value];
+    if(!f) return;
+
+    f.inputs.forEach((label,i)=>{
+      container.innerHTML+=`
+        <input type="number" class="form-control mb-2"
+        placeholder="${label}" id="f${i}">
+      `;
+    });
+  });
+
+});
+
+// Calculate formula
+function calculateFormula(){
+  const category=document.getElementById("formulaCategory").value;
+  const key=document.getElementById("formulaSelect").value;
+  if(!category||!key) return;
+
+  const formula=formulas[category][key];
+  let values=[];
+
+  for(let i=0;i<formula.inputs.length;i++)
+    values.push(parseFloat(document.getElementById("f"+i).value)||0);
+
+  const result=formula.calc(values);
+
+  // Display inside Formula Calculator
+  document.getElementById("formula-result").innerHTML =
+    `<div class="alert alert-success mt-2">
+       Result: <strong>${result}</strong>
+     </div>`;
+}
+
+
+// ============================================
+// GCD & LCM CALCULATOR FUNCTIONS
+// ============================================
+
+/**
+ * Calculate Greatest Common Divisor using Euclidean algorithm
+ */
+function findGCD(a, b) {
+  a = Math.abs(a);
+  b = Math.abs(b);
+  while (b !== 0) {
+    const temp = b;
+    b = a % b;
+    a = temp;
+  }
+  return a;
+}
+
+/**
+ * Calculate Least Common Multiple using the formula: LCM(a,b) = (a * b) / GCD(a,b)
+ */
+function findLCM(a, b) {
+  return Math.abs(a * b) / findGCD(a, b);
+}
+
+/**
+ * Main function to calculate GCD and LCM
+ */
+function calculateGCDLCM() {
+  const num1Input = document.getElementById('gcd-num1');
+  const num2Input = document.getElementById('gcd-num2');
+  const resultDiv = document.getElementById('gcd-lcm-result');
+
+  if (!num1Input.value || !num2Input.value) {
+    alert('Please enter both numbers');
+    return;
+  }
+
+  const num1 = parseInt(num1Input.value);
+  const num2 = parseInt(num2Input.value);
+
+  if (isNaN(num1) || isNaN(num2) || num1 <= 0 || num2 <= 0) {
+    alert('Please enter valid positive integers');
+    return;
+  }
+
+  const gcd = findGCD(num1, num2);
+  const lcm = findLCM(num1, num2);
+
+  // Display results
+  document.getElementById('gcd-value').textContent = gcd;
+  document.getElementById('lcm-value').textContent = lcm;
+  resultDiv.style.display = 'block';
+
+  // Add to history
+  calculationHistory.push({
+    expression: `GCD(${num1}, ${num2}) = ${gcd}; LCM(${num1}, ${num2}) = ${lcm}`,
+    words: `GCD: ${numberToWords(gcd)}, LCM: ${numberToWords(lcm)}`,
+    time: new Date().toLocaleTimeString(),
+  });
+
+  if (calculationHistory.length > 20) {
+    calculationHistory.shift();
+  }
+
+  localStorage.setItem('calcHistory', JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+}
+
+/**
+ * Clear GCD & LCM calculator inputs and results
+ */
+function clearGCDLCM() {
+  document.getElementById('gcd-num1').value = '';
+  document.getElementById('gcd-num2').value = '';
+  document.getElementById('gcd-lcm-result').style.display = 'none';
+}
+
+// ===============================
+// FIBONACCI SEQUENCE CALCULATOR
+// ===============================
+
+/**
+ * Generate Fibonacci sequence up to n terms
+ * @param {number} n - Number of terms to generate
+ * @returns {array} Array of Fibonacci numbers
+ */
+function generateFibonacci(n) {
+  if (n <= 0) return [];
+  if (n === 1) return [0];
+  
+  const fib = [0, 1];
+  for (let i = 2; i < n; i++) {
+    fib.push(fib[i - 1] + fib[i - 2]);
+  }
+  return fib.slice(0, n);
+}
+
+/**
+ * Calculate and display Fibonacci sequence
+ */
+function calculateFibonacci() {
+  const nInput = document.getElementById('fib-terms');
+  const resultDiv = document.getElementById('fib-result');
+  
+  if (!nInput.value) {
+    alert('Please enter the number of terms');
+    return;
+  }
+  
+  const n = parseInt(nInput.value);
+  
+  if (isNaN(n) || n <= 0) {
+    alert('Please enter a valid positive integer');
+    return;
+  }
+  
+  if (n > 50) {
+    alert('Maximum 50 terms allowed to prevent performance issues');
+    return;
+  }
+  
+  const fibSequence = generateFibonacci(n);
+  const sequenceStr = fibSequence.join(', ');
+  
+  // Display results
+  document.getElementById('fib-sequence').textContent = sequenceStr;
+  document.getElementById('fib-sum').textContent = fibSequence.reduce((a, b) => a + b, 0);
+  document.getElementById('fib-count').textContent = fibSequence.length;
+  if (fibSequence.length > 0) {
+    document.getElementById('fib-last').textContent = fibSequence[fibSequence.length - 1];
+  }
+  
+  resultDiv.style.display = 'block';
+  
+  // Add to history
+  calculationHistory.push({
+    expression: `Fibonacci(${n}) = ${sequenceStr.substring(0, 50)}${sequenceStr.length > 50 ? '...' : ''}`,
+    words: `First ${n} Fibonacci numbers: ${sequenceStr.substring(0, 50)}${sequenceStr.length > 50 ? '...' : ''}`,
+    time: new Date().toLocaleTimeString(),
+  });
+  
+  if (calculationHistory.length > 20) {
+    calculationHistory.shift();
+  }
+  
+  localStorage.setItem('calcHistory', JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+}
+
+/**
+ * Find the nth Fibonacci number
+ */
+function findNthFibonacci() {
+  const nInput = document.getElementById('fib-nth-input');
+  const resultDiv = document.getElementById('fib-nth-result');
+  
+  if (!nInput.value) {
+    alert('Please enter the term number (n)');
+    return;
+  }
+  
+  const n = parseInt(nInput.value);
+  
+  if (isNaN(n) || n < 0) {
+    alert('Please enter a valid non-negative integer');
+    return;
+  }
+  
+  if (n > 80) {
+    alert('Maximum 80th term allowed');
+    return;
+  }
+  
+  // Calculate nth Fibonacci using closed form or iterative method
+  let fib;
+  if (n === 0) {
+    fib = 0;
+  } else if (n === 1) {
+    fib = 1;
+  } else {
+    let a = 0, b = 1;
+    for (let i = 2; i <= n; i++) {
+      [a, b] = [b, a + b];
+    }
+    fib = b;
+  }
+  
+  // Display result
+  document.getElementById('fib-nth-value').textContent = fib;
+  resultDiv.style.display = 'block';
+  
+  // Add to history
+  calculationHistory.push({
+    expression: `F(${n}) = ${fib}`,
+    words: `${n}th Fibonacci number is ${numberToWords(fib)}`,
+    time: new Date().toLocaleTimeString(),
+  });
+  
+  if (calculationHistory.length > 20) {
+    calculationHistory.shift();
+  }
+  
+  localStorage.setItem('calcHistory', JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+}
+
+/**
+ * Check if a number is a Fibonacci number
+ */
+function checkFibonacciNumber() {
+  const numInput = document.getElementById('fib-check-input');
+  const resultDiv = document.getElementById('fib-check-result');
+  
+  if (!numInput.value) {
+    alert('Please enter a number to check');
+    return;
+  }
+  
+  const num = parseInt(numInput.value);
+  
+  if (isNaN(num) || num < 0) {
+    alert('Please enter a valid non-negative integer');
+    return;
+  }
+  
+  // Check if number is Fibonacci using the property:
+  // A number is Fibonacci if one or both of (5*n^2 + 4) or (5*n^2 - 4) is a perfect square
+  function isPerfectSquare(x) {
+    const sqrt = Math.sqrt(x);
+    return sqrt === Math.floor(sqrt);
+  }
+  
+  const isFib = isPerfectSquare(5 * num * num + 4) || isPerfectSquare(5 * num * num - 4);
+  
+  // Display result
+  document.getElementById('fib-check-value').textContent = num;
+  document.getElementById('fib-check-answer').textContent = isFib ? 'YES ✓' : 'NO ✗';
+  document.getElementById('fib-check-answer').style.color = isFib ? '#198754' : '#dc3545';
+  resultDiv.style.display = 'block';
+  
+  // Add to history
+  calculationHistory.push({
+    expression: `Is ${num} a Fibonacci number?`,
+    words: `${num} is ${isFib ? '' : 'not '}a Fibonacci number`,
+    time: new Date().toLocaleTimeString(),
+  });
+  
+  if (calculationHistory.length > 20) {
+    calculationHistory.shift();
+  }
+  
+  localStorage.setItem('calcHistory', JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+}
+
+/**
+ * Clear Fibonacci calculator inputs and results
+ */
+function clearFibonacci() {
+  document.getElementById('fib-terms').value = '';
+  document.getElementById('fib-result').style.display = 'none';
+  document.getElementById('fib-nth-input').value = '';
+  document.getElementById('fib-nth-result').style.display = 'none';
+  document.getElementById('fib-check-input').value = '';
+  document.getElementById('fib-check-result').style.display = 'none';
+}
+ /* Clear bitwise calculator
+ */
+function clearBitwise() {
+  document.getElementById('bitwise-num1').value = '5';
+  document.getElementById('bitwise-num2').value = '3';
+  document.getElementById('bitwise-result').style.display = 'none';
+}
+
+function appendPi() {
+  const piDisplay = "π";      // what the user sees
+  const piEval = "Math.PI";   // what eval() will use
+
+  // Reference to your display input
+  const displayEl = document.getElementById("result");
+
+  // Determine last character in the display
+  const lastChar = displayEl.value.slice(-1);
+
+  // If display is empty or ends with an operator → just append π
+  if ( /[+\-×*/^]$/.test(lastChar)) {
+    currentExpression += piEval;
+    displayEl.value += piDisplay;
+  } 
+  else if (!displayEl.value){
+    currentExpression = piEval;
+    displayEl.value += piDisplay;
+  }
+  else {
+    // Otherwise assume multiplication between number and π
+    currentExpression += "*" + piEval;
+    displayEl.value += "×" + piDisplay;
+  }
+
+  // Optional: update word-area preview if you have it
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+
+  if (wordResult && wordArea) {
+    wordResult.innerHTML = '<span class="small-label">Result in words</span><strong>' + numberToWords(Math.PI) + '</strong>';
+    wordArea.style.display = "flex";
+  }
+}
+
+// ===============================
+// BASE CONVERTER & BITWISE OPERATIONS
+// ===============================
+
+/**
+ * Convert decimal number to binary, hex, and octal
+ */
+function convertDecimal() {
+  const decimalInput = document.getElementById('decimal-input');
+  const value = parseInt(decimalInput.value);
+
+  if (isNaN(value) || value < 0) {
+    document.getElementById('binary-result').textContent = '0';
+    document.getElementById('hex-result').textContent = '0x0';
+    document.getElementById('octal-result').textContent = '0';
+    document.getElementById('decimal-result').textContent = '0';
+    return;
+  }
+
+  const binary = value.toString(2);
+  const hex = '0x' + value.toString(16).toUpperCase();
+  const octal = '0' + value.toString(8);
+
+  document.getElementById('binary-result').textContent = binary;
+  document.getElementById('hex-result').textContent = hex;
+  document.getElementById('octal-result').textContent = octal;
+  document.getElementById('decimal-result').textContent = value.toString();
+}
+
+/**
+ * Convert binary to decimal
+ */
+function convertFromBinary() {
+  const binaryInput = document.getElementById('binary-input').value.trim();
+  
+  if (!binaryInput) {
+    document.getElementById('binary-to-decimal').textContent = '0';
+    return;
+  }
+
+  // Validate binary input (only 0 and 1)
+  if (!/^[01]+$/.test(binaryInput)) {
+    document.getElementById('binary-to-decimal').textContent = 'Invalid binary';
+    return;
+  }
+
+  const decimal = parseInt(binaryInput, 2);
+  document.getElementById('binary-to-decimal').textContent = decimal.toString();
+}
+
+/**
+ * Convert hexadecimal to decimal
+ */
+function convertFromHex() {
+  const hexInput = document.getElementById('hex-input').value.trim();
+  
+  if (!hexInput) {
+    document.getElementById('hex-to-decimal').textContent = '0';
+    return;
+  }
+
+  // Validate hex input
+  if (!/^[0-9A-Fa-f]+$/.test(hexInput)) {
+    document.getElementById('hex-to-decimal').textContent = 'Invalid hex';
+    return;
+  }
+
+  const decimal = parseInt(hexInput, 16);
+  document.getElementById('hex-to-decimal').textContent = decimal.toString();
+}
+
+/**
+ * Convert octal to decimal
+ */
+function convertFromOctal() {
+  const octalInput = document.getElementById('octal-input').value.trim();
+  
+  if (!octalInput) {
+    document.getElementById('octal-to-decimal').textContent = '0';
+    return;
+  }
+
+  // Validate octal input (only 0-7)
+  if (!/^[0-7]+$/.test(octalInput)) {
+    document.getElementById('octal-to-decimal').textContent = 'Invalid octal';
+    return;
+  }
+
+  const decimal = parseInt(octalInput, 8);
+  document.getElementById('octal-to-decimal').textContent = decimal.toString();
+}
+
+/**
+ * Bitwise AND operation
+ */
+function bitwiseAND() {
+  const num1 = parseInt(document.getElementById('bitwise-num1').value) || 0;
+  const num2 = parseInt(document.getElementById('bitwise-num2').value) || 0;
+  
+  const result = num1 & num2;
+  displayBitwiseResult(`${num1} & ${num2}`, result);
+}
+
+/**
+ * Bitwise OR operation
+ */
+function bitwiseOR() {
+  const num1 = parseInt(document.getElementById('bitwise-num1').value) || 0;
+  const num2 = parseInt(document.getElementById('bitwise-num2').value) || 0;
+  
+  const result = num1 | num2;
+  displayBitwiseResult(`${num1} | ${num2}`, result);
+}
+
+/**
+ * Bitwise XOR operation
+ */
+function bitwiseXOR() {
+  const num1 = parseInt(document.getElementById('bitwise-num1').value) || 0;
+  const num2 = parseInt(document.getElementById('bitwise-num2').value) || 0;
+  
+  const result = num1 ^ num2;
+  displayBitwiseResult(`${num1} ^ ${num2}`, result);
+}
+
+/**
+ * Bitwise NOT operation
+ */
+function bitwiseNOT() {
+  const num1 = parseInt(document.getElementById('bitwise-num1').value) || 0;
+  
+  // JavaScript's NOT (~) operator works on 32-bit signed integers
+  // We'll use only the first number for NOT operation
+  const result = ~num1;
+  displayBitwiseResult(`~${num1}`, result);
+}
+
+/**
+ * Left Shift operation
+ */
+function leftShift() {
+  const num1 = parseInt(document.getElementById('bitwise-num1').value) || 0;
+  const num2 = parseInt(document.getElementById('bitwise-num2').value) || 0;
+  
+  const result = num1 << num2;
+  displayBitwiseResult(`${num1} << ${num2}`, result);
+}
+
+/**
+ * Right Shift operation
+ */
+function rightShift() {
+  const num1 = parseInt(document.getElementById('bitwise-num1').value) || 0;
+  const num2 = parseInt(document.getElementById('bitwise-num2').value) || 0;
+  
+  const result = num1 >> num2;
+  displayBitwiseResult(`${num1} >> ${num2}`, result);
+}
+
+/**
+ * Display bitwise operation results
+ */
+function displayBitwiseResult(operation, result) {
+  const resultDiv = document.getElementById('bitwise-result');
+  document.getElementById('bitwise-op').textContent = operation;
+  document.getElementById('bitwise-decimal').textContent = result;
+  document.getElementById('bitwise-binary').textContent = result.toString(2);
+  resultDiv.style.display = 'block';
+
+  // Add to history
+  calculationHistory.push({
+    expression: `${operation} = ${result}`,
+    words: `Bitwise operation: ${numberToWords(result)}`,
+    time: new Date().toLocaleTimeString(),
+  });
+
+  if (calculationHistory.length > 20) {
+    calculationHistory.shift();
+  }
+
+  localStorage.setItem('calcHistory', JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+}
+
+
