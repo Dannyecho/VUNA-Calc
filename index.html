@@ -721,11 +721,11 @@ border-radius:15px;">
 
                     <!--  Row 8                  -->
                     <div class="btn-group" role="" style="position:relative;">
-                      <button class="btn btn-special" id="dpMainBtn">
+                      <button class="btn btn-special" id="dpMainBtn" onclick="toggleDPDropdown(event)">
                         ⌃ <span id="dpLabel">2dp</span> ▾
                       </button>
 
-                      <ul  id="dpDropdownMenu"
+                      <ul id="dpDropdownMenu"
                         style="display:none; position:absolute; top:100%; left:0; list-style:none; padding:4px 0; margin:0; z-index:999; min-width:80px;">
                         <li class="btn btn-special"><a href="#" onclick="setDP(1); return false;">⌃ 1dp</a></li>
                         <li class="btn btn-special"><a href="#" onclick="setDP(2); return false;">⌃ 2dp</a></li>
