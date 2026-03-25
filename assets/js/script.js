@@ -1,191 +1,8672 @@
-var left = '';
-var operator = '';
-var right = '';
-let wordPlaceholder = document.getElementById('word-result');
+// ===============================
+// 🧠 SMART RESULT MEMORY FEATURE
+// ===============================
 
-function appendToResult(value) {
-    if (operator.length == 0) {
-        left += value;
-    } else {
-        right += value;
+let LAST_RESULT = 0;
+// ------------------------------
+// Theme Toggle Logic
+// ------------------------------
+function toggleTheme() {
+  const body = document.body;
+  const btn = document.getElementById("theme-toggle");
+
+  body.classList.toggle("dark-mode");
+
+  if (body.classList.contains("dark-mode")) {
+    btn.innerHTML = "☀️";
+    btn.title = "Switch to light mode";
+    localStorage.setItem("theme", "dark");
+  } else {
+    btn.innerHTML = "🌙";
+    btn.title = "Switch to dark mode";
+    localStorage.setItem("theme", "light");
+  }
+}
+
+var inverseMode = false;
+var currentExpression = "";
+let calculationHistory = [];
+document.addEventListener("DOMContentLoaded", function () {
+  loadHistoryFromStorage();
+  renderHistory();
+});
+var currencyRates = {
+  USD: 1,
+  EUR: 0.92,
+  GBP: 0.79,
+  JPY: 149.5,
+  CAD: 1.37,
+  AUD: 1.52,
+  NGN: 1500.0,
+};
+
+const unitConversions = {
+  length: {
+    km: 1000,
+    m: 1,
+    mile: 1609.34,
+    yard: 0.9144,
+    ft: 0.3048,
+    inch: 0.0254,
+  },
+  weight: {
+    kg: 1,
+    g: 0.001,
+    lb: 0.453592,
+    oz: 0.0283495,
+  },
+  temperature: {
+    C: { offset: 0, scale: 1 },
+    F: { offset: 32, scale: 5 / 9 },
+    K: { offset: -273.15, scale: 1 },
+  },
+  area: {
+    sqm: 1,
+    sqkm: 1e6,
+    sqmile: 2.58999e6,
+    sqyard: 0.836127,
+    sqft: 0.092903,
+    sqinch: 0.00064516,
+    hectare: 10000,
+    acre: 4046.86,
+  },
+  data: {
+    bit: 1 / 8,
+    byte: 1,
+    kb: 1024,
+    mb: 1024 * 1024,
+    gb: 1024 * 1024 * 1024,
+    tb: 1024 * 1024 * 1024 * 1024,
+  },
+};
+
+function convertUnit(type) {
+  if (type === "length") {
+    const value =
+      parseFloat(document.getElementById("length-value").value) || 0;
+    const fromUnit = document.getElementById("from-length").value;
+    const toUnit = document.getElementById("to-length").value;
+
+    if (value === 0) {
+      document.getElementById("length-result").textContent = "0";
+      return;
     }
 
-    updateResult();
+    const meters = value * unitConversions["length"][fromUnit];
+    const result = meters / unitConversions["length"][toUnit];
+    document.getElementById("length-result").textContent = formatResult(result);
+    updateExampleConversion(result);
+  } else if (type === "weight") {
+    const value =
+      parseFloat(document.getElementById("weight-value").value) || 0;
+    const fromUnit = document.getElementById("from-weight").value;
+    const toUnit = document.getElementById("to-weight").value;
+
+    if (value === 0) {
+      document.getElementById("weight-result").textContent = "0";
+      return;
+    }
+
+    const kg = value * unitConversions["weight"][fromUnit];
+    const result = kg / unitConversions["weight"][toUnit];
+    document.getElementById("weight-result").textContent = formatResult(result);
+  } else if (type === "temperature") {
+    const value = parseFloat(document.getElementById("temp-value").value) || 0;
+    const fromUnit = document.getElementById("from-temp").value;
+    const toUnit = document.getElementById("to-temp").value;
+
+    let celsius;
+    if (fromUnit === "C") {
+      celsius = value;
+    } else if (fromUnit === "F") {
+      celsius = ((value - 32) * 5) / 9;
+    } else if (fromUnit === "K") {
+      celsius = value - 273.15;
+    }
+
+    let result;
+    if (toUnit === "C") {
+      result = celsius;
+    } else if (toUnit === "F") {
+      result = (celsius * 9) / 5 + 32;
+    } else if (toUnit === "K") {
+      result = celsius + 273.15;
+    }
+
+    document.getElementById("temp-result").textContent = formatResult(result);
+  } else if (type === "currency") {
+    const value =
+      parseFloat(document.getElementById("currency-value").value) || 0;
+    const fromCurrency = document.getElementById("from-currency").value;
+    const toCurrency = document.getElementById("to-currency").value;
+
+    if (
+      value === 0 ||
+      !currencyRates[fromCurrency] ||
+      !currencyRates[toCurrency]
+    ) {
+      document.getElementById("currency-result").textContent = "0";
+      return;
+    }
+
+    const usd = value / currencyRates[fromCurrency];
+    const result = usd * currencyRates[toCurrency];
+    document.getElementById("currency-result").textContent =
+      formatResult(result);
+  } else if (type === "area") {
+    const value = parseFloat(document.getElementById("area-value").value) || 0;
+    const fromUnit = document.getElementById("from-area").value;
+    const toUnit = document.getElementById("to-area").value;
+
+    if (value === 0) {
+      document.getElementById("area-result").textContent = "0";
+      return;
+    }
+
+    const sqm = value * unitConversions.area[fromUnit];
+    const result = sqm / unitConversions.area[toUnit];
+    document.getElementById("area-result").textContent = formatResult(result);
+  } else if (type === "data") {
+    const value = parseFloat(document.getElementById("data-value").value) || 0;
+    const fromUnit = document.getElementById("from-data").value;
+    const toUnit = document.getElementById("to-data").value;
+
+    if (value === 0) {
+      document.getElementById("data-result").textContent = "0";
+      return;
+    }
+
+    const bytes = value * unitConversions.data[fromUnit];
+    const result = bytes / unitConversions.data[toUnit];
+    document.getElementById("data-result").textContent = formatResult(result);
+  }
+}
+
+// Initialize converter displays on load
+window.addEventListener("DOMContentLoaded", function () {
+  try {
+    convertUnit("length");
+    convertUnit("weight");
+    convertUnit("temperature");
+    convertUnit("currency");
+    convertUnit("area");
+    convertUnit("data");
+  } catch (e) {
+    console.warn("Converter init error:", e);
+  }
+});
+
+function formatResult(value) {
+  return value.toFixed(4);
+}
+
+function updateExampleConversion(value) {
+  document.getElementById("example-result").textContent = formatResult(value);
+  document.getElementById("example-add").textContent = formatResult(value + 10);
+}
+
+function fetchCurrencyRates() {
+  const btn = document.getElementById("currency-refresh-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "⏳";
+  }
+
+  fetch("https://api.exchangerate-api.com/v4/latest/USD")
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.rates) {
+        alert("Currency rates fetched successfully.");
+        console.log("Fetched currency rates:", data);
+        currencyRates["EUR"] = data.rates.EUR || currencyRates["EUR"];
+        currencyRates["GBP"] = data.rates.GBP || currencyRates["GBP"];
+        currencyRates["JPY"] = data.rates.JPY || currencyRates["JPY"];
+        currencyRates["CAD"] = data.rates.CAD || currencyRates["CAD"];
+        currencyRates["AUD"] = data.rates.AUD || currencyRates["AUD"];
+        currencyRates["NGN"] = data.rates.NGN || currencyRates["NGN"];
+
+        const timestamp = new Date().toLocaleTimeString();
+        document.getElementById("currency-timestamp").textContent =
+          `Last updated: ${timestamp}`;
+
+        convertUnit("currency");
+        if (btn) {
+          btn.textContent = "🔄";
+          btn.disabled = false;
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching currency rates:", error);
+      document.getElementById("currency-timestamp").textContent =
+        "Unable to fetch live rates";
+      if (btn) {
+        btn.textContent = "🔄";
+        btn.disabled = false;
+      }
+    });
+}
+
+// Set theme on page load from localStorage
+window.addEventListener("DOMContentLoaded", function () {
+  const theme = localStorage.getItem("theme");
+  const body = document.body;
+  const btn = document.getElementById("theme-toggle");
+
+  if (btn) {
+    if (theme === "dark") {
+      body.classList.add("dark-mode");
+      btn.innerHTML = "☀️";
+      btn.title = "Switch to light mode";
+    } else {
+      btn.innerHTML = "🌙";
+      btn.title = "Switch to dark mode";
+    }
+  }
+});
+
+// ------------------------------
+// Calculator State
+// ------------------------------
+let left = "";
+let operator = "";
+let right = "";
+let steps = [];
+const MAX_STEPS = 6;
+
+// ------------------------------
+// Basic Calculator Functions
+// ------------------------------
+function appendToResult(value) {
+  currentExpression += value.toString();
+  updateResult();
 }
 
 function bracketToResult(value) {
-    document.getElementById('result').value += value;
+  currentExpression += value;
+  updateResult();
+}
+
+function backspace() {
+  currentExpression = currentExpression.slice(0, -1);
+  updateResult();
 }
 
 function operatorToResult(value) {
-    if (right.length) {
-        calculateResult();
-    }
-    operator = value;
-    updateResult();
+  if (value === "^") {
+    currentExpression += "**";
+  } else {
+    currentExpression += value;
+  }
+  updateResult();
 }
 
 function clearResult() {
-    left = '';
-    right = '';
-    operator = '';
+  currentExpression = "";
+  document.getElementById("word-result").innerHTML = "";
+  document.getElementById("word-area").style.display = "none";
+  updateResult();
+}
 
-    wordPlaceholder.innerHTML = '';
+// ------------------------------
+// Square Root Function
+// ------------------------------
+function calculateSquareRoot() {
+  if (!currentExpression) return;
+
+  const num = parseFloat(currentExpression);
+
+  if (isNaN(num)) {
+    currentExpression = "Error";
     updateResult();
+    return;
+  }
+
+  if (num < 0) {
+    currentExpression = "Error: Negative";
+    updateResult();
+    return;
+  }
+
+  const result = Math.sqrt(num);
+
+  calculationHistory?.push({
+    expression: `√${num} = ${result}`,
+    words: numberToWords(result),
+    time: new Date().toLocaleTimeString(),
+  });
+  if (calculationHistory.length > 20) calculationHistory.shift();
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  renderHistory();
+
+  currentExpression = result.toString();
+  updateResult();
+}
+
+// ------------------------------
+// EXPONENTIAL FUNCTION (e^x)
+// ------------------------------
+function calculateExponential() {
+  if (!currentExpression) return;
+
+  const num = parseFloat(currentExpression);
+
+  if (isNaN(num)) {
+    currentExpression = "Error";
+    updateResult();
+    return;
+  }
+
+  const result = Math.exp(num);
+
+  calculationHistory?.push({
+    expression: `e^${num} = ${result}`,
+    words: numberToWords(result),
+    time: new Date().toLocaleTimeString(),
+  });
+  if (calculationHistory.length > 20) calculationHistory.shift();
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  renderHistory();
+
+  currentExpression = result.toString();
+  updateResult();
+}
+
+// ------------------------------
+// Factorial Helper Function
+// ------------------------------
+function factorial(n) {
+  if (n < 0) return NaN;
+  if (n === 0 || n === 1) return 1;
+  if (n > 170) return Infinity;
+  let res = 1;
+  for (let i = 2; i <= n; i++) res *= i;
+  return res;
+}
+
+// ------------------------------
+// Permutation: nPr = n! / (n-r)!
+// ------------------------------
+function calculatePermutation() {
+  const match = currentExpression.match(/^(\d+)P(\d+)$/i);
+
+  if (match) {
+    const n = parseInt(match[1]);
+    const r = parseInt(match[2]);
+
+    if (n >= r && n >= 0 && r >= 0) {
+      const result = factorial(n) / factorial(n - r);
+      currentExpression = result.toString();
+
+      calculationHistory?.push({
+        expression: `${n}P${r}`,
+        words: numberToWords(result),
+        answer: result,
+        time: new Date().toLocaleTimeString(),
+      });
+      if (calculationHistory.length > 20) calculationHistory.shift();
+      localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+      renderHistory();
+      resetRedoIndex();
+    } else {
+      currentExpression = "Error";
+    }
+  } else {
+    currentExpression += "P";
+  }
+  updateResult();
+}
+
+// ------------------------------
+// Combination: nCr = n! / (r! * (n-r)!)
+// ------------------------------
+function calculateCombination() {
+  const match = currentExpression.match(/^(\d+)C(\d+)$/i);
+
+  if (match) {
+    const n = parseInt(match[1]);
+    const r = parseInt(match[2]);
+
+    if (n >= r && n >= 0 && r >= 0) {
+      const result = factorial(n) / (factorial(r) * factorial(n - r));
+      currentExpression = result.toString();
+
+      calculationHistory?.push({
+        expression: `${n}C${r}`,
+        words: numberToWords(result),
+        answer: result,
+        time: new Date().toLocaleTimeString(),
+      });
+      if (calculationHistory.length > 20) calculationHistory.shift();
+      localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+      renderHistory();
+      resetRedoIndex();
+    } else {
+      currentExpression = "Error";
+    }
+  } else {
+    currentExpression += "C";
+  }
+  updateResult();
+}
+
+// ------------------------------
+// Calculate Factorial of Current Number (n!)
+// ------------------------------
+function calculateFactorial() {
+  if (!currentExpression) return;
+
+  const n = parseFloat(currentExpression);
+
+  if (isNaN(n) || !Number.isInteger(n) || n < 0) {
+    currentExpression = "Error";
+    updateResult();
+    return;
+  }
+
+  if (n > 170) {
+    currentExpression = "Infinity";
+    updateResult();
+    return;
+  }
+
+  const result = factorial(n);
+
+  calculationHistory?.push({
+    expression: `${n}!`,
+    words: numberToWords(result),
+    answer: result,
+    time: new Date().toLocaleTimeString(),
+  });
+  if (calculationHistory.length > 20) calculationHistory.shift();
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+
+  currentExpression = result.toString();
+  updateResult();
+}
+
+// ------------------------------
+// Calculate Result
+// ------------------------------
+function calculateResult() {
+  if (!currentExpression) return;
+
+  try {
+    // Handle Permutation (nPr) expressions
+    const permMatch = currentExpression.match(/^(\d+)P(\d+)$/i);
+    if (permMatch) {
+      calculatePermutation();
+      return;
+    }
+
+    // Handle Combination (nCr) expressions
+    const combMatch = currentExpression.match(/^(\d+)C(\d+)$/i);
+    if (combMatch) {
+      calculateCombination();
+      return;
+    }
+    let normalizedExpression = normalizeExpression(currentExpression);
+
+    // 🧠 Replace "ans" with last result automatically
+    normalizedExpression = normalizedExpression.replace(
+      /\bans\b/gi,
+      LAST_RESULT,
+    );
+
+    // Calculate result
+    let result = eval(normalizedExpression);
+
+    // Save result for future expressions
+    LAST_RESULT = result;
+
+    // Display normally
+    display.value = result;
+
+    if (isNaN(result) || !isFinite(result)) {
+      throw new Error();
+    }
+
+    calculationHistory?.push({
+      expression: currentExpression,
+      words: numberToWords(result),
+      answer: result,
+      time: new Date().toLocaleTimeString(),
+    });
+
+    if (calculationHistory.length > 20) calculationHistory.shift();
+
+    localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+    renderHistory();
+
+    currentExpression = result.toString();
+    updateResult();
+    document.getElementById("word-result").innerHTML = numberToWords(result);
+  } catch (e) {
+    currentExpression = "Error";
+    updateResult();
+  }
+}
+
+function tenPower() {
+  if (!currentExpression) return;
+
+  const x = parseFloat(currentExpression);
+  if (isNaN(x)) {
+    currentExpression = "Error";
+  } else {
+    currentExpression = Math.pow(10, x).toString();
+  }
+
+  updateResult();
+}
+
+// ------------------------------
+// RECIPROCAL FUNCTION (1/x)
+// ------------------------------
+function calculateReciprocal() {
+  if (!currentExpression) return;
+
+  const x = parseFloat(currentExpression);
+
+  if (isNaN(x)) {
+    currentExpression = "Error";
+  } else if (x === 0) {
+    currentExpression = "Undefined";
+  } else {
+    const result = 1 / x;
+    // Remove trailing zeros and unnecessary decimal point
+    currentExpression = parseFloat(result.toFixed(10)).toString();
+  }
+
+  updateResult();
+}
+
+// ------------------------------
+// HEXADECIMAL CONVERSION FEATURE
+// ------------------------------
+function convertToHex() {
+  if (currentExpression.length === 0 || currentExpression === "0") {
+    alert("Please enter a number first");
+    return;
+  }
+
+  const num = parseFloat(currentExpression);
+
+  if (isNaN(num)) {
+    alert("Invalid number. Please enter a valid decimal number.");
+    return;
+  }
+
+  if (!Number.isInteger(num)) {
+    alert(
+      "Hexadecimal conversion works with whole numbers only. Your number will be rounded.",
+    );
+  }
+
+  const integerNum = Math.floor(Math.abs(num));
+  const hexValue = integerNum.toString(16).toUpperCase();
+
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+
+  let displayMessage =
+    '<span class="small-label">Hexadecimal Conversion</span>';
+  displayMessage += "<strong>";
+
+  if (num < 0) {
+    displayMessage += "Decimal: -" + integerNum + " = Hex: -0x" + hexValue;
+  } else {
+    displayMessage += "Decimal: " + integerNum + " = Hex: 0x" + hexValue;
+  }
+
+  displayMessage += "</strong>";
+
+  wordResult.innerHTML = displayMessage;
+  wordArea.style.display = "flex";
+
+  // Update the main display to show the hex value with 0x prefixing
+  currentExpression = "0x" + hexValue;
+  updateResult();
+
+  enableSpeakButton();
+
+  console.log("HEX Conversion successful:", integerNum, "-> 0x" + hexValue);
+}
+
+function applyLogarithm() {
+  if (currentExpression.length === 0) return;
+
+  const num = parseFloat(currentExpression);
+  if (num <= 0) {
+    currentExpression = "Error";
+  } else {
+    const result = Math.log10(num);
+    if (steps.length < MAX_STEPS) {
+      steps.push(`Step ${steps.length + 1}: log10(${num}) = ${result}`);
+    }
+    currentExpression = result.toString();
+  }
+
+  right = "";
+
+  updateStepsDisplay();
+  updateResult();
+
+}
+
+function toggleInverseMode() {
+  inverseMode = !inverseMode;
+  document.getElementById("sin-btn").textContent = inverseMode
+    ? "sin⁻¹"
+    : "sin";
+  document.getElementById("cos-btn").textContent = inverseMode
+    ? "cos⁻¹"
+    : "cos";
+  document.getElementById("tan-btn").textContent = inverseMode
+    ? "tan⁻¹"
+    : "tan";
+}
+
+function sinDeg(x) {
+  return Math.sin((x * Math.PI) / 180);
+}
+function cosDeg(x) {
+  return Math.cos((x * Math.PI) / 180);
+}
+function tanDeg(x) {
+  return Math.tan((x * Math.PI) / 180);
+}
+
+function asinDeg(x) {
+  return (Math.asin(x) * 180) / Math.PI;
+}
+function acosDeg(x) {
+  return (Math.acos(x) * 180) / Math.PI;
+}
+function atanDeg(x) {
+  return (Math.atan(x) * 180) / Math.PI;
+}
+
+function appendTrig(func) {
+  currentExpression += func + "(";
+  updateResult();
+}
+
+function trigButtonPressed(func) {
+  const map = inverseMode
+    ? { sin: "asin", cos: "acos", tan: "atan" }
+    : { sin: "sin", cos: "cos", tan: "tan" };
+
+  appendTrig(map[func]);
+}
+
+function normalizeExpression(expr) {
+  return expr
+    .replace(/asin\(/g, "asinDeg(")
+    .replace(/acos\(/g, "acosDeg(")
+    .replace(/atan\(/g, "atanDeg(")
+    .replace(/sin\(/g, "sinDeg(")
+    .replace(/cos\(/g, "cosDeg(")
+    .replace(/tan\(/g, "tanDeg(")
+    .replace(/\be\b/g, "Math.E")
+    .replace(/\bpi\b/g, "Math.PI");
+}
+
+function isPrime(num) {
+  if (num <= 1) return false;
+  for (let i = 2; i <= Math.sqrt(num); i++) {
+    if (num % i === 0) return false;
+  }
+  return true;
+}
+
+function Parser(tokens) {
+  this.tokens = tokens;
+  this.index = 0;
+}
+
+Parser.prototype.peek = function () {
+  return this.tokens[this.index];
+};
+
+Parser.prototype.advance = function () {
+  this.index += 1;
+  return this.tokens[this.index - 1];
+};
+
+Parser.prototype.isAtEnd = function () {
+  return this.index >= this.tokens.length;
+};
+
+Parser.prototype.matchOperator = function (op) {
+  const token = this.peek();
+  if (token && token.type === "operator" && token.value === op) {
+    this.advance();
+    return true;
+  }
+  return false;
+};
+
+Parser.prototype.parseExpression = function () {
+  let node = this.parseTerm();
+  while (true) {
+    if (this.matchOperator("+")) {
+      node = { type: "binary", op: "+", left: node, right: this.parseTerm() };
+      continue;
+    }
+    if (this.matchOperator("-")) {
+      node = { type: "binary", op: "-", left: node, right: this.parseTerm() };
+      continue;
+    }
+    break;
+  }
+  return node;
+};
+
+Parser.prototype.parseTerm = function () {
+  let node = this.parsePower();
+  while (true) {
+    if (this.matchOperator("*")) {
+      node = { type: "binary", op: "*", left: node, right: this.parsePower() };
+      continue;
+    }
+    if (this.matchOperator("/")) {
+      node = { type: "binary", op: "/", left: node, right: this.parsePower() };
+      continue;
+    }
+    break;
+  }
+  return node;
+};
+
+Parser.prototype.parsePower = function () {
+  let node = this.parseUnary();
+  if (this.matchOperator("^")) {
+    node = { type: "binary", op: "^", left: node, right: this.parsePower() };
+  }
+  return node;
+};
+
+Parser.prototype.parseUnary = function () {
+  if (this.matchOperator("-")) {
+    return { type: "unary", op: "-", value: this.parseUnary() };
+  }
+  return this.parsePrimary();
+};
+
+Parser.prototype.parsePrimary = function () {
+  const token = this.peek();
+  if (!token) throw new Error("Unexpected end of expression.");
+
+  if (token.type === "number") {
+    this.advance();
+    return { type: "number", value: token.value };
+  }
+
+  if (token.type === "variable") {
+    this.advance();
+    return { type: "variable", name: token.name };
+  }
+
+  if (token.type === "constant") {
+    this.advance();
+    return { type: "constant", name: token.name, value: token.value };
+  }
+
+  if (token.type === "func") {
+    const funcToken = this.advance();
+    const next = this.peek();
+    if (!next || next.type !== "lparen") {
+      throw new Error(`Expected '(' after ${funcToken.name}.`);
+    }
+    this.advance();
+    const arg = this.parseExpression();
+    if (!this.peek() || this.peek().type !== "rparen") {
+      throw new Error("Missing closing parenthesis for function.");
+    }
+    this.advance();
+    return { type: "func", name: funcToken.name, arg };
+  }
+
+  if (token.type === "lparen") {
+    this.advance();
+    const node = this.parseExpression();
+    if (!this.peek() || this.peek().type !== "rparen") {
+      throw new Error("Missing closing parenthesis.");
+    }
+    this.advance();
+    return node;
+  }
+
+  throw new Error("Invalid token in expression.");
+};
+
+function differentiate(node) {
+  switch (node.type) {
+    case "number":
+      return { type: "number", value: 0 };
+    case "constant":
+      return { type: "number", value: 0 };
+    case "variable":
+      return { type: "number", value: 1 };
+    case "unary":
+      return { type: "unary", op: "-", value: differentiate(node.value) };
+    case "binary":
+      return differentiateBinary(node);
+    case "func":
+      return differentiateFunction(node);
+    default:
+      throw new Error("Unsupported expression.");
+  }
+}
+
+function differentiateBinary(node) {
+  const left = node.left;
+  const right = node.right;
+  const dLeft = differentiate(left);
+  const dRight = differentiate(right);
+
+  switch (node.op) {
+    case "+":
+      return { type: "binary", op: "+", left: dLeft, right: dRight };
+    case "-":
+      return { type: "binary", op: "-", left: dLeft, right: dRight };
+    case "*":
+      return {
+        type: "binary",
+        op: "+",
+        left: { type: "binary", op: "*", left: dLeft, right: right },
+        right: { type: "binary", op: "*", left: left, right: dRight },
+      };
+    case "/":
+      return {
+        type: "binary",
+        op: "/",
+        left: {
+          type: "binary",
+          op: "-",
+          left: { type: "binary", op: "*", left: dLeft, right: right },
+          right: { type: "binary", op: "*", left: left, right: dRight },
+        },
+        right: {
+          type: "binary",
+          op: "^",
+          left: right,
+          right: { type: "number", value: 2 },
+        },
+      };
+    case "^":
+      return differentiatePower(left, right);
+    default:
+      throw new Error("Unsupported operator.");
+  }
+}
+
+function convertToFraction() {
+  const display = document.getElementById("result");
+  if (!display || !display.value) return;
+
+  const value = Number(display.value);
+  if (isNaN(value)) return;
+
+  if (Number.isInteger(value)) {
+    display.value = value + "/1";
+    currentExpression = display.value;
+    return;
+  }
+
+  let tolerance = 1.0e-6;
+  let h1 = 1,
+    h2 = 0,
+    k1 = 0,
+    k2 = 1;
+  let b = value;
+
+  do {
+    let a = Math.floor(b);
+    let aux = h1;
+    h1 = a * h1 + h2;
+    h2 = aux;
+    aux = k1;
+    k1 = a * k1 + k2;
+    k2 = aux;
+    b = 1 / (b - a);
+  } while (Math.abs(value - h1 / k1) > value * tolerance);
+
+  display.value = `${h1}/${k1}`;
+  currentExpression = display.value;
+}
+
+function differentiatePower(base, exponent) {
+  if (exponent.type === "number") {
+    return {
+      type: "binary",
+      op: "*",
+      left: {
+        type: "binary",
+        op: "*",
+        left: { type: "number", value: exponent.value },
+        right: {
+          type: "binary",
+          op: "^",
+          left: base,
+          right: { type: "number", value: exponent.value - 1 },
+        },
+      },
+      right: differentiate(base),
+    };
+  }
+
+  if (base.type === "constant" || base.type === "number") {
+    return {
+      type: "binary",
+      op: "*",
+      left: { type: "binary", op: "^", left: base, right: exponent },
+      right: {
+        type: "binary",
+        op: "*",
+        left: { type: "func", name: "ln", arg: base },
+        right: differentiate(exponent),
+      },
+    };
+  }
+
+  throw new Error("Unsupported exponent form for differentiation.");
+}
+
+function differentiateFunction(node) {
+  const arg = node.arg;
+  const dArg = differentiate(arg);
+
+  switch (node.name) {
+    case "sin":
+      return {
+        type: "binary",
+        op: "*",
+        left: { type: "func", name: "cos", arg },
+        right: dArg,
+      };
+    case "cos":
+      return {
+        type: "binary",
+        op: "*",
+        left: {
+          type: "unary",
+          op: "-",
+          value: { type: "func", name: "sin", arg },
+        },
+        right: dArg,
+      };
+    case "tan":
+      return {
+        type: "binary",
+        op: "*",
+        left: {
+          type: "binary",
+          op: "/",
+          left: { type: "number", value: 1 },
+          right: {
+            type: "binary",
+            op: "^",
+            left: { type: "func", name: "cos", arg },
+            right: { type: "number", value: 2 },
+          },
+        },
+        right: dArg,
+      };
+    case "ln":
+      return {
+        type: "binary",
+        op: "*",
+        left: {
+          type: "binary",
+          op: "/",
+          left: { type: "number", value: 1 },
+          right: arg,
+        },
+        right: dArg,
+      };
+    case "log":
+      return {
+        type: "binary",
+        op: "*",
+        left: {
+          type: "binary",
+          op: "/",
+          left: { type: "number", value: 1 },
+          right: {
+            type: "binary",
+            op: "*",
+            left: arg,
+            right: {
+              type: "func",
+              name: "ln",
+              arg: { type: "number", value: 10 },
+            },
+          },
+        },
+        right: dArg,
+      };
+    case "exp":
+      return {
+        type: "binary",
+        op: "*",
+        left: { type: "func", name: "exp", arg },
+        right: dArg,
+      };
+    default:
+      throw new Error(`Unsupported function: ${node.name}`);
+  }
+}
+
+function simplify(node) {
+  if (!node) return node;
+
+  if (node.type === "unary") {
+    const value = simplify(node.value);
+    if (value.type === "number") {
+      return { type: "number", value: -value.value };
+    }
+    return { type: "unary", op: node.op, value };
+  }
+
+  if (node.type === "binary") {
+    const left = simplify(node.left);
+    const right = simplify(node.right);
+
+    if (left.type === "number" && right.type === "number") {
+      return {
+        type: "number",
+        value: evaluateBinary(node.op, left.value, right.value),
+      };
+    }
+
+    switch (node.op) {
+      case "+":
+        if (isZero(left)) return right;
+        if (isZero(right)) return left;
+        break;
+      case "-":
+        if (isZero(right)) return left;
+        if (isZero(left)) return { type: "unary", op: "-", value: right };
+        break;
+      case "*":
+        if (isZero(left) || isZero(right)) return { type: "number", value: 0 };
+        if (isOne(left)) return right;
+        if (isOne(right)) return left;
+        break;
+      case "/":
+        if (isZero(left)) return { type: "number", value: 0 };
+        if (isOne(right)) return left;
+        break;
+      case "^":
+        if (isZero(right)) return { type: "number", value: 1 };
+        if (isOne(right)) return left;
+        if (isZero(left)) return { type: "number", value: 0 };
+        if (isOne(left)) return { type: "number", value: 1 };
+        break;
+    }
+
+    return { type: "binary", op: node.op, left, right };
+  }
+
+  if (node.type === "func") {
+    return { type: "func", name: node.name, arg: simplify(node.arg) };
+  }
+
+  return node;
+}
+
+function evaluateBinary(op, left, right) {
+  switch (op) {
+    case "+":
+      return left + right;
+    case "-":
+      return left - right;
+    case "*":
+      return left * right;
+    case "/":
+      return left / right;
+    case "^":
+      return Math.pow(left, right);
+    default:
+      return NaN;
+  }
+}
+
+function isZero(node) {
+  return node.type === "number" && Math.abs(node.value) < 1e-12;
+}
+
+function isOne(node) {
+  return node.type === "number" && Math.abs(node.value - 1) < 1e-12;
+}
+
+function toString(node, parentPrecedence) {
+  const precedence = getPrecedence(node);
+  const needsParens = parentPrecedence && precedence < parentPrecedence;
+
+  let result;
+  switch (node.type) {
+    case "number":
+      result = formatNumber(node.value);
+      break;
+    case "variable":
+      result = node.name;
+      break;
+    case "constant":
+      result = node.name;
+      break;
+    case "unary":
+      result = "-" + toString(node.value, precedence);
+      break;
+    case "func":
+      result = `${node.name}(${toString(node.arg, 0)})`;
+      break;
+    case "binary":
+      result = formatBinary(node, precedence);
+      break;
+    default:
+      result = "";
+  }
+
+  return needsParens ? `(${result})` : result;
+}
+
+function formatBinary(node, precedence) {
+  if (node.op === "*") {
+    const left = toString(node.left, precedence);
+    const right = toString(node.right, precedence);
+    if (shouldOmitMultiply(node.left, node.right)) {
+      return `${left}${right}`;
+    }
+    return `${left} * ${right}`;
+  }
+
+  const left = toString(node.left, precedence);
+  const right = toString(node.right, precedence + (node.op === "^" ? 1 : 0));
+  return `${left} ${node.op} ${right}`;
+}
+
+function shouldOmitMultiply(left, right) {
+  if (left.type !== "number") return false;
+  if (right.type === "variable" || right.type === "func") return true;
+  if (
+    right.type === "binary" &&
+    right.op === "^" &&
+    right.left.type === "variable"
+  )
+    return true;
+  return false;
+}
+
+function formatNumber(value) {
+  if (!isFinite(value)) return "Error";
+  if (Math.abs(value - Math.round(value)) < 1e-10) {
+    return `${Math.round(value)}`;
+  }
+  return `${parseFloat(value.toFixed(6))}`;
+}
+
+function getPrecedence(node) {
+  if (!node) return 0;
+  if (node.type === "binary") {
+    switch (node.op) {
+      case "+":
+      case "-":
+        return 1;
+      case "*":
+      case "/":
+        return 2;
+      case "^":
+        return 3;
+      default:
+        return 0;
+    }
+  }
+  if (node.type === "unary") return 4;
+  return 5;
+}
+
+function checkPrime() {
+  const num = parseFloat(currentExpression);
+
+  if (
+    isNaN(num) ||
+    !Number.isInteger(num) ||
+    num < 0 ||
+    currentExpression.includes(" ") ||
+    currentExpression.includes("+") ||
+    currentExpression.includes("-") ||
+    currentExpression.includes("*") ||
+    currentExpression.includes("/") ||
+    currentExpression.includes("^") ||
+    currentExpression.includes("(") ||
+    currentExpression.includes(")")
+  ) {
+    alert("Please enter a single positive whole number to check if it's prime");
+    return;
+  }
+
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+
+  if (isPrime(num)) {
+    wordResult.innerHTML =
+      '<span class="small-label">Prime Check</span><strong>' +
+      num +
+      " is a PRIME number! ✓</strong>";
+  } else {
+    wordResult.innerHTML =
+      '<span class="small-label">Prime Check</span><strong>' +
+      num +
+      " is NOT a prime number ✗</strong>";
+  }
+
+  wordArea.style.display = "flex";
+  enableSpeakButton();
+}
+
+// ------------------------------
+// Convert Number to Words
+// ------------------------------
+function numberToWords(num) {
+  if (num === "Error") return "Error";
+  if (!num) return "";
+
+  const n = parseFloat(num);
+  if (isNaN(n)) return "";
+  if (n === 0) return "Zero";
+
+  const ones = [
+    "",
+    "One",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
+  ];
+  const tens = [
+    "",
+    "",
+    "Twenty",
+    "Thirty",
+    "Forty",
+    "Fifty",
+    "Sixty",
+    "Seventy",
+    "Eighty",
+    "Ninety",
+  ];
+  const teens = [
+    "Ten",
+    "Eleven",
+    "Twelve",
+    "Thirteen",
+    "Fourteen",
+    "Fifteen",
+    "Sixteen",
+    "Seventeen",
+    "Eighteen",
+    "Nineteen",
+  ];
+  const scales = ["", "Thousand", "Million", "Billion", "Trillion"];
+
+  function convertGroup(val) {
+    let res = "";
+    if (val >= 100) {
+      res += ones[Math.floor(val / 100)] + " Hundred ";
+      val %= 100;
+    }
+    if (val >= 10 && val <= 19) {
+      res += teens[val - 10] + " ";
+    } else if (val >= 20) {
+      res += tens[Math.floor(val / 10)];
+      if (val % 10 !== 0) res += "-" + ones[val % 10];
+      res += " ";
+    } else if (val > 0) {
+      res += ones[val] + " ";
+    }
+    return res.trim();
+  }
+
+  let sign = n < 0 ? "Negative " : "";
+  let absN = Math.abs(n);
+  const parts = absN.toString().split(".");
+  let integerPart = parseInt(parts[0]);
+  const decimalPart = parts[1];
+  let wordArr = [];
+
+  if (integerPart === 0) {
+    wordArr.push("Zero");
+  } else {
+    let scaleIdx = 0;
+    while (integerPart > 0) {
+      const chunk = integerPart % 1000;
+      if (chunk > 0) {
+        const chunkWords = convertGroup(chunk);
+        wordArr.unshift(
+          chunkWords + (scales[scaleIdx] ? " " + scales[scaleIdx] : ""),
+        );
+      }
+      integerPart = Math.floor(integerPart / 1000);
+      scaleIdx++;
+    }
+  }
+
+  let result = sign + wordArr.join(", ").trim();
+
+  if (decimalPart) {
+    result += " Point";
+    for (let digit of decimalPart) {
+      result += " " + (digit === "0" ? "Zero" : ones[parseInt(digit)]);
+    }
+  }
+  return result.trim();
+}
+
+// hausa language
+function numberToHausa(num) {
+  if (num === "Error") return "Kuskure";
+
+  const ones = [
+    "",
+    "Daya",
+    "Biyu",
+    "Uku",
+    "Hudu",
+    "Biyar",
+    "Shida",
+    "Bakwai",
+    "Takwas",
+    "Tara",
+  ];
+  const tens = [
+    "",
+    "",
+    "Ashirin",
+    "Talatin",
+    "Arba'in",
+    "Hamsin",
+    "Sittin",
+    "Sab'in",
+    "Tamanin",
+    "Tis'in",
+  ];
+  const teens = [
+    "Goma",
+    "Sha daya",
+    "Sha biyu",
+    "Sha uku",
+    "Sha hudu",
+    "Sha biyar",
+    "Sha shida",
+    "Sha bakwai",
+    "Sha takwas",
+    "Sha tara",
+  ];
+  const scales = ["", "Dubu", "Miliyan", "Biliyan", "Triliyan"];
+
+  function convertGroup(val) {
+    let res = "";
+    if (val >= 100) {
+      res += ones[Math.floor(val / 100)] + " Dari ";
+      val %= 100;
+    }
+
+    if (val >= 10 && val <= 19) {
+      res += teens[val - 10] + " ";
+    } else if (val >= 20) {
+      res +=
+        tens[Math.floor(val / 10)] +
+        (val % 10 ? " da " + ones[val % 10] : "") +
+        " ";
+    } else if (val > 0) {
+      res += ones[val] + " ";
+    }
+
+    return res.trim();
+  }
+
+  let n = parseFloat(num);
+  if (isNaN(n)) return "";
+
+  let sign = n < 0 ? "Mara kyau " : "";
+  let absN = Math.abs(n);
+  let parts = absN.toString().split(".");
+  let integerPart = parseInt(parts[0]);
+  let decimalPart = parts[1];
+
+  let wordArr = [];
+
+  if (integerPart === 0) {
+    wordArr.push("Sifili");
+  } else {
+    let scaleIdx = 0;
+    while (integerPart > 0) {
+      let chunk = integerPart % 1000;
+      if (chunk > 0) {
+        let chunkWords = convertGroup(chunk);
+        wordArr.unshift(
+          chunkWords + (scales[scaleIdx] ? " " + scales[scaleIdx] : ""),
+        );
+      }
+      integerPart = Math.floor(integerPart / 1000);
+      scaleIdx++;
+    }
+  }
+
+  let result = sign + wordArr.join(", ").trim();
+
+  if (decimalPart) {
+    result += " Nuni";
+    for (let digit of decimalPart) {
+      result += " " + (digit === "0" ? "Sifili" : ones[parseInt(digit)]);
+    }
+  }
+
+  return result.trim();
+}
+
+// translate to hausas
+function translateToHausa() {
+  if (!currentExpression) return;
+
+  const hausa = numberToHausa(currentExpression);
+  const wordResult = document.getElementById("word-result");
+
+  wordResult.innerHTML =
+    '<span class="small-label">Sakamako a Hausa</span><strong>' +
+    hausa +
+    "</strong>";
 }
 
 function updateResult() {
-    document.getElementById('result').value = left + operator + right;
+  document.getElementById("result").value = currentExpression || "0";
+
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+
+  const num = parseFloat(currentExpression);
+  if (
+    !isNaN(num) &&
+    isFinite(num) &&
+    currentExpression.trim() === num.toString()
+  ) {
+    wordResult.innerHTML =
+      '<span class="small-label">Result in words</span><strong>' +
+      numberToWords(currentExpression) +
+      "</strong>";
+    wordArea.style.display = "flex";
+  } else {
+    wordResult.innerHTML = "";
+    wordArea.style.display = "none";
+  }
+
+  enableSpeakButton();
+  updateAnswerPreview();
 }
 
+// ------------------------------
+// Text-to-Speech
+// ------------------------------
+function speakResult() {
+  const speakBtn = document.getElementById("speak-btn");
+  const wordResultEl = document.getElementById("word-result");
 
-function backspace() {
-    if (right.length) {
-        right = right.slice(0, -1);
-        updateResult();
-        return;
-    }
+  const words = wordResultEl.querySelector("strong")?.innerText || "";
 
-    if (operator.length) {
-        operator = '';
-        updateResult();
-        return;
-    }
+  if (!words) return;
 
-    if (left.length) {
-        left = left.slice(0, -1);
-        updateResult();
-    }
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    speakBtn.classList.remove("speaking");
+    return;
+  }
+
+  const utterance = new SpeechSynthesisUtterance(words);
+  utterance.rate = 0.9;
+  utterance.onstart = () => speakBtn.classList.add("speaking");
+  utterance.onend = () => speakBtn.classList.remove("speaking");
+
+  window.speechSynthesis.speak(utterance);
 }
 
-function calculateResult() {
+// ------------------------------
+// Speak Button Enable/Disable
+// ------------------------------
+function enableSpeakButton() {
+  const speakBtn = document.getElementById("speak-btn");
+  if (!speakBtn) return;
+  const hasContent =
+    document.getElementById("word-result").innerHTML.trim().length > 0;
+  speakBtn.disabled = !hasContent;
+}
+
+function backToEnglish() {
+  if (!currentExpression) return;
+
+  const wordResult = document.getElementById("word-result");
+
+  wordResult.innerHTML =
+    '<span class="small-label">Result in words</span><strong>' +
+    numberToWords(currentExpression) +
+    "</strong>";
+}
+
+// Factor Finder & Prime Checker
+// Get factors of a number
+function factors() {
+  // ensure we have a numeric value
+  num = Number(currentExpression);
+  // zero has infinitely many divisors, return empty array to avoid confusion
+  if (num === 0 || !Number.isFinite(num)) return [];
+
+  // only integer factors make sense
+  if (!Number.isInteger(num)) return [];
+
+  const absNum = Math.abs(num);
+  const result = [];
+
+  // loop up to square root for efficiency
+  for (let i = 1; i <= Math.sqrt(absNum); i++) {
+    if (absNum % i === 0) {
+      result.push(i);
+      const pair = absNum / i;
+      if (pair !== i) {
+        result.push(pair);
+      }
+    }
+  }
+
+  // sort numerical order
+  result.sort((a, b) => a - b);
+
+  // include negative factors if original number was negative
+  if (num < 0) {
+    const negatives = result.map((v) => -v);
+    result.push(...negatives);
+    result.sort((a, b) => a - b);
+  }
+
+  currentExpression = result.toString();
+  updateResult();
+}
+
+function updateStepsDisplay() {
+  // Keeping for compatibility
+}
+
+fetchCurrencyRates();
+
+function copyResult() {
+  const text = document.getElementById("result").value;
+  if (!text) return;
+
+  navigator.clipboard
+    .writeText(text)
+    .then(() => alert("Result copied!"))
+    .catch(() => alert("Failed to copy"));
+}
+
+function percentToResult() {
+  if (!currentExpression) return;
+
+  const match = currentExpression.match(/(.+?)(\*\*|[+\-*/^])([0-9.]*)$/);
+
+  if (!match) {
+    const num = parseFloat(currentExpression);
+    if (isNaN(num)) return;
+
+    currentExpression = (num / 100).toString();
+  } else {
+    const leftPart = match[1];
+    const rightPart = match[3];
+
+    if (!rightPart) return;
+
+    let leftVal;
+
     try {
-        let leftVal = parseFloat(left);
-        let rightVal = parseFloat(right);
-        let result = 0;
-
-        /* SENDING TO THE SERVER
-        let data = {
-            left: leftVal,
-            right: rightVal,
-            operator: operator,
-        };  
-
-        
-        let xhr = new XMLHttpRequest();
-        // xhr.setRequestHeader( 'Content-Type', 'application/json' );
-        xhr.open( 'POST', window.location.origin+'/server.php', true );
-        xhr.onreadystatechange = function(){
-            if( xhr.readyState == 4 ){
-                result = xhr.response;
-                console.log( 'result', result );
-            }
-        };
-        
-        xhr.send( JSON.stringify(data) );
-        alert('Sending'); */
-
-        switch (operator) {
-            case '+':
-                result = leftVal + rightVal;
-                break;
-            case '-':
-                result = leftVal - rightVal;
-                break;
-            case '*':
-                result = leftVal * rightVal;
-                break;
-            case '/':
-                result = leftVal / rightVal;
-                break;
-        }
-
-        if (!isNaN(result)) {
-            left = result.toString();
-
-            right = '';
-            operator = '';
-            updateResult();
-            numberToWords(result.toString());
-        }
-
-    } catch (error) {
-        document.getElementById('result').value = 'Error';
+      leftVal = eval(leftPart);
+    } catch (e) {
+      leftVal = parseFloat(leftPart);
     }
+
+    const rightVal = parseFloat(rightPart);
+    if (isNaN(leftVal) || isNaN(rightVal)) return;
+
+    const percentVal = (leftVal * rightVal) / 100;
+
+    currentExpression = percentVal.toString();
+  }
+
+  // 🔥 ADD THIS LINE
+  currentExpression += "*";
+
+  updateResult();
+}
+function startVoiceInput() {
+  clearResult();
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Speech recognition not supported in this browser.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+
+  recognition.onresult = (event) => {
+    const spokenText = event.results[0][0].transcript;
+    handleSpokenMath(spokenText);
+  };
+
+  recognition.start();
 }
 
-function numberToWords(numVal) {
-    const unitsMap = [
-        "", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-        "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
-        "seventeen", "eighteen", "nineteen"
+function handleSpokenMath(text) {
+  const tokens = normalizeSpeech(text);
+
+  tokens.forEach((token) => {
+    if (["+", "-", "*", "x", "/"].includes(token)) {
+      operatorToResult(token);
+    } else {
+      appendToResult(token);
+    }
+  });
+}
+
+function normalizeSpeech(text) {
+  let normalized = text.toLowerCase();
+
+  const replacements = {
+    "multiplied by": "*",
+    "divided by": "/",
+    times: "*",
+    x: "*",
+    multiply: "*",
+    plus: "+",
+    add: "+",
+    minus: "-",
+    subtract: "-",
+  };
+
+  for (let key in replacements) {
+    normalized = normalized.replaceAll(key, replacements[key]);
+  }
+
+  const numbers = {
+    zero: "0",
+    one: "1",
+    two: "2",
+    three: "3",
+    four: "4",
+    five: "5",
+    six: "6",
+    seven: "7",
+    eight: "8",
+    nine: "9",
+  };
+
+  for (let word in numbers) {
+    normalized = normalized.replaceAll(word, numbers[word]);
+  }
+
+  normalized = normalized.replace(/([\+\-\*\/])/g, " $1 ");
+
+  return normalized.split(" ").filter((t) => t.trim() !== "");
+}
+
+function toggleHistory() {
+  const historyCol = document.getElementById("history-column");
+  const btn = document.getElementById("toggle-history-btn");
+
+  if (!historyCol) return;
+
+  historyCol.classList.toggle("d-none");
+
+  if (historyCol.classList.contains("d-none")) {
+    btn.textContent = "Show History";
+    btn.classList.replace("btn-outline-primary", "btn-primary");
+  } else {
+    btn.textContent = "Hide History";
+    btn.classList.replace("btn-primary", "btn-outline-primary");
+  }
+}
+
+function saveHistoryToStorage() {
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+}
+
+function renderHistory() {
+  const list = document.getElementById("history-list");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  if (calculationHistory.length === 0) {
+    const emptyTemplate = document.getElementById("history-empty-template");
+    if (emptyTemplate) {
+      list.appendChild(emptyTemplate.content.cloneNode(true));
+    }
+    return;
+  }
+
+  calculationHistory
+    .slice()
+    .reverse()
+    .forEach((item, index) => {
+      const tpl = document
+        .getElementById("history-item-template")
+        .content.cloneNode(true);
+
+      const itemEl = tpl.querySelector(".history-item");
+      tpl.querySelector(".history-item-expression").textContent =
+        item.expression;
+      tpl.querySelector(".history-item-words").textContent = item.words;
+      tpl.querySelector(".history-item-time").textContent = item.time;
+      const remarkText = tpl.querySelector(".remark-text");
+      const remarkBox = tpl.querySelector(".remark-box");
+      const remarkInput = remarkBox.querySelector("input");
+      if (item.remark) {
+        remarkText.textContent = item.remark;
+      }
+      // DELETE
+      const actualIndex = calculationHistory.length - 1 - index;
+      tpl.querySelector(".btn-delete").onclick = (e) => {
+        e.stopPropagation();
+        calculationHistory.splice(actualIndex, 1);
+        saveHistoryToStorage();
+        renderHistory();
+      };
+
+      tpl.querySelector(".btn-remark").onclick = (e) => {
+        e.stopPropagation();
+        remarkBox.classList.remove("d-none");
+        remarkInput.focus();
+      };
+
+      remarkBox.querySelector(".btn-primary").onclick = (e) => {
+        e.stopPropagation();
+        item.remark = remarkInput.value.trim();
+        saveHistoryToStorage();
+        renderHistory();
+      };
+
+      remarkBox.querySelector(".btn-outline-secondary").onclick = (e) => {
+        e.stopPropagation();
+        remarkBox.classList.add("d-none");
+      };
+
+      itemEl.addEventListener("click", () => {
+        currentExpression = item.expression;
+        updateResult();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      list.appendChild(tpl);
+
+      setTimeout(() => {
+        itemEl.classList.add("show");
+      }, index * 50);
+    });
+}
+
+function loadHistoryFromStorage() {
+  const stored = localStorage.getItem("calcHistory");
+  if (stored) calculationHistory = JSON.parse(stored);
+}
+
+function clearHistory() {
+  if (!confirm("Are you sure you want to clear all calculation history?"))
+    return;
+  calculationHistory = [];
+  localStorage.removeItem("calcHistory");
+  renderHistory();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const scrollBtn = document.getElementById("scroll-to-calculator");
+  if (scrollBtn) {
+    scrollBtn.addEventListener("click", () => {
+      const calculatorTop = document.querySelector(".calculator-card");
+      if (calculatorTop) {
+        calculatorTop.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
+});
+
+// ------------------------------
+// Redo Functionality
+// ------------------------------
+var redoIndex = -1;
+
+function redoCalculation() {
+  var calcHistory = localStorage.getItem("calcHistory");
+  if (!calcHistory) return;
+  var History;
+  try {
+    History = JSON.parse(calcHistory);
+  } catch (e) {
+    return;
+  }
+  if (!History || History.length === 0) return;
+
+  // Only cycle through the last 5 (or fewer) calculations
+  var maxSteps = Math.min(5, History.length);
+  redoIndex = (redoIndex + 1) % maxSteps;
+
+  var entry = History[History.length - 1 - redoIndex];
+  if (!entry) return;
+
+  var displayExpr = entry.expression || "";
+  var displayAnswer =
+    entry.answer !== undefined && entry.answer !== null ? entry.answer : "";
+
+  // Show full expression = answer (preserves sin/cos/tan/sqrt/! etc.)
+  var resultDisplay = document.getElementById("result");
+  if (resultDisplay) {
+    resultDisplay.value =
+      displayAnswer !== "" ? displayExpr + " = " + displayAnswer : displayExpr;
+  }
+
+  // Update the English word area
+  if (entry.words) {
+    var wordResult = document.getElementById("word-result");
+    var wordArea = document.getElementById("word-area");
+    if (wordResult) wordResult.innerHTML = entry.words;
+    if (wordArea) wordArea.style.display = "flex";
+  }
+}
+
+// Resets the redo pointer whenever a new calculation is made
+function resetRedoIndex() {
+  redoIndex = -1;
+}
+
+function enableRedo() {
+  const redoBtn = document.getElementById("redoBtn");
+  if (redoBtn) redoBtn.disabled = false;
+}
+
+function disableRedo() {
+  const redoBtn = document.getElementById("redoBtn");
+  if (redoBtn) redoBtn.disabled = true;
+}
+
+// ============================================
+// PHYSICS CALCULATOR FUNCTIONALITY
+// ============================================
+const physicsFormulas = {
+  mechanics: {
+    velocity: {
+      name: "Velocity",
+      formula: "v = d / t",
+      description: "Calculate velocity from distance and time",
+      inputs: ["distance (m)", "time (s)"],
+      output: "velocity (m/s)",
+      calculate: (d, t) => d / t,
+    },
+    acceleration: {
+      name: "Acceleration",
+      formula: "a = (v_f - v_i) / t",
+      description: "Calculate acceleration from velocity change and time",
+      inputs: ["initial velocity (m/s)", "final velocity (m/s)", "time (s)"],
+      output: "acceleration (m/s²)",
+      calculate: (vi, vf, t) => (vf - vi) / t,
+    },
+    force: {
+      name: "Force (Newton's 2nd Law)",
+      formula: "F = m × a",
+      description: "Calculate force from mass and acceleration",
+      inputs: ["mass (kg)", "acceleration (m/s²)"],
+      output: "force (N)",
+      calculate: (m, a) => m * a,
+    },
+    kineticEnergy: {
+      name: "Kinetic Energy",
+      formula: "KE = ½ × m × v²",
+      description: "Calculate kinetic energy from mass and velocity",
+      inputs: ["mass (kg)", "velocity (m/s)"],
+      output: "kinetic energy (J)",
+      calculate: (m, v) => 0.5 * m * v * v,
+    },
+    potentialEnergy: {
+      name: "Gravitational Potential Energy",
+      formula: "PE = m × g × h",
+      description: "Calculate potential energy from mass, gravity, and height",
+      inputs: ["mass (kg)", "height (m)", "gravity (m/s²)"],
+      output: "potential energy (J)",
+      calculate: (m, h, g = 9.8) => m * g * h,
+    },
+    momentum: {
+      name: "Momentum",
+      formula: "p = m × v",
+      description: "Calculate momentum from mass and velocity",
+      inputs: ["mass (kg)", "velocity (m/s)"],
+      output: "momentum (kg·m/s)",
+      calculate: (m, v) => m * v,
+    },
+    work: {
+      name: "Work",
+      formula: "W = F × d",
+      description: "Calculate work from force and displacement",
+      inputs: ["force (N)", "displacement (m)"],
+      output: "work (J)",
+      calculate: (f, d) => f * d,
+    },
+    power: {
+      name: "Power",
+      formula: "P = W / t",
+      description: "Calculate power from work and time",
+      inputs: ["work (J)", "time (s)"],
+      output: "power (W)",
+      calculate: (w, t) => w / t,
+    },
+  },
+  electricity: {
+    ohmsLaw: {
+      name: "Ohm's Law (Voltage)",
+      formula: "V = I × R",
+      description: "Calculate voltage from current and resistance",
+      inputs: ["current (A)", "resistance (Ω)"],
+      output: "voltage (V)",
+      calculate: (i, r) => i * r,
+    },
+    current: {
+      name: "Ohm's Law (Current)",
+      formula: "I = V / R",
+      description: "Calculate current from voltage and resistance",
+      inputs: ["voltage (V)", "resistance (Ω)"],
+      output: "current (A)",
+      calculate: (v, r) => v / r,
+    },
+    resistance: {
+      name: "Ohm's Law (Resistance)",
+      formula: "R = V / I",
+      description: "Calculate resistance from voltage and current",
+      inputs: ["voltage (V)", "current (A)"],
+      output: "resistance (Ω)",
+      calculate: (v, i) => v / i,
+    },
+    electricalPower: {
+      name: "Electrical Power",
+      formula: "P = V × I",
+      description: "Calculate electrical power from voltage and current",
+      inputs: ["voltage (V)", "current (A)"],
+      output: "power (W)",
+      calculate: (v, i) => v * i,
+    },
+    electricalEnergy: {
+      name: "Electrical Energy",
+      formula: "E = P × t",
+      description: "Calculate electrical energy from power and time",
+      inputs: ["power (W)", "time (s)"],
+      output: "energy (J)",
+      calculate: (p, t) => p * t,
+    },
+  },
+  thermodynamics: {
+    heatTransfer: {
+      name: "Heat Transfer",
+      formula: "Q = m × c × ΔT",
+      description:
+        "Calculate heat transfer from mass, specific heat, and temperature change",
+      inputs: ["mass (kg)", "specific heat (J/kg·K)", "temperature change (K)"],
+      output: "heat (J)",
+      calculate: (m, c, dt) => m * c * dt,
+    },
+    efficiency: {
+      name: "Efficiency",
+      formula: "η = (useful output / total input) × 100",
+      description: "Calculate efficiency percentage",
+      inputs: ["useful output", "total input"],
+      output: "efficiency (%)",
+      calculate: (output, input) => (output / input) * 100,
+    },
+  },
+  waves: {
+    waveSpeed: {
+      name: "Wave Speed",
+      formula: "v = f × λ",
+      description: "Calculate wave speed from frequency and wavelength",
+      inputs: ["frequency (Hz)", "wavelength (m)"],
+      output: "wave speed (m/s)",
+      calculate: (f, lambda) => f * lambda,
+    },
+    frequency: {
+      name: "Frequency",
+      formula: "f = 1 / T",
+      description: "Calculate frequency from period",
+      inputs: ["period (s)"],
+      output: "frequency (Hz)",
+      calculate: (t) => 1 / t,
+    },
+  },
+};
+
+function calculatePhysics() {
+  const category = document.getElementById("physics-category").value;
+  const formulaKey = document.getElementById("physics-formula").value;
+  const resultDiv = document.getElementById("physics-result");
+
+  if (!category || !formulaKey) {
+    resultDiv.innerHTML =
+      '<div class="alert alert-warning py-2 px-3">Please select both category and formula</div>';
+    return;
+  }
+
+  const formula = physicsFormulas[category][formulaKey];
+  const inputs = [];
+
+  for (let i = 1; i <= 3; i++) {
+    const input = document.getElementById(`physics-input-${i}`);
+    if (input && input.style.display !== "none") {
+      const value = parseFloat(input.value);
+      if (isNaN(value)) {
+        resultDiv.innerHTML =
+          '<div class="alert alert-danger py-2 px-3">Please enter valid numbers for all inputs</div>';
+        return;
+      }
+      inputs.push(value);
+    }
+  }
+
+  try {
+    const result = formula.calculate(...inputs);
+
+    if (isNaN(result) || !isFinite(result)) {
+      resultDiv.innerHTML =
+        '<div class="alert alert-danger py-2 px-3">Error in calculation. Please check your inputs.</div>';
+      return;
+    }
+
+    let resultHTML = '<div class="alert alert-success py-2 px-3">';
+    resultHTML += `<strong>${formula.name}</strong><br>`;
+    resultHTML += `Formula: ${formula.formula}<br>`;
+    resultHTML += `Result: <strong>${result.toFixed(4)} ${formula.output.match(/\(([^)]+)\)/)?.[1] || ""}</strong>`;
+    resultHTML += "</div>";
+
+    resultDiv.innerHTML = resultHTML;
+  } catch (error) {
+    resultDiv.innerHTML =
+      '<div class="alert alert-danger py-2 px-3">Error in calculation: ' +
+      error.message +
+      "</div>";
+  }
+}
+
+function updatePhysicsFormulas() {
+  const category = document.getElementById("physics-category").value;
+  const formulaSelect = document.getElementById("physics-formula");
+  const inputsContainer = document.getElementById("physics-inputs-container");
+  const resultDiv = document.getElementById("physics-result");
+
+  formulaSelect.innerHTML = '<option value="">-- Select Formula --</option>';
+  inputsContainer.innerHTML = "";
+  resultDiv.innerHTML = "";
+
+  if (!category) return;
+
+  const formulas = physicsFormulas[category];
+  for (const [key, formula] of Object.entries(formulas)) {
+    const option = document.createElement("option");
+    option.value = key;
+    option.textContent = formula.name;
+    formulaSelect.appendChild(option);
+  }
+}
+
+function updatePhysicsInputs() {
+  const category = document.getElementById("physics-category").value;
+  const formulaKey = document.getElementById("physics-formula").value;
+  const inputsContainer = document.getElementById("physics-inputs-container");
+  const resultDiv = document.getElementById("physics-result");
+
+  inputsContainer.innerHTML = "";
+  resultDiv.innerHTML = "";
+
+  if (!category || !formulaKey) return;
+
+  const formula = physicsFormulas[category][formulaKey];
+
+  let inputsHTML = `<div class="alert alert-info py-2 px-3 mb-2"><small>${formula.description}</small></div>`;
+
+  formula.inputs.forEach((inputLabel, index) => {
+    inputsHTML += `
+      <div class="mb-2">
+        <label class="form-label small">${inputLabel}</label>
+        <input type="number" class="form-control form-control-sm" id="physics-input-${index + 1}"
+               placeholder="Enter ${inputLabel}" step="any">
+      </div>
+    `;
+  });
+
+  inputsContainer.innerHTML = inputsHTML;
+}
+
+function clearPhysicsCalculator() {
+  document.getElementById("physics-category").value = "";
+  document.getElementById("physics-formula").innerHTML =
+    '<option value="">-- Select Formula --</option>';
+  document.getElementById("physics-inputs-container").innerHTML = "";
+  document.getElementById("physics-result").innerHTML = "";
+}
+
+// ============================================
+// END OF PHYSICS CALCULATOR FUNCTIONALITY
+// ============================================
+
+function openGeometry() {
+  document.getElementById("geometryModal").style.display = "flex";
+}
+
+function closeGeometry() {
+  document.getElementById("geometryModal").style.display = "none";
+}
+
+function calculateGeometry() {
+  let shape = document.getElementById("shapeSelect").value;
+  let v1 = parseFloat(document.getElementById("input1").value);
+  let v2 = parseFloat(document.getElementById("input2").value);
+  let result;
+
+  if (isNaN(v1)) {
+    alert("Enter Value 1");
+    return;
+  }
+
+  switch (shape) {
+    case "rectangle":
+      if (isNaN(v2)) return alert("Enter Value 2");
+      result = v1 * v2;
+      break;
+    case "triangle":
+      if (isNaN(v2)) return alert("Enter Value 2");
+      result = 0.5 * v1 * v2;
+      break;
+    case "circle":
+      result = Math.PI * v1 * v1;
+      break;
+    case "square":
+      result = v1 * v1;
+      break;
+    case "perimeterSquare":
+      result = 4 * v1;
+      break;
+    case "perimeterRectangle":
+      if (isNaN(v2)) return alert("Enter Value 2");
+      result = 2 * (v1 + v2);
+      break;
+    case "cubeVolume":
+      result = v1 * v1 * v1;
+      break;
+    case "cylinderVolume":
+      if (isNaN(v2)) return alert("Enter Height");
+      result = Math.PI * v1 * v1 * v2;
+      break;
+    default:
+      alert("Select a shape");
+      return;
+  }
+
+  left = result.toFixed(4).toString();
+  operator = "";
+  right = "";
+  currentExpression = left;
+  calculateResult();
+  closeGeometry();
+}
+
+function updateGeometryInputs() {
+  let shape = document.getElementById("shapeSelect").value;
+  let input2 = document.getElementById("input2");
+
+  if (
+    shape === "circle" ||
+    shape === "square" ||
+    shape === "perimeterSquare" ||
+    shape === "cubeVolume"
+  ) {
+    input2.style.display = "none";
+  } else {
+    input2.style.display = "block";
+  }
+}
+
+// The Cube Root Function
+function cubeRootResult() {
+  if (currentExpression.length === 0) return;
+  const num = parseFloat(currentExpression);
+  const cbrt = num < 0 ? -Math.pow(Math.abs(num), 1 / 3) : Math.pow(num, 1 / 3);
+
+  const tolerance = 1e-10;
+  const rounded =
+    Math.abs(cbrt - Math.round(cbrt)) < tolerance ? Math.round(cbrt) : cbrt;
+
+  currentExpression = rounded.toString();
+  operator = "";
+  right = "";
+  updateResult();
+}
+
+// ============================================
+// PERCENTAGE CHANGE CALCULATOR FUNCTIONS
+// ============================================
+function calculatePercentageChange() {
+  // Get input values
+  const original = parseFloat(document.getElementById("pc-original").value);
+  const newValue = parseFloat(document.getElementById("pc-new").value);
+
+  // Validation
+  if (isNaN(original) || isNaN(newValue)) {
+    alert("Please enter valid numbers");
+    return;
+  }
+
+  if (original === 0) {
+    alert("Original value cannot be zero");
+    return;
+  }
+
+  // Calculate percentage change
+  const absoluteChange = newValue - original;
+  const percentageChange = (absoluteChange / Math.abs(original)) * 100;
+
+  // Determine description
+  let description = "";
+  if (percentageChange > 0) {
+    description = `an increase of ${Math.abs(percentageChange).toFixed(2)}%`;
+  } else if (percentageChange < 0) {
+    description = `a decrease of ${Math.abs(percentageChange).toFixed(2)}%`;
+  } else {
+    description = "no change";
+  }
+
+  // Display results
+  const resultDiv = document.getElementById("pc-result");
+  document.getElementById("pc-change-value").textContent =
+    percentageChange.toFixed(2);
+  document.getElementById("pc-absolute-change").textContent =
+    Math.abs(absoluteChange).toFixed(2);
+  document.getElementById("pc-description").textContent =
+    `From ${original} to ${newValue} is ${description}`;
+  resultDiv.style.display = "block";
+
+  // Update main calculator display with the result
+  left = percentageChange.toFixed(2).toString();
+  operator = "";
+  right = "";
+  updateResult();
+}
+
+function clearPercentageChange() {
+  // Clear input fields
+  document.getElementById("pc-original").value = "100";
+  document.getElementById("pc-new").value = "150";
+
+  // Hide result
+  document.getElementById("pc-result").style.display = "none";
+
+  // Clear calculator display
+  left = "";
+  operator = "";
+  right = "";
+  updateResult();
+}
+
+// Function to calculate the 2x2 determinant
+function calculateMatrix() {
+  // 1. Fetch values (default to 0 if empty)
+  const a = parseFloat(document.getElementById("m11").value) || 0;
+  const b = parseFloat(document.getElementById("m12").value) || 0;
+  const c = parseFloat(document.getElementById("m21").value) || 0;
+  const d = parseFloat(document.getElementById("m22").value) || 0;
+
+  // 2. Determinant Formula: (a * d) - (b * c)
+  const detResult = a * d - b * c;
+
+  // 3. Update the UI Result
+  document.getElementById("matrix-result").innerText = detResult;
+
+  // 4. Sync with main calculator display
+  currentExpression = detResult.toString();
+  updateResult();
+
+  // 5. Automatically trigger word translation and speech if needed
+  if (typeof numberToWords === "function") {
+    const words = numberToWords(detResult);
+    const wordArea = document.getElementById("word-area");
+    const wordText =
+      document.getElementById("word-result-text") ||
+      document.getElementById("word-result");
+
+    if (wordText) wordText.innerHTML = words;
+    if (wordArea) wordArea.style.display = "flex";
+    enableSpeakButton();
+  }
+}
+
+function redoCalculation() {
+  var calcHistory = localStorage.getItem("calcHistory");
+  if (!calcHistory) return;
+  var History;
+  try {
+    History = JSON.parse(calcHistory);
+  } catch (e) {
+    return;
+  }
+  if (!History || History.length === 0) return;
+  // Cap at last 5 entries; cycle through on repeated presses
+  var maxSteps = Math.min(5, History.length);
+  redoIndex = (redoIndex + 1) % maxSteps;
+  var entry = History[History.length - 1 - redoIndex];
+  if (!entry) return;
+  var displayExpr = entry.expression || "";
+  var displayAnswer =
+    entry.answer !== undefined && entry.answer !== null ? entry.answer : "";
+  // Show full expression = answer (preserves sin/cos/tan/sqrt/! etc.)
+  var resultDisplay = document.getElementById("result");
+  if (resultDisplay) {
+    resultDisplay.value =
+      displayAnswer !== "" ? displayExpr + " = " + displayAnswer : displayExpr;
+  }
+  // Update the English word display area
+  if (entry.words) {
+    var wordResult = document.getElementById("word-result");
+    var wordArea = document.getElementById("word-area");
+    if (wordResult) wordResult.innerHTML = entry.words;
+    if (wordArea) wordArea.style.display = "flex";
+  }
+  // Update button label with current step indicator
+  var redoBtn = document.getElementById("redoBtn");
+}
+
+// Reset redo pointer when a new calculation is made
+function resetRedoIndex() {
+  redoIndex = -1;
+  var redoBtn = document.getElementById("redoBtn");
+  if (redoBtn) redoBtn.value = "↻ REDO";
+}
+
+function enableRedo() {
+  const redoBtn = document.getElementById("redoBtn");
+  if (redoBtn) redoBtn.disabled = false;
+}
+
+function disableRedo() {
+  const redoBtn = document.getElementById("redoBtn");
+  if (redoBtn) redoBtn.disabled = true;
+}
+
+// ============================================
+// QUADRATIC EQUATION SOLVER FUNCTIONS
+// ============================================
+
+function solveQuadratic() {
+  // Get input values
+  const a = parseFloat(document.getElementById("quad-a").value);
+  const b = parseFloat(document.getElementById("quad-b").value);
+  const c = parseFloat(document.getElementById("quad-c").value);
+
+  // Validation
+  if (isNaN(a) || isNaN(b) || isNaN(c)) {
+    alert("Please enter valid numbers for a, b, and c");
+    return;
+  }
+
+  if (a === 0) {
+    alert(' "a" cannot be 0 in a quadratic equation (ax² + bx + c = 0)');
+    return;
+  }
+
+  // Calculate discriminant (D = b² - 4ac)
+  const discriminant = b * b - 4 * a * c;
+
+  let roots = "";
+  let description = "";
+
+  if (discriminant > 0) {
+    const root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+    const root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+    roots = `x₁ = ${root1.toFixed(4)}, x₂ = ${root2.toFixed(4)}`;
+    description = "Two distinct real roots";
+  } else if (discriminant === 0) {
+    const root = -b / (2 * a);
+    roots = `x = ${root.toFixed(4)} (repeated)`;
+    description = "One repeated real root";
+  } else {
+    const realPart = (-b / (2 * a)).toFixed(4);
+    const imaginaryPart = (Math.sqrt(-discriminant) / (2 * a)).toFixed(4);
+    roots = `x₁ = ${realPart} + ${imaginaryPart}i, x₂ = ${realPart} - ${imaginaryPart}i`;
+    description = "Two complex/imaginary roots";
+  }
+
+  // Display results
+  const resultDiv = document.getElementById("quad-result");
+  document.getElementById("quad-roots-value").textContent = roots;
+  document.getElementById("quad-discriminant").textContent =
+    discriminant.toFixed(4);
+  document.getElementById("quad-description").textContent = description;
+  resultDiv.style.display = "block";
+
+  // Update main calculator display with the discriminant (or root if real)
+  currentExpression = discriminant.toString();
+  updateResult();
+}
+
+function clearQuadratic() {
+  // Clear input fields
+  document.getElementById("quad-a").value = "1";
+  document.getElementById("quad-b").value = "5";
+  document.getElementById("quad-c").value = "6";
+
+  // Hide result
+  document.getElementById("quad-result").style.display = "none";
+
+  // Clear calculator display
+  currentExpression = "";
+  updateResult();
+}
+
+// ================= MEMORY SYSTEM =================
+
+const display = document.getElementById("result");
+let memory = 0;
+
+window.updateMemoryIndicator = function () {
+  const indicator = document.getElementById("memoryIndicator");
+  if (!indicator) return;
+  indicator.style.visibility = memory !== 0 ? "visible" : "hidden";
+};
+
+window.memoryClear = function () {
+  memory = 0;
+  updateMemoryIndicator();
+};
+
+window.memoryRecall = function () {
+  display.value = memory.toString();
+};
+
+window.memoryAdd = function () {
+  const value = parseFloat(display.value) || 0;
+  memory += value;
+  updateMemoryIndicator();
+};
+
+window.memorySubtract = function () {
+  const value = parseFloat(display.value) || 0;
+  memory -= value;
+  updateMemoryIndicator();
+};
+// Subtracts the current display value from the memory
+function memorySubtract() {
+  const value = parseFloat(display.value) || 0;
+  memory -= value;
+  updateMemoryIndicator();
+}
+// ------------------------------
+// Answer Preview (live result before = is pressed)
+// ------------------------------
+function updateAnswerPreview() {
+  const previewEl = document.getElementById("answer-preview");
+  if (!previewEl) return;
+
+  const expr = currentExpression.trim();
+
+  if (!expr || expr === "Error") {
+    previewEl.textContent = "";
+    return;
+  }
+
+  try {
+    const permMatch = expr.match(/^(\d+)P(\d+)$/i);
+    const combMatch = expr.match(/^(\d+)C(\d+)$/i);
+    let result;
+
+    if (permMatch) {
+      const n = parseInt(permMatch[1]);
+      const r = parseInt(permMatch[2]);
+      if (n >= r && n >= 0 && r >= 0) {
+        result = factorial(n) / factorial(n - r);
+      }
+    } else if (combMatch) {
+      const n = parseInt(combMatch[1]);
+      const r = parseInt(combMatch[2]);
+      if (n >= r && n >= 0 && r >= 0) {
+        result = factorial(n) / (factorial(r) * factorial(n - r));
+      }
+    } else {
+      result = eval(normalizeExpression(expr));
+    }
+
+    if (
+      result !== undefined &&
+      !isNaN(result) &&
+      isFinite(result) &&
+      expr !== result.toString()
+    ) {
+      const formatted =
+        Math.abs(result - Math.round(result)) < 1e-10
+          ? Math.round(result).toString()
+          : parseFloat(result.toFixed(6)).toString();
+      previewEl.textContent = "ANSWER PREVIEW = " + formatted;
+    } else {
+      previewEl.textContent = "";
+    }
+  } catch (e) {
+    previewEl.textContent = "";
+  }
+}
+document.addEventListener("keydown", function (event) {
+  const key = event.key;
+
+  if (!isNaN(key)) {
+    // Check if the key is a number
+    appendToResult(key);
+  } else if (key === "+" || key === "-" || key === "*" || key === "/") {
+    operatorToResult(key);
+  } else if (key === "Enter") {
+    calculateResult();
+  } else if (key === "Backspace") {
+    backspace();
+  } else if (key === "Escape") {
+    clearResult();
+  } else if (key === "(" || key === ")") {
+    bracketToResult(key);
+  } else if (key === ".") {
+    appendToResult(key);
+  } else if (key === "s") {
+    trigButtonPressed("sin");
+  } else if (key === "c") {
+    trigButtonPressed("cos");
+  } else if (key === "t") {
+    trigButtonPressed("tan");
+  } else if (key === "i") {
+    toggleInverseMode();
+  } else if (key === "A") {
+    trigButtonPressed("sin");
+  } else if (key === "C") {
+    trigButtonPressed("cos");
+  } else if (key === "T") {
+    trigButtonPressed("tan");
+  }
+});
+
+// ============================================
+// PORTUGUESE LANGUAGE TRANSLATOR
+// ============================================
+
+function numberToPortuguese(num) {
+  if (num === "Error") return "Erro";
+
+  const ones = [
+    "",
+    "Um",
+    "Dois",
+    "Três",
+    "Quatro",
+    "Cinco",
+    "Seis",
+    "Sete",
+    "Oito",
+    "Nove",
+  ];
+  const tens = [
+    "",
+    "",
+    "Vinte",
+    "Trinta",
+    "Quarenta",
+    "Cinquenta",
+    "Sessenta",
+    "Setenta",
+    "Oitenta",
+    "Noventa",
+  ];
+  const teens = [
+    "Dez",
+    "Onze",
+    "Doze",
+    "Treze",
+    "Quatorze",
+    "Quinze",
+    "Dezesseis",
+    "Dezessete",
+    "Dezoito",
+    "Dezenove",
+  ];
+  const scales = ["", "Mil", "Milhão", "Bilhão", "Trilhão"];
+
+  function convertGroup(val) {
+    let res = "";
+    if (val >= 100) {
+      res += ones[Math.floor(val / 100)] + " Cento ";
+      val %= 100;
+    }
+    if (val >= 10 && val <= 19) {
+      res += teens[val - 10] + " ";
+    } else if (val >= 20) {
+      res += tens[Math.floor(val / 10)];
+      if (val % 10 !== 0) res += " e " + ones[val % 10];
+      res += " ";
+    } else if (val > 0) {
+      res += ones[val] + " ";
+    }
+    return res.trim();
+  }
+
+  let n = parseFloat(num);
+  if (isNaN(n)) return "";
+  if (n === 0) return "Zero";
+
+  let sign = n < 0 ? "Negativo " : "";
+  let absN = Math.abs(n);
+  let parts = absN.toString().split(".");
+  let integerPart = parseInt(parts[0]);
+  let decimalPart = parts[1];
+
+  let wordArr = [];
+
+  if (integerPart === 0) {
+    wordArr.push("Zero");
+  } else {
+    let scaleIdx = 0;
+    while (integerPart > 0) {
+      let chunk = integerPart % 1000;
+      if (chunk > 0) {
+        let chunkWords = convertGroup(chunk);
+        wordArr.unshift(
+          chunkWords + (scales[scaleIdx] ? " " + scales[scaleIdx] : ""),
+        );
+      }
+      integerPart = Math.floor(integerPart / 1000);
+      scaleIdx++;
+    }
+  }
+
+  let result = sign + wordArr.join(", ").trim();
+
+  if (decimalPart) {
+    result += " Vírgula";
+    for (let digit of decimalPart) {
+      result += " " + (digit === "0" ? "Zero" : ones[parseInt(digit)]);
+    }
+  }
+
+  return result.trim();
+}
+
+function translateToPortuguese() {
+  if (!currentExpression) return;
+
+  const portuguese = numberToPortuguese(currentExpression);
+  const wordResult = document.getElementById("word-result");
+
+  wordResult.innerHTML =
+    '<span class="small-label">Resultado em Português</span><strong>' +
+    portuguese +
+    "</strong>";
+}
+
+// ============================================
+// CUBIC EQUATION SOLVER FUNCTIONS
+// ============================================
+
+function solveCubic() {
+  // Get input values
+  const a = parseFloat(document.getElementById("cubic-a").value);
+  const b = parseFloat(document.getElementById("cubic-b").value);
+  const c = parseFloat(document.getElementById("cubic-c").value);
+  const d = parseFloat(document.getElementById("cubic-d").value);
+
+  // Validation
+  if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d)) {
+    alert("Please enter valid numbers for a, b, c, and d");
+    return;
+  }
+
+  if (a === 0) {
+    alert('"a" cannot be 0 in a cubic equation (ax³ + bx² + cx + d = 0)');
+    return;
+  }
+
+  // Normalize the equation: convert to form t³ + pt + q = 0
+  const a2 = b / a,
+    a3 = c / a,
+    a4 = d / a;
+  const p = a3 - (a2 * a2) / 3;
+  const q = a4 + (2 * a2 * a2 * a2) / 27 - (a2 * a3) / 3;
+
+  // Cardano's formula
+  const discriminant = -(4 * p * p * p + 27 * q * q);
+  const innerVal = (q / 2) ** 2 + (p / 3) ** 3;
+
+  let roots = [];
+  let description = "";
+
+  if (Math.abs(innerVal) < 1e-10) {
+    // Multiple roots case
+    if (Math.abs(p) < 1e-10 && Math.abs(q) < 1e-10) {
+      // Triple root
+      roots = [(-a2 / 3).toFixed(4)];
+      description = "One triple real root";
+    } else {
+      // One single and one double root
+      const root1 = ((3 * q) / p - a2 / 3).toFixed(4);
+      const root2 = ((-3 * q) / (2 * p) - a2 / 3).toFixed(4);
+      roots = [root1, root2, root2];
+      description = "One single and one double real root";
+    }
+  } else if (innerVal > 0) {
+    // One real root, two complex
+    const sqrtInner = Math.sqrt(innerVal);
+    const cbrtVal1 = Math.cbrt(-q / 2 + sqrtInner);
+    const cbrtVal2 = Math.cbrt(-q / 2 - sqrtInner);
+    const realRoot = (cbrtVal1 + cbrtVal2 - a2 / 3).toFixed(4);
+
+    roots = [realRoot];
+    description = "One real root and two complex conjugate roots";
+  } else {
+    // Three distinct real roots (trigonometric solution)
+    const m = 2 * Math.sqrt(-p / 3);
+    const theta = (1 / 3) * Math.acos((3 * q) / (p * m));
+    const offset = a2 / 3;
+
+    const root1 = (m * Math.cos(theta) - offset).toFixed(4);
+    const root2 = (m * Math.cos(theta + (2 * Math.PI) / 3) - offset).toFixed(4);
+    const root3 = (m * Math.cos(theta + (4 * Math.PI) / 3) - offset).toFixed(4);
+
+    roots = [root1, root2, root3];
+    description = "Three distinct real roots";
+  }
+
+  // Display results
+  const resultDiv = document.getElementById("cubic-result");
+  document.getElementById("cubic-roots-value").textContent = roots.join(", ");
+  document.getElementById("cubic-description").textContent = description;
+  resultDiv.style.display = "block";
+
+  // Update main calculator display
+  currentExpression = roots[0];
+  updateResult();
+}
+
+function clearCubic() {
+  // Clear input fields
+  document.getElementById("cubic-a").value = "1";
+  document.getElementById("cubic-b").value = "0";
+  document.getElementById("cubic-c").value = "-7";
+  document.getElementById("cubic-d").value = "6";
+
+  // Hide result
+  document.getElementById("cubic-result").style.display = "none";
+
+  // Clear calculator display
+  currentExpression = "";
+  updateResult();
+}
+
+// ============================================
+// QUARTIC EQUATION SOLVER FUNCTIONS
+// ============================================
+
+function solveQuartic() {
+  // Get input values
+  const a = parseFloat(document.getElementById("quartic-a").value);
+  const b = parseFloat(document.getElementById("quartic-b").value);
+  const c = parseFloat(document.getElementById("quartic-c").value);
+  const d = parseFloat(document.getElementById("quartic-d").value);
+  const e = parseFloat(document.getElementById("quartic-e").value);
+
+  // Validation
+  if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d) || isNaN(e)) {
+    alert("Please enter valid numbers for a, b, c, d, and e");
+    return;
+  }
+
+  if (a === 0) {
+    alert(
+      '"a" cannot be 0 in a quartic equation (ax⁴ + bx³ + cx² + dx + e = 0)',
+    );
+    return;
+  }
+
+  // Using Ferrari's method - convert to depressed quartic
+  const p = c / a;
+  const q = d / a;
+  const r = e / a;
+  const bOverA = b / a;
+
+  // Calculate resolvent cubic coefficients
+  const p2 = p * p;
+  const resolventA = 1;
+  const resolventB = -p;
+  const resolventC = q * q - 4 * r;
+  const resolventD = 4 * p * r - q * q - bOverA * bOverA;
+
+  // Solve cubic to get y
+  let y;
+  const discriminant = -(4 * resolventC ** 3 + 27 * resolventD ** 2);
+
+  // Simple cubic solver for resolvent
+  const innerVal = (resolventD / 2) ** 2 + (resolventC / 3) ** 3;
+
+  if (innerVal >= 0) {
+    const sqrtInner = Math.sqrt(innerVal);
+    const cbrt1 = Math.cbrt(-resolventD / 2 + sqrtInner);
+    const cbrt2 = Math.cbrt(-resolventD / 2 - sqrtInner);
+    const yVal = cbrt1 + cbrt2 - resolventB / 3;
+    y = yVal >= 0 ? yVal : 0;
+  } else {
+    y = Math.abs(resolventC) / 3;
+  }
+
+  // Calculate roots using y
+  const sqrt_y = Math.sqrt(Math.max(0, y));
+  const sqrt_term = Math.sqrt(
+    Math.max(0, p + 2 * y - q / (2 * sqrt_y + 1e-10)),
+  );
+
+  const root1 = (-bOverA / 4 + sqrt_y / 2 + sqrt_term / 2).toFixed(4);
+  const root2 = (-bOverA / 4 + sqrt_y / 2 - sqrt_term / 2).toFixed(4);
+  const root3 = (
+    -bOverA / 4 -
+    sqrt_y / 2 +
+    Math.sqrt(Math.max(0, p + 2 * y + q / (2 * sqrt_y + 1e-10))) / 2
+  ).toFixed(4);
+  const root4 = (
+    -bOverA / 4 -
+    sqrt_y / 2 -
+    Math.sqrt(Math.max(0, p + 2 * y + q / (2 * sqrt_y + 1e-10))) / 2
+  ).toFixed(4);
+
+  const roots = [root1, root2, root3, root4];
+  const description = "Four potential roots (may include complex values)";
+
+  // Display results
+  const resultDiv = document.getElementById("quartic-result");
+  document.getElementById("quartic-roots-value").textContent = roots.join(", ");
+  document.getElementById("quartic-description").textContent = description;
+  resultDiv.style.display = "block";
+
+  // Update main calculator display
+  currentExpression = root1;
+  updateResult();
+}
+
+function clearQuartic() {
+  // Clear input fields
+  document.getElementById("quartic-a").value = "1";
+  document.getElementById("quartic-b").value = "0";
+  document.getElementById("quartic-c").value = "-13";
+  document.getElementById("quartic-d").value = "0";
+  document.getElementById("quartic-e").value = "36";
+
+  // Hide result
+  document.getElementById("quartic-result").style.display = "none";
+
+  // Clear calculator display
+  currentExpression = "";
+  updateResult();
+}
+// ============================================
+// PROBABILITY CALCULATOR FUNCTIONS
+// ============================================
+
+/**
+ * Updates the input fields based on the selected probability calculation type.
+ */
+function updateProbabilityInputs() {
+  const probType = document.getElementById("probability-type").value;
+  const container = document.getElementById("probability-inputs-container");
+  const resultDiv = document.getElementById("probability-result");
+
+  // Clear previous inputs and hide result
+  container.innerHTML = "";
+  resultDiv.style.display = "none";
+
+  if (!probType) return;
+
+  let inputsHTML = "";
+
+  switch (probType) {
+    case "single":
+      inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Favorable Outcomes</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-favorable" placeholder="e.g., 1" step="any" min="0" value="1">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Total Possible Outcomes</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-total" placeholder="e.g., 6" step="any" min="1" value="6">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(A) = Favorable / Total</div>
+            `;
+      break;
+
+    case "and":
+      inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Event A (P(A))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-a" placeholder="e.g., 0.5" step="0.01" min="0" max="1" value="0.5">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Event B (P(B))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-b" placeholder="e.g., 0.5" step="0.01" min="0" max="1" value="0.5">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(A and B) = P(A) × P(B) (for independent events)</div>
+            `;
+      break;
+
+    case "or":
+      inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Event A (P(A))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-a-or" placeholder="e.g., 0.25" step="0.01" min="0" max="1" value="0.25">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Event B (P(B))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-b-or" placeholder="e.g., 0.25" step="0.01" min="0" max="1" value="0.25">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(A or B) = P(A) + P(B) (for mutually exclusive events)</div>
+            `;
+      break;
+
+    case "conditional":
+      inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Probability of A and B (P(A∩B))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-a-and-b" placeholder="e.g., 0.1" step="0.01" min="0" max="1" value="0.1">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Probability of B (P(B))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-b-cond" placeholder="e.g., 0.2" step="0.01" min="0" max="1" value="0.2">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(A|B) = P(A∩B) / P(B)</div>
+            `;
+      break;
+
+    case "binomial":
+      inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Number of Trials (n)</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-trials" placeholder="e.g., 5" step="1" min="1" value="5">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Number of Successes (k)</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-successes" placeholder="e.g., 3" step="1" min="0" value="3">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Success per Trial (p)</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-p" placeholder="e.g., 0.5" step="0.01" min="0" max="1" value="0.5">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(X=k) = C(n,k) × pᵏ × (1-p)ⁿ⁻ᵏ</div>
+            `;
+      break;
+
+    case "complement":
+      inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Event (P(A))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-a-comp" placeholder="e.g., 0.3" step="0.01" min="0" max="1" value="0.3">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(A') = 1 - P(A)</div>
+            `;
+      break;
+  }
+
+  container.innerHTML = inputsHTML;
+}
+
+/**
+ * Helper function to calculate combinations (nCr)
+ */
+function combination(n, k) {
+  if (k < 0 || k > n) return 0;
+  if (k === 0 || k === n) return 1;
+
+  // Use the multiplicative formula to avoid large numbers
+  k = Math.min(k, n - k);
+  let result = 1;
+  for (let i = 1; i <= k; i++) {
+    result *= (n - k + i) / i;
+  }
+  return result;
+}
+
+/**
+ * Main function to perform the probability calculation based on user input.
+ */
+function calculateProbability() {
+  const probType = document.getElementById("probability-type").value;
+  const resultDiv = document.getElementById("probability-result");
+  const probValueSpan = document.getElementById("probability-value");
+  const formulaSpan = document.getElementById("probability-formula");
+  const explanationSpan = document.getElementById("probability-explanation");
+
+  if (!probType) {
+    alert("Please select a calculation type.");
+    return;
+  }
+
+  let result = null;
+  let formula = "";
+  let explanation = "";
+
+  try {
+    switch (probType) {
+      case "single": {
+        const favorable = parseFloat(
+          document.getElementById("prob-favorable").value,
+        );
+        const total = parseFloat(document.getElementById("prob-total").value);
+
+        if (isNaN(favorable) || isNaN(total) || total <= 0 || favorable < 0) {
+          throw new Error(
+            "Invalid input. Please ensure Favorable Outcomes is >= 0 and Total Outcomes is > 0.",
+          );
+        }
+        result = favorable / total;
+        formula = `P(A) = Favorable / Total = ${favorable} / ${total}`;
+        explanation = `The probability of the event occurring is ${result.toFixed(4)}.`;
+        break;
+      }
+
+      case "and": {
+        const pA = parseFloat(document.getElementById("prob-a").value);
+        const pB = parseFloat(document.getElementById("prob-b").value);
+
+        if (isNaN(pA) || isNaN(pB) || pA < 0 || pA > 1 || pB < 0 || pB > 1) {
+          throw new Error("Probabilities must be between 0 and 1.");
+        }
+        result = pA * pB;
+        formula = `P(A and B) = P(A) × P(B) = ${pA.toFixed(4)} × ${pB.toFixed(4)}`;
+        explanation = `The probability of both independent events occurring is ${result.toFixed(4)}.`;
+        break;
+      }
+
+      case "or": {
+        const pA = parseFloat(document.getElementById("prob-a-or").value);
+        const pB = parseFloat(document.getElementById("prob-b-or").value);
+
+        if (isNaN(pA) || isNaN(pB) || pA < 0 || pA > 1 || pB < 0 || pB > 1) {
+          throw new Error("Probabilities must be between 0 and 1.");
+        }
+        result = pA + pB;
+        if (result > 1) result = 1; // Cap at 1 for mutually exclusive events that might be incorrectly input
+        formula = `P(A or B) = P(A) + P(B) = ${pA.toFixed(4)} + ${pB.toFixed(4)}`;
+        explanation = `The probability of either event occurring (mutually exclusive) is ${result.toFixed(4)}.`;
+        break;
+      }
+
+      case "conditional": {
+        const pAandB = parseFloat(
+          document.getElementById("prob-a-and-b").value,
+        );
+        const pB = parseFloat(document.getElementById("prob-b-cond").value);
+
+        if (
+          isNaN(pAandB) ||
+          isNaN(pB) ||
+          pAandB < 0 ||
+          pAandB > 1 ||
+          pB <= 0 ||
+          pB > 1
+        ) {
+          throw new Error(
+            "P(A∩B) must be between 0 and 1, and P(B) must be between >0 and 1.",
+          );
+        }
+        result = pAandB / pB;
+        if (result > 1) result = 1; // Cap at 1
+        formula = `P(A|B) = P(A∩B) / P(B) = ${pAandB.toFixed(4)} / ${pB.toFixed(4)}`;
+        explanation = `The probability of event A given that B has occurred is ${result.toFixed(4)}.`;
+        break;
+      }
+
+      case "binomial": {
+        const n = parseInt(document.getElementById("prob-trials").value);
+        const k = parseInt(document.getElementById("prob-successes").value);
+        const p = parseFloat(document.getElementById("prob-p").value);
+
+        if (
+          isNaN(n) ||
+          isNaN(k) ||
+          isNaN(p) ||
+          n < 1 ||
+          k < 0 ||
+          k > n ||
+          p < 0 ||
+          p > 1
+        ) {
+          throw new Error(
+            "Invalid input. Ensure n >= 1, 0 <= k <= n, and 0 <= p <= 1.",
+          );
+        }
+        const comb = combination(n, k);
+        result = comb * Math.pow(p, k) * Math.pow(1 - p, n - k);
+        formula = `P(X=${k}) = C(${n}, ${k}) × ${p.toFixed(2)}^${k} × (1-${p.toFixed(2)})^${n - k}`;
+        explanation = `The probability of getting exactly ${k} successes in ${n} trials is ${result.toFixed(6)}.`;
+        break;
+      }
+
+      case "complement": {
+        const pA = parseFloat(document.getElementById("prob-a-comp").value);
+
+        if (isNaN(pA) || pA < 0 || pA > 1) {
+          throw new Error("Probability must be between 0 and 1.");
+        }
+        result = 1 - pA;
+        formula = `P(A') = 1 - P(A) = 1 - ${pA.toFixed(4)}`;
+        explanation = `The probability of the event NOT occurring is ${result.toFixed(4)}.`;
+        break;
+      }
+    }
+
+    // Display the result
+    if (result !== null) {
+      probValueSpan.textContent = result.toFixed(6);
+      formulaSpan.textContent = formula;
+      explanationSpan.textContent = explanation;
+      resultDiv.style.display = "block";
+
+      // Update main calculator display with the result (optional)
+      // currentExpression = result.toString();
+      // updateResult();
+    }
+  } catch (error) {
+    alert("Error: " + error.message);
+    resultDiv.style.display = "none";
+  }
+}
+
+/**
+ * Clears the probability calculator inputs and hides the result.
+ */
+function clearProbabilityCalculator() {
+  document.getElementById("probability-type").value = "";
+  document.getElementById("probability-inputs-container").innerHTML = "";
+  document.getElementById("probability-result").style.display = "none";
+}
+
+// ============================================
+// BMI CALCULATOR FUNCTIONS
+// ============================================
+
+/**
+ * Calculates the Body Mass Index (BMI) based on weight and height.
+ */
+function calculateBMI() {
+  const weight = parseFloat(document.getElementById("bmi-weight").value);
+  const heightCm = parseFloat(document.getElementById("bmi-height").value);
+  const resultDiv = document.getElementById("bmi-result");
+  const bmiValueSpan = document.getElementById("bmi-value");
+  const bmiCategorySpan = document.getElementById("bmi-category");
+  const bmiNoteSpan = document.getElementById("bmi-note");
+
+  if (isNaN(weight) || isNaN(heightCm) || weight <= 0 || heightCm <= 0) {
+    alert("Please enter valid positive numbers for weight and height.");
+    return;
+  }
+
+  // Formula: BMI = weight (kg) / [height (m)]^2
+  const heightM = heightCm / 100;
+  const bmi = weight / (heightM * heightM);
+  const bmiRounded = bmi.toFixed(2);
+
+  let category = "";
+  let note = "";
+
+  if (bmi < 18.5) {
+    category = "Underweight";
+    note =
+      "It is important to eat a balanced diet and consult a healthcare provider.";
+  } else if (bmi >= 18.5 && bmi < 25) {
+    category = "Normal weight";
+    note =
+      "Great job! Maintain a healthy lifestyle with balanced nutrition and exercise.";
+  } else if (bmi >= 25 && bmi < 30) {
+    category = "Overweight";
+    note =
+      "Consider a more active lifestyle and balanced diet to reach a healthier range.";
+  } else {
+    category = "Obese";
+    note =
+      "It is recommended to consult a healthcare provider for personalized advice.";
+  }
+
+  // Display the result
+  bmiValueSpan.textContent = bmiRounded;
+  bmiCategorySpan.textContent = category;
+  bmiNoteSpan.textContent = note;
+  resultDiv.style.display = "block";
+
+  // Update main calculator display with the result
+  currentExpression = bmiRounded;
+  updateResult();
+}
+
+/**
+ * Clears the BMI calculator inputs and hides the result.
+ */
+function clearBMICalculator() {
+  document.getElementById("bmi-weight").value = "";
+  document.getElementById("bmi-height").value = "";
+  document.getElementById("bmi-result").style.display = "none";
+}
+
+// ============================================
+// STATISTICAL CALCULATOR FUNCTIONS
+// ============================================
+function calculateStatistics() {
+  const input = document.getElementById("stats-data-input").value.trim();
+
+  if (!input) {
+    alert("Please enter data values");
+    return;
+  }
+
+  const dataArray = input
+    .split(",")
+    .map((val) => {
+      const num = parseFloat(val.trim());
+      return isNaN(num) ? null : num;
+    })
+    .filter((val) => val !== null);
+
+  if (dataArray.length === 0) {
+    alert("No valid numbers found. Please enter comma-separated numbers.");
+    return;
+  }
+
+  const stats = {
+    count: dataArray.length,
+    sum: dataArray.reduce((a, b) => a + b, 0),
+    min: Math.min(...dataArray),
+    max: Math.max(...dataArray),
+    mean: 0,
+    median: 0,
+    mode: "N/A",
+    stddev: 0,
+  };
+
+  stats.mean = stats.sum / stats.count;
+
+  const sorted = [...dataArray].sort((a, b) => a - b);
+  if (stats.count % 2 === 0) {
+    stats.median = (sorted[stats.count / 2 - 1] + sorted[stats.count / 2]) / 2;
+  } else {
+    stats.median = sorted[Math.floor(stats.count / 2)];
+  }
+
+  const frequency = {};
+  let maxFreq = 0;
+  let modes = [];
+
+  dataArray.forEach((num) => {
+    frequency[num] = (frequency[num] || 0) + 1;
+    if (frequency[num] > maxFreq) {
+      maxFreq = frequency[num];
+    }
+  });
+
+  Object.keys(frequency).forEach((key) => {
+    if (frequency[key] === maxFreq) {
+      modes.push(parseFloat(key));
+    }
+  });
+
+  if (modes.length === dataArray.length) {
+    stats.mode = "No mode";
+  } else if (modes.length === 1) {
+    stats.mode = modes[0].toFixed(4);
+  } else {
+    stats.mode = modes.map((m) => m.toFixed(4)).join(", ");
+  }
+
+  const variance =
+    dataArray.reduce((sum, val) => sum + Math.pow(val - stats.mean, 2), 0) /
+    stats.count;
+  stats.stddev = Math.sqrt(variance);
+
+  displayStatisticsResults(stats);
+}
+
+function displayStatisticsResults(stats) {
+  const resultDiv = document.getElementById("stats-result");
+  document.getElementById("stat-count").textContent = stats.count;
+  document.getElementById("stat-sum").textContent = stats.sum.toFixed(2);
+  document.getElementById("stat-mean").textContent = stats.mean.toFixed(4);
+  document.getElementById("stat-median").textContent = stats.median.toFixed(4);
+  document.getElementById("stat-mode").textContent = stats.mode;
+  document.getElementById("stat-min").textContent = stats.min.toFixed(2);
+  document.getElementById("stat-max").textContent = stats.max.toFixed(2);
+  document.getElementById("stat-stddev").textContent = stats.stddev.toFixed(4);
+  resultDiv.style.display = "block";
+}
+
+function clearStatistics() {
+  document.getElementById("stats-data-input").value = "";
+  document.getElementById("stats-result").style.display = "none";
+}
+
+// ------------------------------
+// ROUND UP TO DECIMAL PLACES
+// ------------------------------
+let currentDP = 2;
+
+function setDP(dp) {
+  currentDP = dp;
+  document.getElementById("dpLabel").textContent = dp + "dp";
+  document.getElementById("dpDropdownMenu").style.display = "none";
+  roundToDecimal(dp);
+}
+
+function roundToDecimal(dp) {
+  const val = parseFloat(document.getElementById("result").value);
+  if (isNaN(val)) return;
+  document.getElementById("result").value = val.toFixed(dp);
+}
+
+function toggleDPDropdown(event) {
+  event.stopPropagation();
+  const menu = document.getElementById("dpDropdownMenu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+// Close when clicking anywhere outside the dropdown
+document.addEventListener("click", function () {
+  const menu = document.getElementById("dpDropdownMenu");
+  if (menu) menu.style.display = "none";
+});
+
+// ========================================================
+// ================= FORMULA CALCULATOR ===================
+// ========================================================
+
+const formulas = {
+  geometry: {
+    circleArea: {
+      name: "Area of Circle",
+      inputs: ["Radius"],
+      calc: (v) => Math.PI * v[0] * v[0],
+    },
+    circleCircumference: {
+      name: "Circumference of Circle",
+      inputs: ["Radius"],
+      calc: (v) => 2 * Math.PI * v[0],
+    },
+    triangleArea: {
+      name: "Area of Triangle",
+      inputs: ["Base", "Height"],
+      calc: (v) => 0.5 * v[0] * v[1],
+    },
+    rectangleArea: {
+      name: "Area of Rectangle",
+      inputs: ["Length", "Width"],
+      calc: (v) => v[0] * v[1],
+    },
+    squareArea: {
+      name: "Area of Square",
+      inputs: ["Side"],
+      calc: (v) => v[0] * v[0],
+    },
+    cubeVolume: {
+      name: "Volume of Cube",
+      inputs: ["Side"],
+      calc: (v) => v[0] ** 3,
+    },
+    sphereVolume: {
+      name: "Volume of Sphere",
+      inputs: ["Radius"],
+      calc: (v) => (4 / 3) * Math.PI * v[0] ** 3,
+    },
+    cylinderVolume: {
+      name: "Volume of Cylinder",
+      inputs: ["Radius", "Height"],
+      calc: (v) => Math.PI * v[0] ** 2 * v[1],
+    },
+    pythagoras: {
+      name: "Pythagorean Theorem",
+      inputs: ["a", "b"],
+      calc: (v) => Math.sqrt(v[0] ** 2 + v[1] ** 2),
+    },
+    sphereSurface: {
+      name: "Surface Area of Sphere",
+      inputs: ["Radius"],
+      calc: (v) => 4 * Math.PI * v[0] ** 2,
+    },
+  },
+  finance: {
+    simpleInterest: {
+      name: "Simple Interest",
+      inputs: ["Principal", "Rate", "Time"],
+      calc: (v) => (v[0] * v[1] * v[2]) / 100,
+    },
+    compoundInterest: {
+      name: "Compound Interest",
+      inputs: ["Principal", "Rate", "Time", "n"],
+      calc: (v) => v[0] * (1 + v[1] / 100 / v[3]) ** (v[3] * v[2]),
+    },
+    percentage: {
+      name: "Percentage",
+      inputs: ["Value", "Total"],
+      calc: (v) => (v[0] / v[1]) * 100,
+    },
+    discount: {
+      name: "Discount Price",
+      inputs: ["Original Price", "Discount %"],
+      calc: (v) => v[0] - (v[1] / 100) * v[0],
+    },
+    profit: {
+      name: "Profit/Loss",
+      inputs: ["Selling Price", "Cost Price"],
+      calc: (v) => v[0] - v[1],
+    },
+  },
+  algebra: {
+    slope: {
+      name: "Slope of Line",
+      inputs: ["x1", "y1", "x2", "y2"],
+      calc: (v) => (v[3] - v[1]) / (v[2] - v[0]),
+    },
+    distance: {
+      name: "Distance Between Points",
+      inputs: ["x1", "y1", "x2", "y2"],
+      calc: (v) => Math.sqrt((v[2] - v[0]) ** 2 + (v[3] - v[1]) ** 2),
+    },
+    average: {
+      name: "Average",
+      inputs: ["Sum", "Count"],
+      calc: (v) => v[0] / v[1],
+    },
+    speed: {
+      name: "Speed",
+      inputs: ["Distance", "Time"],
+      calc: (v) => v[0] / v[1],
+    },
+    quadratic: {
+      name: "Quadratic Formula",
+      inputs: ["a", "b", "c"],
+      calc: (v) =>
+        (-v[1] + Math.sqrt(v[1] ** 2 - 4 * v[0] * v[2])) / (2 * v[0]),
+    },
+  },
+};
+
+// Populate formulas
+document.addEventListener("DOMContentLoaded", () => {
+  const category = document.getElementById("formulaCategory");
+  const select = document.getElementById("formulaSelect");
+  const container = document.getElementById("formulaInputs");
+
+  if (!category) return;
+
+  category.addEventListener("change", () => {
+    select.innerHTML = '<option value="">Select Formula</option>';
+    container.innerHTML = "";
+    if (!category.value) return;
+
+    Object.entries(formulas[category.value]).forEach(([key, f]) => {
+      select.innerHTML += `<option value="${key}">${f.name}</option>`;
+    });
+  });
+
+  select.addEventListener("change", () => {
+    container.innerHTML = "";
+    const f = formulas[category.value]?.[select.value];
+    if (!f) return;
+
+    f.inputs.forEach((label, i) => {
+      container.innerHTML += `
+        <input type="number" class="form-control mb-2"
+        placeholder="${label}" id="f${i}">
+      `;
+    });
+  });
+});
+
+// Calculate formula
+function calculateFormula() {
+  const category = document.getElementById("formulaCategory").value;
+  const key = document.getElementById("formulaSelect").value;
+  if (!category || !key) return;
+
+  const formula = formulas[category][key];
+  let values = [];
+
+  for (let i = 0; i < formula.inputs.length; i++)
+    values.push(parseFloat(document.getElementById("f" + i).value) || 0);
+
+  const result = formula.calc(values);
+
+  // Display inside Formula Calculator
+  document.getElementById("formula-result").innerHTML =
+    `<div class="alert alert-success mt-2">
+       Result: <strong>${result}</strong>
+     </div>`;
+}
+
+// ============================================
+// GCD & LCM CALCULATOR FUNCTIONS
+// ============================================
+
+/**
+ * Calculate Greatest Common Divisor using Euclidean algorithm
+ */
+function findGCD(a, b) {
+  a = Math.abs(a);
+  b = Math.abs(b);
+  while (b !== 0) {
+    const temp = b;
+    b = a % b;
+    a = temp;
+  }
+  return a;
+}
+
+/**
+ * Calculate Least Common Multiple using the formula: LCM(a,b) = (a * b) / GCD(a,b)
+ */
+function findLCM(a, b) {
+  return Math.abs(a * b) / findGCD(a, b);
+}
+
+/**
+ * Main function to calculate GCD and LCM
+ */
+function calculateGCDLCM() {
+  const num1Input = document.getElementById("gcd-num1");
+  const num2Input = document.getElementById("gcd-num2");
+  const resultDiv = document.getElementById("gcd-lcm-result");
+
+  if (!num1Input.value || !num2Input.value) {
+    alert("Please enter both numbers");
+    return;
+  }
+
+  const num1 = parseInt(num1Input.value);
+  const num2 = parseInt(num2Input.value);
+
+  if (isNaN(num1) || isNaN(num2) || num1 <= 0 || num2 <= 0) {
+    alert("Please enter valid positive integers");
+    return;
+  }
+
+  const gcd = findGCD(num1, num2);
+  const lcm = findLCM(num1, num2);
+
+  // Display results
+  document.getElementById("gcd-value").textContent = gcd;
+  document.getElementById("lcm-value").textContent = lcm;
+  resultDiv.style.display = "block";
+
+  // Add to history
+  calculationHistory.push({
+    expression: `GCD(${num1}, ${num2}) = ${gcd}; LCM(${num1}, ${num2}) = ${lcm}`,
+    words: `GCD: ${numberToWords(gcd)}, LCM: ${numberToWords(lcm)}`,
+    time: new Date().toLocaleTimeString(),
+  });
+
+  if (calculationHistory.length > 20) {
+    calculationHistory.shift();
+  }
+
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+}
+
+/**
+ * Clear GCD & LCM calculator inputs and results
+ */
+function clearGCDLCM() {
+  document.getElementById("gcd-num1").value = "";
+  document.getElementById("gcd-num2").value = "";
+  document.getElementById("gcd-lcm-result").style.display = "none";
+}
+
+// ===============================
+// FIBONACCI SEQUENCE CALCULATOR
+// ===============================
+
+/**
+ * Generate Fibonacci sequence up to n terms
+ * @param {number} n - Number of terms to generate
+ * @returns {array} Array of Fibonacci numbers
+ */
+function generateFibonacci(n) {
+  if (n <= 0) return [];
+  if (n === 1) return [0];
+
+  const fib = [0, 1];
+  for (let i = 2; i < n; i++) {
+    fib.push(fib[i - 1] + fib[i - 2]);
+  }
+  return fib.slice(0, n);
+}
+
+/**
+ * Calculate and display Fibonacci sequence
+ */
+function calculateFibonacci() {
+  const nInput = document.getElementById("fib-terms");
+  const resultDiv = document.getElementById("fib-result");
+
+  if (!nInput.value) {
+    alert("Please enter the number of terms");
+    return;
+  }
+
+  const n = parseInt(nInput.value);
+
+  if (isNaN(n) || n <= 0) {
+    alert("Please enter a valid positive integer");
+    return;
+  }
+
+  if (n > 50) {
+    alert("Maximum 50 terms allowed to prevent performance issues");
+    return;
+  }
+
+  const fibSequence = generateFibonacci(n);
+  const sequenceStr = fibSequence.join(", ");
+
+  // Display results
+  document.getElementById("fib-sequence").textContent = sequenceStr;
+  document.getElementById("fib-sum").textContent = fibSequence.reduce(
+    (a, b) => a + b,
+    0,
+  );
+  document.getElementById("fib-count").textContent = fibSequence.length;
+  if (fibSequence.length > 0) {
+    document.getElementById("fib-last").textContent =
+      fibSequence[fibSequence.length - 1];
+  }
+
+  resultDiv.style.display = "block";
+
+  // Add to history
+  calculationHistory.push({
+    expression: `Fibonacci(${n}) = ${sequenceStr.substring(0, 50)}${sequenceStr.length > 50 ? "..." : ""}`,
+    words: `First ${n} Fibonacci numbers: ${sequenceStr.substring(0, 50)}${sequenceStr.length > 50 ? "..." : ""}`,
+    time: new Date().toLocaleTimeString(),
+  });
+
+  if (calculationHistory.length > 20) {
+    calculationHistory.shift();
+  }
+
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+}
+
+/**
+ * Find the nth Fibonacci number
+ */
+function findNthFibonacci() {
+  const nInput = document.getElementById("fib-nth-input");
+  const resultDiv = document.getElementById("fib-nth-result");
+
+  if (!nInput.value) {
+    alert("Please enter the term number (n)");
+    return;
+  }
+
+  const n = parseInt(nInput.value);
+
+  if (isNaN(n) || n < 0) {
+    alert("Please enter a valid non-negative integer");
+    return;
+  }
+
+  if (n > 80) {
+    alert("Maximum 80th term allowed");
+    return;
+  }
+
+  // Calculate nth Fibonacci using closed form or iterative method
+  let fib;
+  if (n === 0) {
+    fib = 0;
+  } else if (n === 1) {
+    fib = 1;
+  } else {
+    let a = 0,
+      b = 1;
+    for (let i = 2; i <= n; i++) {
+      [a, b] = [b, a + b];
+    }
+    fib = b;
+  }
+
+  // Display result
+  document.getElementById("fib-nth-value").textContent = fib;
+  resultDiv.style.display = "block";
+
+  // Add to history
+  calculationHistory.push({
+    expression: `F(${n}) = ${fib}`,
+    words: `${n}th Fibonacci number is ${numberToWords(fib)}`,
+    time: new Date().toLocaleTimeString(),
+  });
+
+  if (calculationHistory.length > 20) {
+    calculationHistory.shift();
+  }
+
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+}
+
+/**
+ * Check if a number is a Fibonacci number
+ */
+function checkFibonacciNumber() {
+  const numInput = document.getElementById("fib-check-input");
+  const resultDiv = document.getElementById("fib-check-result");
+
+  if (!numInput.value) {
+    alert("Please enter a number to check");
+    return;
+  }
+
+  const num = parseInt(numInput.value);
+
+  if (isNaN(num) || num < 0) {
+    alert("Please enter a valid non-negative integer");
+    return;
+  }
+
+  // Check if number is Fibonacci using the property:
+  // A number is Fibonacci if one or both of (5*n^2 + 4) or (5*n^2 - 4) is a perfect square
+  function isPerfectSquare(x) {
+    const sqrt = Math.sqrt(x);
+    return sqrt === Math.floor(sqrt);
+  }
+
+  const isFib =
+    isPerfectSquare(5 * num * num + 4) || isPerfectSquare(5 * num * num - 4);
+
+  // Display result
+  document.getElementById("fib-check-value").textContent = num;
+  document.getElementById("fib-check-answer").textContent = isFib
+    ? "YES ✓"
+    : "NO ✗";
+  document.getElementById("fib-check-answer").style.color = isFib
+    ? "#198754"
+    : "#dc3545";
+  resultDiv.style.display = "block";
+
+  // Add to history
+  calculationHistory.push({
+    expression: `Is ${num} a Fibonacci number?`,
+    words: `${num} is ${isFib ? "" : "not "}a Fibonacci number`,
+    time: new Date().toLocaleTimeString(),
+  });
+
+  if (calculationHistory.length > 20) {
+    calculationHistory.shift();
+  }
+
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+}
+
+/**
+ * Clear Fibonacci calculator inputs and results
+ */
+function clearFibonacci() {
+  document.getElementById("fib-terms").value = "";
+  document.getElementById("fib-result").style.display = "none";
+  document.getElementById("fib-nth-input").value = "";
+  document.getElementById("fib-nth-result").style.display = "none";
+  document.getElementById("fib-check-input").value = "";
+  document.getElementById("fib-check-result").style.display = "none";
+}
+/* Clear bitwise calculator
+ */
+function clearBitwise() {
+  document.getElementById("bitwise-num1").value = "5";
+  document.getElementById("bitwise-num2").value = "3";
+  document.getElementById("bitwise-result").style.display = "none";
+}
+
+function appendPi() {
+  const piDisplay = "π"; // what the user sees
+  const piEval = "Math.PI"; // what eval() will use
+
+  // Reference to your display input
+  const displayEl = document.getElementById("result");
+
+  // Determine last character in the display
+  const lastChar = displayEl.value.slice(-1);
+
+  // If display is empty or ends with an operator → just append π
+  if (/[+\-×*/^]$/.test(lastChar)) {
+    currentExpression += piEval;
+    displayEl.value += piDisplay;
+  } else if (!displayEl.value) {
+    currentExpression = piEval;
+    displayEl.value += piDisplay;
+  } else {
+    // Otherwise assume multiplication between number and π
+    currentExpression += "*" + piEval;
+    displayEl.value += "×" + piDisplay;
+  }
+
+  // Optional: update word-area preview if you have it
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+
+  if (wordResult && wordArea) {
+    wordResult.innerHTML =
+      '<span class="small-label">Result in words</span><strong>' +
+      numberToWords(Math.PI) +
+      "</strong>";
+    wordArea.style.display = "flex";
+  }
+}
+
+// ===============================
+// BASE CONVERTER & BITWISE OPERATIONS
+// ===============================
+
+/**
+ * Convert decimal number to binary, hex, and octal
+ */
+function convertDecimal() {
+  const decimalInput = document.getElementById("decimal-input");
+  const value = parseInt(decimalInput.value);
+
+  if (isNaN(value) || value < 0) {
+    document.getElementById("binary-result").textContent = "0";
+    document.getElementById("hex-result").textContent = "0x0";
+    document.getElementById("octal-result").textContent = "0";
+    document.getElementById("decimal-result").textContent = "0";
+    return;
+  }
+
+  const binary = value.toString(2);
+  const hex = "0x" + value.toString(16).toUpperCase();
+  const octal = "0" + value.toString(8);
+
+  document.getElementById("binary-result").textContent = binary;
+  document.getElementById("hex-result").textContent = hex;
+  document.getElementById("octal-result").textContent = octal;
+  document.getElementById("decimal-result").textContent = value.toString();
+}
+
+/**
+ * Convert binary to decimal
+ */
+function convertFromBinary() {
+  const binaryInput = document.getElementById("binary-input").value.trim();
+
+  if (!binaryInput) {
+    document.getElementById("binary-to-decimal").textContent = "0";
+    return;
+  }
+
+  // Validate binary input (only 0 and 1)
+  if (!/^[01]+$/.test(binaryInput)) {
+    document.getElementById("binary-to-decimal").textContent = "Invalid binary";
+    return;
+  }
+
+  const decimal = parseInt(binaryInput, 2);
+  document.getElementById("binary-to-decimal").textContent = decimal.toString();
+}
+
+/**
+ * Convert hexadecimal to decimal
+ */
+function convertFromHex() {
+  const hexInput = document.getElementById("hex-input").value.trim();
+
+  if (!hexInput) {
+    document.getElementById("hex-to-decimal").textContent = "0";
+    return;
+  }
+
+  // Validate hex input
+  if (!/^[0-9A-Fa-f]+$/.test(hexInput)) {
+    document.getElementById("hex-to-decimal").textContent = "Invalid hex";
+    return;
+  }
+
+  const decimal = parseInt(hexInput, 16);
+  document.getElementById("hex-to-decimal").textContent = decimal.toString();
+}
+
+/**
+ * Convert octal to decimal
+ */
+function convertFromOctal() {
+  const octalInput = document.getElementById("octal-input").value.trim();
+
+  if (!octalInput) {
+    document.getElementById("octal-to-decimal").textContent = "0";
+    return;
+  }
+
+  // Validate octal input (only 0-7)
+  if (!/^[0-7]+$/.test(octalInput)) {
+    document.getElementById("octal-to-decimal").textContent = "Invalid octal";
+    return;
+  }
+
+  const decimal = parseInt(octalInput, 8);
+  document.getElementById("octal-to-decimal").textContent = decimal.toString();
+}
+
+/**
+ * Bitwise AND operation
+ */
+function bitwiseAND() {
+  const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+  const num2 = parseInt(document.getElementById("bitwise-num2").value) || 0;
+
+  const result = num1 & num2;
+  displayBitwiseResult(`${num1} & ${num2}`, result);
+}
+
+/**
+ * Bitwise OR operation
+ */
+function bitwiseOR() {
+  const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+  const num2 = parseInt(document.getElementById("bitwise-num2").value) || 0;
+
+  const result = num1 | num2;
+  displayBitwiseResult(`${num1} | ${num2}`, result);
+}
+
+/**
+ * Bitwise XOR operation
+ */
+function bitwiseXOR() {
+  const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+  const num2 = parseInt(document.getElementById("bitwise-num2").value) || 0;
+
+  const result = num1 ^ num2;
+  displayBitwiseResult(`${num1} ^ ${num2}`, result);
+}
+
+/**
+ * Bitwise NOT operation
+ */
+function bitwiseNOT() {
+  const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+
+  // JavaScript's NOT (~) operator works on 32-bit signed integers
+  // We'll use only the first number for NOT operation
+  const result = ~num1;
+  displayBitwiseResult(`~${num1}`, result);
+}
+
+/**
+ * Left Shift operation
+ */
+function leftShift() {
+  const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+  const num2 = parseInt(document.getElementById("bitwise-num2").value) || 0;
+
+  const result = num1 << num2;
+  displayBitwiseResult(`${num1} << ${num2}`, result);
+}
+
+/**
+ * Right Shift operation
+ */
+function rightShift() {
+  const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+  const num2 = parseInt(document.getElementById("bitwise-num2").value) || 0;
+
+  const result = num1 >> num2;
+  displayBitwiseResult(`${num1} >> ${num2}`, result);
+}
+
+/**
+ * Display bitwise operation results
+ */
+function displayBitwiseResult(operation, result) {
+  // ===============================
+  // 🧠 SMART RESULT MEMORY FEATURE
+  // ===============================
+
+  let LAST_RESULT = 0;
+  // ------------------------------
+  // Theme Toggle Logic
+  // ------------------------------
+  function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById("theme-toggle");
+
+    body.classList.toggle("dark-mode");
+
+    if (body.classList.contains("dark-mode")) {
+      btn.innerHTML = "☀️";
+      btn.title = "Switch to light mode";
+      localStorage.setItem("theme", "dark");
+    } else {
+      btn.innerHTML = "🌙";
+      btn.title = "Switch to dark mode";
+      localStorage.setItem("theme", "light");
+    }
+  }
+
+  var inverseMode = false;
+  var currentExpression = "";
+  let calculationHistory = [];
+  document.addEventListener("DOMContentLoaded", function () {
+    loadHistoryFromStorage();
+    renderHistory();
+  });
+  var currencyRates = {
+    USD: 1,
+    EUR: 0.92,
+    GBP: 0.79,
+    JPY: 149.5,
+    CAD: 1.37,
+    AUD: 1.52,
+    NGN: 1500.0,
+  };
+
+  const unitConversions = {
+    length: {
+      km: 1000,
+      m: 1,
+      mile: 1609.34,
+      yard: 0.9144,
+      ft: 0.3048,
+      inch: 0.0254,
+    },
+    weight: {
+      kg: 1,
+      g: 0.001,
+      lb: 0.453592,
+      oz: 0.0283495,
+    },
+    temperature: {
+      C: { offset: 0, scale: 1 },
+      F: { offset: 32, scale: 5 / 9 },
+      K: { offset: -273.15, scale: 1 },
+    },
+    area: {
+      sqm: 1,
+      sqkm: 1e6,
+      sqmile: 2.58999e6,
+      sqyard: 0.836127,
+      sqft: 0.092903,
+      sqinch: 0.00064516,
+      hectare: 10000,
+      acre: 4046.86,
+    },
+    data: {
+      bit: 1 / 8,
+      byte: 1,
+      kb: 1024,
+      mb: 1024 * 1024,
+      gb: 1024 * 1024 * 1024,
+      tb: 1024 * 1024 * 1024 * 1024,
+    },
+  };
+
+  function convertUnit(type) {
+    if (type === "length") {
+      const value =
+        parseFloat(document.getElementById("length-value").value) || 0;
+      const fromUnit = document.getElementById("from-length").value;
+      const toUnit = document.getElementById("to-length").value;
+
+      if (value === 0) {
+        document.getElementById("length-result").textContent = "0";
+        return;
+      }
+
+      const meters = value * unitConversions["length"][fromUnit];
+      const result = meters / unitConversions["length"][toUnit];
+      document.getElementById("length-result").textContent =
+        formatResult(result);
+      updateExampleConversion(result);
+    } else if (type === "weight") {
+      const value =
+        parseFloat(document.getElementById("weight-value").value) || 0;
+      const fromUnit = document.getElementById("from-weight").value;
+      const toUnit = document.getElementById("to-weight").value;
+
+      if (value === 0) {
+        document.getElementById("weight-result").textContent = "0";
+        return;
+      }
+
+      const kg = value * unitConversions["weight"][fromUnit];
+      const result = kg / unitConversions["weight"][toUnit];
+      document.getElementById("weight-result").textContent =
+        formatResult(result);
+    } else if (type === "temperature") {
+      const value =
+        parseFloat(document.getElementById("temp-value").value) || 0;
+      const fromUnit = document.getElementById("from-temp").value;
+      const toUnit = document.getElementById("to-temp").value;
+
+      let celsius;
+      if (fromUnit === "C") {
+        celsius = value;
+      } else if (fromUnit === "F") {
+        celsius = ((value - 32) * 5) / 9;
+      } else if (fromUnit === "K") {
+        celsius = value - 273.15;
+      }
+
+      let result;
+      if (toUnit === "C") {
+        result = celsius;
+      } else if (toUnit === "F") {
+        result = (celsius * 9) / 5 + 32;
+      } else if (toUnit === "K") {
+        result = celsius + 273.15;
+      }
+
+      document.getElementById("temp-result").textContent = formatResult(result);
+    } else if (type === "currency") {
+      const value =
+        parseFloat(document.getElementById("currency-value").value) || 0;
+      const fromCurrency = document.getElementById("from-currency").value;
+      const toCurrency = document.getElementById("to-currency").value;
+
+      if (
+        value === 0 ||
+        !currencyRates[fromCurrency] ||
+        !currencyRates[toCurrency]
+      ) {
+        document.getElementById("currency-result").textContent = "0";
+        return;
+      }
+
+      const usd = value / currencyRates[fromCurrency];
+      const result = usd * currencyRates[toCurrency];
+      document.getElementById("currency-result").textContent =
+        formatResult(result);
+    } else if (type === "area") {
+      const value =
+        parseFloat(document.getElementById("area-value").value) || 0;
+      const fromUnit = document.getElementById("from-area").value;
+      const toUnit = document.getElementById("to-area").value;
+
+      if (value === 0) {
+        document.getElementById("area-result").textContent = "0";
+        return;
+      }
+
+      const sqm = value * unitConversions.area[fromUnit];
+      const result = sqm / unitConversions.area[toUnit];
+      document.getElementById("area-result").textContent = formatResult(result);
+    } else if (type === "data") {
+      const value =
+        parseFloat(document.getElementById("data-value").value) || 0;
+      const fromUnit = document.getElementById("from-data").value;
+      const toUnit = document.getElementById("to-data").value;
+
+      if (value === 0) {
+        document.getElementById("data-result").textContent = "0";
+        return;
+      }
+
+      const bytes = value * unitConversions.data[fromUnit];
+      const result = bytes / unitConversions.data[toUnit];
+      document.getElementById("data-result").textContent = formatResult(result);
+    }
+  }
+
+  // Initialize converter displays on load
+  window.addEventListener("DOMContentLoaded", function () {
+    try {
+      convertUnit("length");
+      convertUnit("weight");
+      convertUnit("temperature");
+      convertUnit("currency");
+      convertUnit("area");
+      convertUnit("data");
+    } catch (e) {
+      console.warn("Converter init error:", e);
+    }
+  });
+
+  function formatResult(value) {
+    return value.toFixed(4);
+  }
+
+  function updateExampleConversion(value) {
+    document.getElementById("example-result").textContent = formatResult(value);
+    document.getElementById("example-add").textContent = formatResult(
+      value + 10,
+    );
+  }
+
+  function fetchCurrencyRates() {
+    const btn = document.getElementById("currency-refresh-btn");
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "⏳";
+    }
+
+    fetch("https://api.exchangerate-api.com/v4/latest/USD")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.rates) {
+          alert("Currency rates fetched successfully.");
+          console.log("Fetched currency rates:", data);
+          currencyRates["EUR"] = data.rates.EUR || currencyRates["EUR"];
+          currencyRates["GBP"] = data.rates.GBP || currencyRates["GBP"];
+          currencyRates["JPY"] = data.rates.JPY || currencyRates["JPY"];
+          currencyRates["CAD"] = data.rates.CAD || currencyRates["CAD"];
+          currencyRates["AUD"] = data.rates.AUD || currencyRates["AUD"];
+          currencyRates["NGN"] = data.rates.NGN || currencyRates["NGN"];
+
+          const timestamp = new Date().toLocaleTimeString();
+          document.getElementById("currency-timestamp").textContent =
+            `Last updated: ${timestamp}`;
+
+          convertUnit("currency");
+          if (btn) {
+            btn.textContent = "🔄";
+            btn.disabled = false;
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching currency rates:", error);
+        document.getElementById("currency-timestamp").textContent =
+          "Unable to fetch live rates";
+        if (btn) {
+          btn.textContent = "🔄";
+          btn.disabled = false;
+        }
+      });
+  }
+
+  // Set theme on page load from localStorage
+  window.addEventListener("DOMContentLoaded", function () {
+    const theme = localStorage.getItem("theme");
+    const body = document.body;
+    const btn = document.getElementById("theme-toggle");
+
+    if (btn) {
+      if (theme === "dark") {
+        body.classList.add("dark-mode");
+        btn.innerHTML = "☀️";
+        btn.title = "Switch to light mode";
+      } else {
+        btn.innerHTML = "🌙";
+        btn.title = "Switch to dark mode";
+      }
+    }
+  });
+
+  // ------------------------------
+  // Calculator State
+  // ------------------------------
+  let left = "";
+  let operator = "";
+  let right = "";
+  let steps = [];
+  const MAX_STEPS = 6;
+
+  // ------------------------------
+  // Basic Calculator Functions
+  // ------------------------------
+  function appendToResult(value) {
+    currentExpression += value.toString();
+    updateResult();
+  }
+
+  function bracketToResult(value) {
+    currentExpression += value;
+    updateResult();
+  }
+
+  function backspace() {
+    currentExpression = currentExpression.slice(0, -1);
+    updateResult();
+  }
+
+  function operatorToResult(value) {
+    if (value === "^") {
+      currentExpression += "**";
+    } else {
+      currentExpression += value;
+    }
+    updateResult();
+  }
+
+  function clearResult() {
+    currentExpression = "";
+    document.getElementById("word-result").innerHTML = "";
+    document.getElementById("word-area").style.display = "none";
+    updateResult();
+  }
+
+  // ------------------------------
+  // Square Root Function
+  // ------------------------------
+  function calculateSquareRoot() {
+    if (!currentExpression) return;
+
+    const num = parseFloat(currentExpression);
+
+    if (isNaN(num)) {
+      currentExpression = "Error";
+      updateResult();
+      return;
+    }
+
+    if (num < 0) {
+      currentExpression = "Error: Negative";
+      updateResult();
+      return;
+    }
+
+    const result = Math.sqrt(num);
+
+    calculationHistory?.push({
+      expression: `√${num} = ${result}`,
+      words: numberToWords(result),
+      time: new Date().toLocaleTimeString(),
+    });
+    if (calculationHistory.length > 20) calculationHistory.shift();
+    localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+    renderHistory();
+
+    currentExpression = result.toString();
+    updateResult();
+  }
+
+  // ------------------------------
+  // Factorial Helper Function
+  // ------------------------------
+  function factorial(n) {
+    if (n < 0) return NaN;
+    if (n === 0 || n === 1) return 1;
+    if (n > 170) return Infinity;
+    let res = 1;
+    for (let i = 2; i <= n; i++) res *= i;
+    return res;
+  }
+
+  // ------------------------------
+  // Permutation: nPr = n! / (n-r)!
+  // ------------------------------
+  function calculatePermutation() {
+    const match = currentExpression.match(/^(\d+)P(\d+)$/i);
+
+    if (match) {
+      const n = parseInt(match[1]);
+      const r = parseInt(match[2]);
+
+      if (n >= r && n >= 0 && r >= 0) {
+        const result = factorial(n) / factorial(n - r);
+        currentExpression = result.toString();
+
+        calculationHistory?.push({
+          expression: `${n}P${r}`,
+          words: numberToWords(result),
+          answer: result,
+          time: new Date().toLocaleTimeString(),
+        });
+        if (calculationHistory.length > 20) calculationHistory.shift();
+        localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+        renderHistory();
+        resetRedoIndex();
+      } else {
+        currentExpression = "Error";
+      }
+    } else {
+      currentExpression += "P";
+    }
+    updateResult();
+  }
+
+  // ------------------------------
+  // Combination: nCr = n! / (r! * (n-r)!)
+  // ------------------------------
+  function calculateCombination() {
+    const match = currentExpression.match(/^(\d+)C(\d+)$/i);
+
+    if (match) {
+      const n = parseInt(match[1]);
+      const r = parseInt(match[2]);
+
+      if (n >= r && n >= 0 && r >= 0) {
+        const result = factorial(n) / (factorial(r) * factorial(n - r));
+        currentExpression = result.toString();
+
+        calculationHistory?.push({
+          expression: `${n}C${r}`,
+          words: numberToWords(result),
+          answer: result,
+          time: new Date().toLocaleTimeString(),
+        });
+        if (calculationHistory.length > 20) calculationHistory.shift();
+        localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+        renderHistory();
+        resetRedoIndex();
+      } else {
+        currentExpression = "Error";
+      }
+    } else {
+      currentExpression += "C";
+    }
+    updateResult();
+  }
+
+  // ------------------------------
+  // Calculate Factorial of Current Number (n!)
+  // ------------------------------
+  function calculateFactorial() {
+    if (!currentExpression) return;
+
+    const n = parseFloat(currentExpression);
+
+    if (isNaN(n) || !Number.isInteger(n) || n < 0) {
+      currentExpression = "Error";
+      updateResult();
+      return;
+    }
+
+    if (n > 170) {
+      currentExpression = "Infinity";
+      updateResult();
+      return;
+    }
+
+    const result = factorial(n);
+
+    calculationHistory?.push({
+      expression: `${n}!`,
+      words: numberToWords(result),
+      answer: result,
+      time: new Date().toLocaleTimeString(),
+    });
+    if (calculationHistory.length > 20) calculationHistory.shift();
+    localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+    renderHistory();
+    resetRedoIndex();
+
+    currentExpression = result.toString();
+    updateResult();
+  }
+
+  // ------------------------------
+  // Calculate Result
+  // ------------------------------
+  function calculateResult() {
+    if (!currentExpression) return;
+
+    try {
+      // Handle Permutation (nPr) expressions
+      const permMatch = currentExpression.match(/^(\d+)P(\d+)$/i);
+      if (permMatch) {
+        calculatePermutation();
+        return;
+      }
+
+      // Handle Combination (nCr) expressions
+      const combMatch = currentExpression.match(/^(\d+)C(\d+)$/i);
+      if (combMatch) {
+        calculateCombination();
+        return;
+      }
+      let normalizedExpression = normalizeExpression(currentExpression);
+
+      // 🧠 Replace "ans" with last result automatically
+      normalizedExpression = normalizedExpression.replace(
+        /\bans\b/gi,
+        LAST_RESULT,
+      );
+
+      // Calculate result
+      let result = eval(normalizedExpression);
+
+      // Save result for future expressions
+      LAST_RESULT = result;
+
+      // Display normally
+      display.value = result;
+
+      if (isNaN(result) || !isFinite(result)) {
+        throw new Error();
+      }
+
+      calculationHistory?.push({
+        expression: currentExpression,
+        words: numberToWords(result),
+        answer: result,
+        time: new Date().toLocaleTimeString(),
+      });
+
+      if (calculationHistory.length > 20) calculationHistory.shift();
+
+      localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+      renderHistory();
+
+      currentExpression = result.toString();
+      updateResult();
+      document.getElementById("word-result").innerHTML = numberToWords(result);
+    } catch (e) {
+      currentExpression = "Error";
+      updateResult();
+    }
+  }
+
+  function tenPower() {
+    if (!currentExpression) return;
+
+    const x = parseFloat(currentExpression);
+    if (isNaN(x)) {
+      currentExpression = "Error";
+    } else {
+      currentExpression = Math.pow(10, x).toString();
+    }
+
+    updateResult();
+  }
+
+  // ------------------------------
+  // RECIPROCAL FUNCTION (1/x)
+  // ------------------------------
+  function calculateReciprocal() {
+    if (!currentExpression) return;
+
+    const x = parseFloat(currentExpression);
+
+    if (isNaN(x)) {
+      currentExpression = "Error";
+    } else if (x === 0) {
+      currentExpression = "Undefined";
+    } else {
+      const result = 1 / x;
+      // Remove trailing zeros and unnecessary decimal point
+      currentExpression = parseFloat(result.toFixed(10)).toString();
+    }
+
+    updateResult();
+  }
+
+  // ------------------------------
+  // HEXADECIMAL CONVERSION FEATURE
+  // ------------------------------
+  function convertToHex() {
+    if (currentExpression.length === 0 || currentExpression === "0") {
+      alert("Please enter a number first");
+      return;
+    }
+
+    const num = parseFloat(currentExpression);
+
+    if (isNaN(num)) {
+      alert("Invalid number. Please enter a valid decimal number.");
+      return;
+    }
+
+    if (!Number.isInteger(num)) {
+      alert(
+        "Hexadecimal conversion works with whole numbers only. Your number will be rounded.",
+      );
+    }
+
+    const integerNum = Math.floor(Math.abs(num));
+    const hexValue = integerNum.toString(16).toUpperCase();
+
+    const wordResult = document.getElementById("word-result");
+    const wordArea = document.getElementById("word-area");
+
+    let displayMessage =
+      '<span class="small-label">Hexadecimal Conversion</span>';
+    displayMessage += "<strong>";
+
+    if (num < 0) {
+      displayMessage += "Decimal: -" + integerNum + " = Hex: -0x" + hexValue;
+    } else {
+      displayMessage += "Decimal: " + integerNum + " = Hex: 0x" + hexValue;
+    }
+
+    displayMessage += "</strong>";
+
+    wordResult.innerHTML = displayMessage;
+    wordArea.style.display = "flex";
+
+    // Update the main display to show the hex value with 0x prefixing
+    currentExpression = "0x" + hexValue;
+    updateResult();
+
+    enableSpeakButton();
+
+    console.log("HEX Conversion successful:", integerNum, "-> 0x" + hexValue);
+  }
+
+  function applyLogarithm() {
+    if (currentExpression.length === 0) return;
+
+    const num = parseFloat(currentExpression);
+    if (num <= 0) {
+      currentExpression = "Error";
+    } else {
+      const result = Math.log10(num);
+      if (steps.length < MAX_STEPS) {
+        steps.push(`Step ${steps.length + 1}: log10(${num}) = ${result}`);
+      }
+      currentExpression = result.toString();
+    }
+
+    right = "";
+  }
+
+  function toggleInverseMode() {
+    inverseMode = !inverseMode;
+    document.getElementById("sin-btn").textContent = inverseMode
+      ? "sin⁻¹"
+      : "sin";
+    document.getElementById("cos-btn").textContent = inverseMode
+      ? "cos⁻¹"
+      : "cos";
+    document.getElementById("tan-btn").textContent = inverseMode
+      ? "tan⁻¹"
+      : "tan";
+  }
+
+  function sinDeg(x) {
+    return Math.sin((x * Math.PI) / 180);
+  }
+  function cosDeg(x) {
+    return Math.cos((x * Math.PI) / 180);
+  }
+  function tanDeg(x) {
+    return Math.tan((x * Math.PI) / 180);
+  }
+
+  function asinDeg(x) {
+    return (Math.asin(x) * 180) / Math.PI;
+  }
+  function acosDeg(x) {
+    return (Math.acos(x) * 180) / Math.PI;
+  }
+  function atanDeg(x) {
+    return (Math.atan(x) * 180) / Math.PI;
+  }
+
+  function appendTrig(func) {
+    currentExpression += func + "(";
+    updateResult();
+  }
+
+  function trigButtonPressed(func) {
+    const map = inverseMode
+      ? { sin: "asin", cos: "acos", tan: "atan" }
+      : { sin: "sin", cos: "cos", tan: "tan" };
+
+    appendTrig(map[func]);
+  }
+
+  function normalizeExpression(expr) {
+    return expr
+      .replace(/asin\(/g, "asinDeg(")
+      .replace(/acos\(/g, "acosDeg(")
+      .replace(/atan\(/g, "atanDeg(")
+      .replace(/sin\(/g, "sinDeg(")
+      .replace(/cos\(/g, "cosDeg(")
+      .replace(/tan\(/g, "tanDeg(");
+  }
+
+  function isPrime(num) {
+    if (num <= 1) return false;
+    for (let i = 2; i <= Math.sqrt(num); i++) {
+      if (num % i === 0) return false;
+    }
+    return true;
+  }
+
+  function Parser(tokens) {
+    this.tokens = tokens;
+    this.index = 0;
+  }
+
+  Parser.prototype.peek = function () {
+    return this.tokens[this.index];
+  };
+
+  Parser.prototype.advance = function () {
+    this.index += 1;
+    return this.tokens[this.index - 1];
+  };
+
+  Parser.prototype.isAtEnd = function () {
+    return this.index >= this.tokens.length;
+  };
+
+  Parser.prototype.matchOperator = function (op) {
+    const token = this.peek();
+    if (token && token.type === "operator" && token.value === op) {
+      this.advance();
+      return true;
+    }
+    return false;
+  };
+
+  Parser.prototype.parseExpression = function () {
+    let node = this.parseTerm();
+    while (true) {
+      if (this.matchOperator("+")) {
+        node = { type: "binary", op: "+", left: node, right: this.parseTerm() };
+        continue;
+      }
+      if (this.matchOperator("-")) {
+        node = { type: "binary", op: "-", left: node, right: this.parseTerm() };
+        continue;
+      }
+      break;
+    }
+    return node;
+  };
+
+  Parser.prototype.parseTerm = function () {
+    let node = this.parsePower();
+    while (true) {
+      if (this.matchOperator("*")) {
+        node = {
+          type: "binary",
+          op: "*",
+          left: node,
+          right: this.parsePower(),
+        };
+        continue;
+      }
+      if (this.matchOperator("/")) {
+        node = {
+          type: "binary",
+          op: "/",
+          left: node,
+          right: this.parsePower(),
+        };
+        continue;
+      }
+      break;
+    }
+    return node;
+  };
+
+  Parser.prototype.parsePower = function () {
+    let node = this.parseUnary();
+    if (this.matchOperator("^")) {
+      node = { type: "binary", op: "^", left: node, right: this.parsePower() };
+    }
+    return node;
+  };
+
+  Parser.prototype.parseUnary = function () {
+    if (this.matchOperator("-")) {
+      return { type: "unary", op: "-", value: this.parseUnary() };
+    }
+    return this.parsePrimary();
+  };
+
+  Parser.prototype.parsePrimary = function () {
+    const token = this.peek();
+    if (!token) throw new Error("Unexpected end of expression.");
+
+    if (token.type === "number") {
+      this.advance();
+      return { type: "number", value: token.value };
+    }
+
+    if (token.type === "variable") {
+      this.advance();
+      return { type: "variable", name: token.name };
+    }
+
+    if (token.type === "constant") {
+      this.advance();
+      return { type: "constant", name: token.name, value: token.value };
+    }
+
+    if (token.type === "func") {
+      const funcToken = this.advance();
+      const next = this.peek();
+      if (!next || next.type !== "lparen") {
+        throw new Error(`Expected '(' after ${funcToken.name}.`);
+      }
+      this.advance();
+      const arg = this.parseExpression();
+      if (!this.peek() || this.peek().type !== "rparen") {
+        throw new Error("Missing closing parenthesis for function.");
+      }
+      this.advance();
+      return { type: "func", name: funcToken.name, arg };
+    }
+
+    if (token.type === "lparen") {
+      this.advance();
+      const node = this.parseExpression();
+      if (!this.peek() || this.peek().type !== "rparen") {
+        throw new Error("Missing closing parenthesis.");
+      }
+      this.advance();
+      return node;
+    }
+
+    throw new Error("Invalid token in expression.");
+  };
+
+  function differentiate(node) {
+    switch (node.type) {
+      case "number":
+        return { type: "number", value: 0 };
+      case "constant":
+        return { type: "number", value: 0 };
+      case "variable":
+        return { type: "number", value: 1 };
+      case "unary":
+        return { type: "unary", op: "-", value: differentiate(node.value) };
+      case "binary":
+        return differentiateBinary(node);
+      case "func":
+        return differentiateFunction(node);
+      default:
+        throw new Error("Unsupported expression.");
+    }
+  }
+
+  function differentiateBinary(node) {
+    const left = node.left;
+    const right = node.right;
+    const dLeft = differentiate(left);
+    const dRight = differentiate(right);
+
+    switch (node.op) {
+      case "+":
+        return { type: "binary", op: "+", left: dLeft, right: dRight };
+      case "-":
+        return { type: "binary", op: "-", left: dLeft, right: dRight };
+      case "*":
+        return {
+          type: "binary",
+          op: "+",
+          left: { type: "binary", op: "*", left: dLeft, right: right },
+          right: { type: "binary", op: "*", left: left, right: dRight },
+        };
+      case "/":
+        return {
+          type: "binary",
+          op: "/",
+          left: {
+            type: "binary",
+            op: "-",
+            left: { type: "binary", op: "*", left: dLeft, right: right },
+            right: { type: "binary", op: "*", left: left, right: dRight },
+          },
+          right: {
+            type: "binary",
+            op: "^",
+            left: right,
+            right: { type: "number", value: 2 },
+          },
+        };
+      case "^":
+        return differentiatePower(left, right);
+      default:
+        throw new Error("Unsupported operator.");
+    }
+  }
+
+  function convertToFraction() {
+    const display = document.getElementById("result");
+    if (!display || !display.value) return;
+
+    const value = Number(display.value);
+    if (isNaN(value)) return;
+
+    if (Number.isInteger(value)) {
+      display.value = value + "/1";
+      currentExpression = display.value;
+      return;
+    }
+
+    let tolerance = 1.0e-6;
+    let h1 = 1,
+      h2 = 0,
+      k1 = 0,
+      k2 = 1;
+    let b = value;
+
+    do {
+      let a = Math.floor(b);
+      let aux = h1;
+      h1 = a * h1 + h2;
+      h2 = aux;
+      aux = k1;
+      k1 = a * k1 + k2;
+      k2 = aux;
+      b = 1 / (b - a);
+    } while (Math.abs(value - h1 / k1) > value * tolerance);
+
+    display.value = `${h1}/${k1}`;
+    currentExpression = display.value;
+  }
+
+  function differentiatePower(base, exponent) {
+    if (exponent.type === "number") {
+      return {
+        type: "binary",
+        op: "*",
+        left: {
+          type: "binary",
+          op: "*",
+          left: { type: "number", value: exponent.value },
+          right: {
+            type: "binary",
+            op: "^",
+            left: base,
+            right: { type: "number", value: exponent.value - 1 },
+          },
+        },
+        right: differentiate(base),
+      };
+    }
+
+    if (base.type === "constant" || base.type === "number") {
+      return {
+        type: "binary",
+        op: "*",
+        left: { type: "binary", op: "^", left: base, right: exponent },
+        right: {
+          type: "binary",
+          op: "*",
+          left: { type: "func", name: "ln", arg: base },
+          right: differentiate(exponent),
+        },
+      };
+    }
+
+    throw new Error("Unsupported exponent form for differentiation.");
+  }
+
+  function differentiateFunction(node) {
+    const arg = node.arg;
+    const dArg = differentiate(arg);
+
+    switch (node.name) {
+      case "sin":
+        return {
+          type: "binary",
+          op: "*",
+          left: { type: "func", name: "cos", arg },
+          right: dArg,
+        };
+      case "cos":
+        return {
+          type: "binary",
+          op: "*",
+          left: {
+            type: "unary",
+            op: "-",
+            value: { type: "func", name: "sin", arg },
+          },
+          right: dArg,
+        };
+      case "tan":
+        return {
+          type: "binary",
+          op: "*",
+          left: {
+            type: "binary",
+            op: "/",
+            left: { type: "number", value: 1 },
+            right: {
+              type: "binary",
+              op: "^",
+              left: { type: "func", name: "cos", arg },
+              right: { type: "number", value: 2 },
+            },
+          },
+          right: dArg,
+        };
+      case "ln":
+        return {
+          type: "binary",
+          op: "*",
+          left: {
+            type: "binary",
+            op: "/",
+            left: { type: "number", value: 1 },
+            right: arg,
+          },
+          right: dArg,
+        };
+      case "log":
+        return {
+          type: "binary",
+          op: "*",
+          left: {
+            type: "binary",
+            op: "/",
+            left: { type: "number", value: 1 },
+            right: {
+              type: "binary",
+              op: "*",
+              left: arg,
+              right: {
+                type: "func",
+                name: "ln",
+                arg: { type: "number", value: 10 },
+              },
+            },
+          },
+          right: dArg,
+        };
+      case "exp":
+        return {
+          type: "binary",
+          op: "*",
+          left: { type: "func", name: "exp", arg },
+          right: dArg,
+        };
+      default:
+        throw new Error(`Unsupported function: ${node.name}`);
+    }
+  }
+
+  function simplify(node) {
+    if (!node) return node;
+
+    if (node.type === "unary") {
+      const value = simplify(node.value);
+      if (value.type === "number") {
+        return { type: "number", value: -value.value };
+      }
+      return { type: "unary", op: node.op, value };
+    }
+
+    if (node.type === "binary") {
+      const left = simplify(node.left);
+      const right = simplify(node.right);
+
+      if (left.type === "number" && right.type === "number") {
+        return {
+          type: "number",
+          value: evaluateBinary(node.op, left.value, right.value),
+        };
+      }
+
+      switch (node.op) {
+        case "+":
+          if (isZero(left)) return right;
+          if (isZero(right)) return left;
+          break;
+        case "-":
+          if (isZero(right)) return left;
+          if (isZero(left)) return { type: "unary", op: "-", value: right };
+          break;
+        case "*":
+          if (isZero(left) || isZero(right))
+            return { type: "number", value: 0 };
+          if (isOne(left)) return right;
+          if (isOne(right)) return left;
+          break;
+        case "/":
+          if (isZero(left)) return { type: "number", value: 0 };
+          if (isOne(right)) return left;
+          break;
+        case "^":
+          if (isZero(right)) return { type: "number", value: 1 };
+          if (isOne(right)) return left;
+          if (isZero(left)) return { type: "number", value: 0 };
+          if (isOne(left)) return { type: "number", value: 1 };
+          break;
+      }
+
+      return { type: "binary", op: node.op, left, right };
+    }
+
+    if (node.type === "func") {
+      return { type: "func", name: node.name, arg: simplify(node.arg) };
+    }
+
+    return node;
+  }
+
+  function evaluateBinary(op, left, right) {
+    switch (op) {
+      case "+":
+        return left + right;
+      case "-":
+        return left - right;
+      case "*":
+        return left * right;
+      case "/":
+        return left / right;
+      case "^":
+        return Math.pow(left, right);
+      default:
+        return NaN;
+    }
+  }
+
+  function isZero(node) {
+    return node.type === "number" && Math.abs(node.value) < 1e-12;
+  }
+
+  function isOne(node) {
+    return node.type === "number" && Math.abs(node.value - 1) < 1e-12;
+  }
+
+  function toString(node, parentPrecedence) {
+    const precedence = getPrecedence(node);
+    const needsParens = parentPrecedence && precedence < parentPrecedence;
+
+    let result;
+    switch (node.type) {
+      case "number":
+        result = formatNumber(node.value);
+        break;
+      case "variable":
+        result = node.name;
+        break;
+      case "constant":
+        result = node.name;
+        break;
+      case "unary":
+        result = "-" + toString(node.value, precedence);
+        break;
+      case "func":
+        result = `${node.name}(${toString(node.arg, 0)})`;
+        break;
+      case "binary":
+        result = formatBinary(node, precedence);
+        break;
+      default:
+        result = "";
+    }
+
+    return needsParens ? `(${result})` : result;
+  }
+
+  function formatBinary(node, precedence) {
+    if (node.op === "*") {
+      const left = toString(node.left, precedence);
+      const right = toString(node.right, precedence);
+      if (shouldOmitMultiply(node.left, node.right)) {
+        return `${left}${right}`;
+      }
+      return `${left} * ${right}`;
+    }
+
+    const left = toString(node.left, precedence);
+    const right = toString(node.right, precedence + (node.op === "^" ? 1 : 0));
+    return `${left} ${node.op} ${right}`;
+  }
+
+  function shouldOmitMultiply(left, right) {
+    if (left.type !== "number") return false;
+    if (right.type === "variable" || right.type === "func") return true;
+    if (
+      right.type === "binary" &&
+      right.op === "^" &&
+      right.left.type === "variable"
+    )
+      return true;
+    return false;
+  }
+
+  function formatNumber(value) {
+    if (!isFinite(value)) return "Error";
+    if (Math.abs(value - Math.round(value)) < 1e-10) {
+      return `${Math.round(value)}`;
+    }
+    return `${parseFloat(value.toFixed(6))}`;
+  }
+
+  function getPrecedence(node) {
+    if (!node) return 0;
+    if (node.type === "binary") {
+      switch (node.op) {
+        case "+":
+        case "-":
+          return 1;
+        case "*":
+        case "/":
+          return 2;
+        case "^":
+          return 3;
+        default:
+          return 0;
+      }
+    }
+    if (node.type === "unary") return 4;
+    return 5;
+  }
+
+  function checkPrime() {
+    const num = parseFloat(currentExpression);
+
+    if (
+      isNaN(num) ||
+      !Number.isInteger(num) ||
+      num < 0 ||
+      currentExpression.includes(" ") ||
+      currentExpression.includes("+") ||
+      currentExpression.includes("-") ||
+      currentExpression.includes("*") ||
+      currentExpression.includes("/") ||
+      currentExpression.includes("^") ||
+      currentExpression.includes("(") ||
+      currentExpression.includes(")")
+    ) {
+      alert(
+        "Please enter a single positive whole number to check if it's prime",
+      );
+      return;
+    }
+
+    const wordResult = document.getElementById("word-result");
+    const wordArea = document.getElementById("word-area");
+
+    if (isPrime(num)) {
+      wordResult.innerHTML =
+        '<span class="small-label">Prime Check</span><strong>' +
+        num +
+        " is a PRIME number! ✓</strong>";
+    } else {
+      wordResult.innerHTML =
+        '<span class="small-label">Prime Check</span><strong>' +
+        num +
+        " is NOT a prime number ✗</strong>";
+    }
+
+    wordArea.style.display = "flex";
+    enableSpeakButton();
+  }
+
+  // ------------------------------
+  // Convert Number to Words
+  // ------------------------------
+  function numberToWords(num) {
+    if (num === "Error") return "Error";
+    if (!num) return "";
+
+    const n = parseFloat(num);
+    if (isNaN(n)) return "";
+    if (n === 0) return "Zero";
+
+    const ones = [
+      "",
+      "One",
+      "Two",
+      "Three",
+      "Four",
+      "Five",
+      "Six",
+      "Seven",
+      "Eight",
+      "Nine",
     ];
-
-    const tensMap = [
-        "", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"
+    const tens = [
+      "",
+      "",
+      "Twenty",
+      "Thirty",
+      "Forty",
+      "Fifty",
+      "Sixty",
+      "Seventy",
+      "Eighty",
+      "Ninety",
     ];
+    const teens = [
+      "Ten",
+      "Eleven",
+      "Twelve",
+      "Thirteen",
+      "Fourteen",
+      "Fifteen",
+      "Sixteen",
+      "Seventeen",
+      "Eighteen",
+      "Nineteen",
+    ];
+    const scales = ["", "Thousand", "Million", "Billion", "Trillion"];
 
-    const scales = ["", "thousand", "million", "billion", "trillion"];
+    function convertGroup(val) {
+      let res = "";
+      if (val >= 100) {
+        res += ones[Math.floor(val / 100)] + " Hundred ";
+        val %= 100;
+      }
+      if (val >= 10 && val <= 19) {
+        res += teens[val - 10] + " ";
+      } else if (val >= 20) {
+        res += tens[Math.floor(val / 10)];
+        if (val % 10 !== 0) res += "-" + ones[val % 10];
+        res += " ";
+      } else if (val > 0) {
+        res += ones[val] + " ";
+      }
+      return res.trim();
+    }
 
-    let words = "";
-    let scaleIndex = 0;
+    let sign = n < 0 ? "Negative " : "";
+    let absN = Math.abs(n);
+    const parts = absN.toString().split(".");
+    let integerPart = parseInt(parts[0]);
+    const decimalPart = parts[1];
+    let wordArr = [];
+
+    if (integerPart === 0) {
+      wordArr.push("Zero");
+    } else {
+      let scaleIdx = 0;
+      while (integerPart > 0) {
+        const chunk = integerPart % 1000;
+        if (chunk > 0) {
+          const chunkWords = convertGroup(chunk);
+          wordArr.unshift(
+            chunkWords + (scales[scaleIdx] ? " " + scales[scaleIdx] : ""),
+          );
+        }
+        integerPart = Math.floor(integerPart / 1000);
+        scaleIdx++;
+      }
+    }
+
+    let result = sign + wordArr.join(", ").trim();
+
+    if (decimalPart) {
+      result += " Point";
+      for (let digit of decimalPart) {
+        result += " " + (digit === "0" ? "Zero" : ones[parseInt(digit)]);
+      }
+    }
+    return result.trim();
+  }
+
+  // hausa language
+  function numberToHausa(num) {
+    if (num === "Error") return "Kuskure";
+
+    const ones = [
+      "",
+      "Daya",
+      "Biyu",
+      "Uku",
+      "Hudu",
+      "Biyar",
+      "Shida",
+      "Bakwai",
+      "Takwas",
+      "Tara",
+    ];
+    const tens = [
+      "",
+      "",
+      "Ashirin",
+      "Talatin",
+      "Arba'in",
+      "Hamsin",
+      "Sittin",
+      "Sab'in",
+      "Tamanin",
+      "Tis'in",
+    ];
+    const teens = [
+      "Goma",
+      "Sha daya",
+      "Sha biyu",
+      "Sha uku",
+      "Sha hudu",
+      "Sha biyar",
+      "Sha shida",
+      "Sha bakwai",
+      "Sha takwas",
+      "Sha tara",
+    ];
+    const scales = ["", "Dubu", "Miliyan", "Biliyan", "Triliyan"];
+
+    function convertGroup(val) {
+      let res = "";
+      if (val >= 100) {
+        res += ones[Math.floor(val / 100)] + " Dari ";
+        val %= 100;
+      }
+
+      if (val >= 10 && val <= 19) {
+        res += teens[val - 10] + " ";
+      } else if (val >= 20) {
+        res +=
+          tens[Math.floor(val / 10)] +
+          (val % 10 ? " da " + ones[val % 10] : "") +
+          " ";
+      } else if (val > 0) {
+        res += ones[val] + " ";
+      }
+
+      return res.trim();
+    }
+
+    let n = parseFloat(num);
+    if (isNaN(n)) return "";
+
+    let sign = n < 0 ? "Mara kyau " : "";
+    let absN = Math.abs(n);
+    let parts = absN.toString().split(".");
+    let integerPart = parseInt(parts[0]);
+    let decimalPart = parts[1];
 
     let wordArr = [];
 
-    let splitedNum = numVal.split( '.' );
-    for( let i=0; i<splitedNum.length; i++ ){
-        let num = splitedNum[i];
-        if (num === 0) {
-            wordPlaceholder.innerHTML = 'Zero';
+    if (integerPart === 0) {
+      wordArr.push("Sifili");
+    } else {
+      let scaleIdx = 0;
+      while (integerPart > 0) {
+        let chunk = integerPart % 1000;
+        if (chunk > 0) {
+          let chunkWords = convertGroup(chunk);
+          wordArr.unshift(
+            chunkWords + (scales[scaleIdx] ? " " + scales[scaleIdx] : ""),
+          );
         }
-
-        while (num > 0) {
-            let currentNum = num % 1000;
-            num = Math.floor(num / 1000);
-    
-            let currentWords = "";
-    
-            // console.log('current num', currentNum);
-            // console.log('num', num);
-            const hundreds = Math.floor(currentNum / 100);
-            currentNum %= 100;
-    
-            // console.log('hundreds', hundreds);
-            // console.log('current num', currentNum);
-    
-            if (hundreds > 0) {
-                currentWords += unitsMap[hundreds] + " hundred ";
-            }
-    
-            if (currentNum > 0) {
-                if (currentNum < 20) {
-                    currentWords += unitsMap[currentNum] + " ";
-                } else {
-                    const tens = Math.floor(currentNum / 10);
-                    const units = currentNum % 10;
-    
-                    currentWords += tensMap[tens] + " ";
-                    if (units > 0) {
-                        currentWords += unitsMap[units] + " ";
-                    }
-                }
-            }
-    
-            if (currentWords.trim() !== "") {
-                // console.log('Words1', words);
-                words = currentWords.trim() + ' ' + scales[scaleIndex] + " " + words;
-                // console.log('Words2', words);
-            }
-    
-            scaleIndex++;
-        }
-
-        // console.log(words.trim());
-        wordArr.push(words.trim());
-        scaleIndex = 0;
-        words = '';
+        integerPart = Math.floor(integerPart / 1000);
+        scaleIdx++;
+      }
     }
 
-    wordPlaceholder.innerHTML = wordArr.join(' point ');
-    // return ;
+    let result = sign + wordArr.join(", ").trim();
+
+    if (decimalPart) {
+      result += " Nuni";
+      for (let digit of decimalPart) {
+        result += " " + (digit === "0" ? "Sifili" : ones[parseInt(digit)]);
+      }
+    }
+
+    return result.trim();
+  }
+
+  // translate to hausas
+  function translateToHausa() {
+    if (!currentExpression) return;
+
+    const hausa = numberToHausa(currentExpression);
+    const wordResult = document.getElementById("word-result");
+
+    wordResult.innerHTML =
+      '<span class="small-label">Sakamako a Hausa</span><strong>' +
+      hausa +
+      "</strong>";
+  }
+
+  function updateResult() {
+    document.getElementById("result").value = currentExpression || "0";
+
+    const wordResult = document.getElementById("word-result");
+    const wordArea = document.getElementById("word-area");
+
+    const num = parseFloat(currentExpression);
+    if (
+      !isNaN(num) &&
+      isFinite(num) &&
+      currentExpression.trim() === num.toString()
+    ) {
+      wordResult.innerHTML =
+        '<span class="small-label">Result in words</span><strong>' +
+        numberToWords(currentExpression) +
+        "</strong>";
+      wordArea.style.display = "flex";
+    } else {
+      wordResult.innerHTML = "";
+      wordArea.style.display = "none";
+    }
+
+    enableSpeakButton();
+    updateAnswerPreview();
+  }
+
+  // ------------------------------
+  // Text-to-Speech
+  // ------------------------------
+  function speakResult() {
+    const speakBtn = document.getElementById("speak-btn");
+    const wordResultEl = document.getElementById("word-result");
+
+    const words = wordResultEl.querySelector("strong")?.innerText || "";
+
+    if (!words) return;
+
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      speakBtn.classList.remove("speaking");
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(words);
+    utterance.rate = 0.9;
+    utterance.onstart = () => speakBtn.classList.add("speaking");
+    utterance.onend = () => speakBtn.classList.remove("speaking");
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // ------------------------------
+  // Speak Button Enable/Disable
+  // ------------------------------
+  function enableSpeakButton() {
+    const speakBtn = document.getElementById("speak-btn");
+    if (!speakBtn) return;
+    const hasContent =
+      document.getElementById("word-result").innerHTML.trim().length > 0;
+    speakBtn.disabled = !hasContent;
+  }
+
+  function backToEnglish() {
+    if (!currentExpression) return;
+
+    const wordResult = document.getElementById("word-result");
+
+    wordResult.innerHTML =
+      '<span class="small-label">Result in words</span><strong>' +
+      numberToWords(currentExpression) +
+      "</strong>";
+  }
+
+  // Factor Finder & Prime Checker
+  // Get factors of a number
+  function factors() {
+    // ensure we have a numeric value
+    num = Number(currentExpression);
+    // zero has infinitely many divisors, return empty array to avoid confusion
+    if (num === 0 || !Number.isFinite(num)) return [];
+
+    // only integer factors make sense
+    if (!Number.isInteger(num)) return [];
+
+    const absNum = Math.abs(num);
+    const result = [];
+
+    // loop up to square root for efficiency
+    for (let i = 1; i <= Math.sqrt(absNum); i++) {
+      if (absNum % i === 0) {
+        result.push(i);
+        const pair = absNum / i;
+        if (pair !== i) {
+          result.push(pair);
+        }
+      }
+    }
+
+    // sort numerical order
+    result.sort((a, b) => a - b);
+
+    // include negative factors if original number was negative
+    if (num < 0) {
+      const negatives = result.map((v) => -v);
+      result.push(...negatives);
+      result.sort((a, b) => a - b);
+    }
+
+    currentExpression = result.toString();
+    updateResult();
+  }
+
+  function updateStepsDisplay() {
+    // Keeping for compatibility
+  }
+
+  fetchCurrencyRates();
+
+  function copyResult() {
+    const text = document.getElementById("result").value;
+    if (!text) return;
+
+    navigator.clipboard
+      .writeText(text)
+      .then(() => alert("Result copied!"))
+      .catch(() => alert("Failed to copy"));
+  }
+
+  function percentToResult() {
+    if (!currentExpression) return;
+
+    const match = currentExpression.match(/(.+?)(\*\*|[+\-*/^])([0-9.]*)$/);
+
+    if (!match) {
+      const num = parseFloat(currentExpression);
+      if (isNaN(num)) return;
+
+      currentExpression = (num / 100).toString();
+    } else {
+      const leftPart = match[1];
+      const rightPart = match[3];
+
+      if (!rightPart) return;
+
+      let leftVal;
+
+      try {
+        leftVal = eval(leftPart);
+      } catch (e) {
+        leftVal = parseFloat(leftPart);
+      }
+
+      const rightVal = parseFloat(rightPart);
+      if (isNaN(leftVal) || isNaN(rightVal)) return;
+
+      const percentVal = (leftVal * rightVal) / 100;
+
+      currentExpression = percentVal.toString();
+    }
+
+    // 🔥 ADD THIS LINE
+    currentExpression += "*";
+
+    updateResult();
+  }
+  function startVoiceInput() {
+    clearResult();
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Speech recognition not supported in this browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+
+    recognition.onresult = (event) => {
+      const spokenText = event.results[0][0].transcript;
+      handleSpokenMath(spokenText);
+    };
+
+    recognition.start();
+  }
+
+  function handleSpokenMath(text) {
+    const tokens = normalizeSpeech(text);
+
+    tokens.forEach((token) => {
+      if (["+", "-", "*", "x", "/"].includes(token)) {
+        operatorToResult(token);
+      } else {
+        appendToResult(token);
+      }
+    });
+  }
+
+  function normalizeSpeech(text) {
+    let normalized = text.toLowerCase();
+
+    const replacements = {
+      "multiplied by": "*",
+      "divided by": "/",
+      times: "*",
+      x: "*",
+      multiply: "*",
+      plus: "+",
+      add: "+",
+      minus: "-",
+      subtract: "-",
+    };
+
+    for (let key in replacements) {
+      normalized = normalized.replaceAll(key, replacements[key]);
+    }
+
+    const numbers = {
+      zero: "0",
+      one: "1",
+      two: "2",
+      three: "3",
+      four: "4",
+      five: "5",
+      six: "6",
+      seven: "7",
+      eight: "8",
+      nine: "9",
+    };
+
+    for (let word in numbers) {
+      normalized = normalized.replaceAll(word, numbers[word]);
+    }
+
+    normalized = normalized.replace(/([\+\-\*\/])/g, " $1 ");
+
+    return normalized.split(" ").filter((t) => t.trim() !== "");
+  }
+
+  function toggleHistory() {
+    const historyCol = document.getElementById("history-column");
+    const btn = document.getElementById("toggle-history-btn");
+
+    if (!historyCol) return;
+
+    historyCol.classList.toggle("d-none");
+
+    if (historyCol.classList.contains("d-none")) {
+      btn.textContent = "Show History";
+      btn.classList.replace("btn-outline-primary", "btn-primary");
+    } else {
+      btn.textContent = "Hide History";
+      btn.classList.replace("btn-primary", "btn-outline-primary");
+    }
+  }
+
+  function saveHistoryToStorage() {
+    localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  }
+
+  function renderHistory() {
+    const list = document.getElementById("history-list");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    if (calculationHistory.length === 0) {
+      const emptyTemplate = document.getElementById("history-empty-template");
+      if (emptyTemplate) {
+        list.appendChild(emptyTemplate.content.cloneNode(true));
+      }
+      return;
+    }
+
+    calculationHistory
+      .slice()
+      .reverse()
+      .forEach((item, index) => {
+        const tpl = document
+          .getElementById("history-item-template")
+          .content.cloneNode(true);
+
+        const itemEl = tpl.querySelector(".history-item");
+        tpl.querySelector(".history-item-expression").textContent =
+          item.expression;
+        tpl.querySelector(".history-item-words").textContent = item.words;
+        tpl.querySelector(".history-item-time").textContent = item.time;
+        const remarkText = tpl.querySelector(".remark-text");
+        const remarkBox = tpl.querySelector(".remark-box");
+        const remarkInput = remarkBox.querySelector("input");
+        if (item.remark) {
+          remarkText.textContent = item.remark;
+        }
+        // DELETE
+        const actualIndex = calculationHistory.length - 1 - index;
+        tpl.querySelector(".btn-delete").onclick = (e) => {
+          e.stopPropagation();
+          calculationHistory.splice(actualIndex, 1);
+          saveHistoryToStorage();
+          renderHistory();
+        };
+
+        tpl.querySelector(".btn-remark").onclick = (e) => {
+          e.stopPropagation();
+          remarkBox.classList.remove("d-none");
+          remarkInput.focus();
+        };
+
+        remarkBox.querySelector(".btn-primary").onclick = (e) => {
+          e.stopPropagation();
+          item.remark = remarkInput.value.trim();
+          saveHistoryToStorage();
+          renderHistory();
+        };
+
+        remarkBox.querySelector(".btn-outline-secondary").onclick = (e) => {
+          e.stopPropagation();
+          remarkBox.classList.add("d-none");
+        };
+
+        itemEl.addEventListener("click", () => {
+          currentExpression = item.expression;
+          updateResult();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        list.appendChild(tpl);
+
+        setTimeout(() => {
+          itemEl.classList.add("show");
+        }, index * 50);
+      });
+  }
+
+  function loadHistoryFromStorage() {
+    const stored = localStorage.getItem("calcHistory");
+    if (stored) calculationHistory = JSON.parse(stored);
+  }
+
+  function clearHistory() {
+    if (!confirm("Are you sure you want to clear all calculation history?"))
+      return;
+    calculationHistory = [];
+    localStorage.removeItem("calcHistory");
+    renderHistory();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const scrollBtn = document.getElementById("scroll-to-calculator");
+    if (scrollBtn) {
+      scrollBtn.addEventListener("click", () => {
+        const calculatorTop = document.querySelector(".calculator-card");
+        if (calculatorTop) {
+          calculatorTop.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+  });
+
+  // ------------------------------
+  // Redo Functionality
+  // ------------------------------
+  var redoIndex = -1;
+
+  function redoCalculation() {
+    var calcHistory = localStorage.getItem("calcHistory");
+    if (!calcHistory) return;
+    var History;
+    try {
+      History = JSON.parse(calcHistory);
+    } catch (e) {
+      return;
+    }
+    if (!History || History.length === 0) return;
+
+    // Only cycle through the last 5 (or fewer) calculations
+    var maxSteps = Math.min(5, History.length);
+    redoIndex = (redoIndex + 1) % maxSteps;
+
+    var entry = History[History.length - 1 - redoIndex];
+    if (!entry) return;
+
+    var displayExpr = entry.expression || "";
+    var displayAnswer =
+      entry.answer !== undefined && entry.answer !== null ? entry.answer : "";
+
+    // Show full expression = answer (preserves sin/cos/tan/sqrt/! etc.)
+    var resultDisplay = document.getElementById("result");
+    if (resultDisplay) {
+      resultDisplay.value =
+        displayAnswer !== ""
+          ? displayExpr + " = " + displayAnswer
+          : displayExpr;
+    }
+
+    // Update the English word area
+    if (entry.words) {
+      var wordResult = document.getElementById("word-result");
+      var wordArea = document.getElementById("word-area");
+      if (wordResult) wordResult.innerHTML = entry.words;
+      if (wordArea) wordArea.style.display = "flex";
+    }
+  }
+
+  // Resets the redo pointer whenever a new calculation is made
+  function resetRedoIndex() {
+    redoIndex = -1;
+  }
+
+  function enableRedo() {
+    const redoBtn = document.getElementById("redoBtn");
+    if (redoBtn) redoBtn.disabled = false;
+  }
+
+  function disableRedo() {
+    const redoBtn = document.getElementById("redoBtn");
+    if (redoBtn) redoBtn.disabled = true;
+  }
+
+  // ============================================
+  // PHYSICS CALCULATOR FUNCTIONALITY
+  // ============================================
+  const physicsFormulas = {
+    mechanics: {
+      velocity: {
+        name: "Velocity",
+        formula: "v = d / t",
+        description: "Calculate velocity from distance and time",
+        inputs: ["distance (m)", "time (s)"],
+        output: "velocity (m/s)",
+        calculate: (d, t) => d / t,
+      },
+      acceleration: {
+        name: "Acceleration",
+        formula: "a = (v_f - v_i) / t",
+        description: "Calculate acceleration from velocity change and time",
+        inputs: ["initial velocity (m/s)", "final velocity (m/s)", "time (s)"],
+        output: "acceleration (m/s²)",
+        calculate: (vi, vf, t) => (vf - vi) / t,
+      },
+      force: {
+        name: "Force (Newton's 2nd Law)",
+        formula: "F = m × a",
+        description: "Calculate force from mass and acceleration",
+        inputs: ["mass (kg)", "acceleration (m/s²)"],
+        output: "force (N)",
+        calculate: (m, a) => m * a,
+      },
+      kineticEnergy: {
+        name: "Kinetic Energy",
+        formula: "KE = ½ × m × v²",
+        description: "Calculate kinetic energy from mass and velocity",
+        inputs: ["mass (kg)", "velocity (m/s)"],
+        output: "kinetic energy (J)",
+        calculate: (m, v) => 0.5 * m * v * v,
+      },
+      potentialEnergy: {
+        name: "Gravitational Potential Energy",
+        formula: "PE = m × g × h",
+        description:
+          "Calculate potential energy from mass, gravity, and height",
+        inputs: ["mass (kg)", "height (m)", "gravity (m/s²)"],
+        output: "potential energy (J)",
+        calculate: (m, h, g = 9.8) => m * g * h,
+      },
+      momentum: {
+        name: "Momentum",
+        formula: "p = m × v",
+        description: "Calculate momentum from mass and velocity",
+        inputs: ["mass (kg)", "velocity (m/s)"],
+        output: "momentum (kg·m/s)",
+        calculate: (m, v) => m * v,
+      },
+      work: {
+        name: "Work",
+        formula: "W = F × d",
+        description: "Calculate work from force and displacement",
+        inputs: ["force (N)", "displacement (m)"],
+        output: "work (J)",
+        calculate: (f, d) => f * d,
+      },
+      power: {
+        name: "Power",
+        formula: "P = W / t",
+        description: "Calculate power from work and time",
+        inputs: ["work (J)", "time (s)"],
+        output: "power (W)",
+        calculate: (w, t) => w / t,
+      },
+    },
+    electricity: {
+      ohmsLaw: {
+        name: "Ohm's Law (Voltage)",
+        formula: "V = I × R",
+        description: "Calculate voltage from current and resistance",
+        inputs: ["current (A)", "resistance (Ω)"],
+        output: "voltage (V)",
+        calculate: (i, r) => i * r,
+      },
+      current: {
+        name: "Ohm's Law (Current)",
+        formula: "I = V / R",
+        description: "Calculate current from voltage and resistance",
+        inputs: ["voltage (V)", "resistance (Ω)"],
+        output: "current (A)",
+        calculate: (v, r) => v / r,
+      },
+      resistance: {
+        name: "Ohm's Law (Resistance)",
+        formula: "R = V / I",
+        description: "Calculate resistance from voltage and current",
+        inputs: ["voltage (V)", "current (A)"],
+        output: "resistance (Ω)",
+        calculate: (v, i) => v / i,
+      },
+      electricalPower: {
+        name: "Electrical Power",
+        formula: "P = V × I",
+        description: "Calculate electrical power from voltage and current",
+        inputs: ["voltage (V)", "current (A)"],
+        output: "power (W)",
+        calculate: (v, i) => v * i,
+      },
+      electricalEnergy: {
+        name: "Electrical Energy",
+        formula: "E = P × t",
+        description: "Calculate electrical energy from power and time",
+        inputs: ["power (W)", "time (s)"],
+        output: "energy (J)",
+        calculate: (p, t) => p * t,
+      },
+    },
+    thermodynamics: {
+      heatTransfer: {
+        name: "Heat Transfer",
+        formula: "Q = m × c × ΔT",
+        description:
+          "Calculate heat transfer from mass, specific heat, and temperature change",
+        inputs: [
+          "mass (kg)",
+          "specific heat (J/kg·K)",
+          "temperature change (K)",
+        ],
+        output: "heat (J)",
+        calculate: (m, c, dt) => m * c * dt,
+      },
+      efficiency: {
+        name: "Efficiency",
+        formula: "η = (useful output / total input) × 100",
+        description: "Calculate efficiency percentage",
+        inputs: ["useful output", "total input"],
+        output: "efficiency (%)",
+        calculate: (output, input) => (output / input) * 100,
+      },
+    },
+    waves: {
+      waveSpeed: {
+        name: "Wave Speed",
+        formula: "v = f × λ",
+        description: "Calculate wave speed from frequency and wavelength",
+        inputs: ["frequency (Hz)", "wavelength (m)"],
+        output: "wave speed (m/s)",
+        calculate: (f, lambda) => f * lambda,
+      },
+      frequency: {
+        name: "Frequency",
+        formula: "f = 1 / T",
+        description: "Calculate frequency from period",
+        inputs: ["period (s)"],
+        output: "frequency (Hz)",
+        calculate: (t) => 1 / t,
+      },
+    },
+  };
+
+  function calculatePhysics() {
+    const category = document.getElementById("physics-category").value;
+    const formulaKey = document.getElementById("physics-formula").value;
+    const resultDiv = document.getElementById("physics-result");
+
+    if (!category || !formulaKey) {
+      resultDiv.innerHTML =
+        '<div class="alert alert-warning py-2 px-3">Please select both category and formula</div>';
+      return;
+    }
+
+    const formula = physicsFormulas[category][formulaKey];
+    const inputs = [];
+
+    for (let i = 1; i <= 3; i++) {
+      const input = document.getElementById(`physics-input-${i}`);
+      if (input && input.style.display !== "none") {
+        const value = parseFloat(input.value);
+        if (isNaN(value)) {
+          resultDiv.innerHTML =
+            '<div class="alert alert-danger py-2 px-3">Please enter valid numbers for all inputs</div>';
+          return;
+        }
+        inputs.push(value);
+      }
+    }
+
+    try {
+      const result = formula.calculate(...inputs);
+
+      if (isNaN(result) || !isFinite(result)) {
+        resultDiv.innerHTML =
+          '<div class="alert alert-danger py-2 px-3">Error in calculation. Please check your inputs.</div>';
+        return;
+      }
+
+      let resultHTML = '<div class="alert alert-success py-2 px-3">';
+      resultHTML += `<strong>${formula.name}</strong><br>`;
+      resultHTML += `Formula: ${formula.formula}<br>`;
+      resultHTML += `Result: <strong>${result.toFixed(4)} ${formula.output.match(/\(([^)]+)\)/)?.[1] || ""}</strong>`;
+      resultHTML += "</div>";
+
+      resultDiv.innerHTML = resultHTML;
+    } catch (error) {
+      resultDiv.innerHTML =
+        '<div class="alert alert-danger py-2 px-3">Error in calculation: ' +
+        error.message +
+        "</div>";
+    }
+  }
+
+  function updatePhysicsFormulas() {
+    const category = document.getElementById("physics-category").value;
+    const formulaSelect = document.getElementById("physics-formula");
+    const inputsContainer = document.getElementById("physics-inputs-container");
+    const resultDiv = document.getElementById("physics-result");
+
+    formulaSelect.innerHTML = '<option value="">-- Select Formula --</option>';
+    inputsContainer.innerHTML = "";
+    resultDiv.innerHTML = "";
+
+    if (!category) return;
+
+    const formulas = physicsFormulas[category];
+    for (const [key, formula] of Object.entries(formulas)) {
+      const option = document.createElement("option");
+      option.value = key;
+      option.textContent = formula.name;
+      formulaSelect.appendChild(option);
+    }
+  }
+
+  function updatePhysicsInputs() {
+    const category = document.getElementById("physics-category").value;
+    const formulaKey = document.getElementById("physics-formula").value;
+    const inputsContainer = document.getElementById("physics-inputs-container");
+    const resultDiv = document.getElementById("physics-result");
+
+    inputsContainer.innerHTML = "";
+    resultDiv.innerHTML = "";
+
+    if (!category || !formulaKey) return;
+
+    const formula = physicsFormulas[category][formulaKey];
+
+    let inputsHTML = `<div class="alert alert-info py-2 px-3 mb-2"><small>${formula.description}</small></div>`;
+
+    formula.inputs.forEach((inputLabel, index) => {
+      inputsHTML += `
+      <div class="mb-2">
+        <label class="form-label small">${inputLabel}</label>
+        <input type="number" class="form-control form-control-sm" id="physics-input-${index + 1}"
+               placeholder="Enter ${inputLabel}" step="any">
+      </div>
+    `;
+    });
+
+    inputsContainer.innerHTML = inputsHTML;
+  }
+
+  function clearPhysicsCalculator() {
+    document.getElementById("physics-category").value = "";
+    document.getElementById("physics-formula").innerHTML =
+      '<option value="">-- Select Formula --</option>';
+    document.getElementById("physics-inputs-container").innerHTML = "";
+    document.getElementById("physics-result").innerHTML = "";
+  }
+
+  // ============================================
+  // END OF PHYSICS CALCULATOR FUNCTIONALITY
+  // ============================================
+
+  function openGeometry() {
+    document.getElementById("geometryModal").style.display = "flex";
+  }
+
+  function closeGeometry() {
+    document.getElementById("geometryModal").style.display = "none";
+  }
+
+  function calculateGeometry() {
+    let shape = document.getElementById("shapeSelect").value;
+    let v1 = parseFloat(document.getElementById("input1").value);
+    let v2 = parseFloat(document.getElementById("input2").value);
+    let result;
+
+    if (isNaN(v1)) {
+      alert("Enter Value 1");
+      return;
+    }
+
+    switch (shape) {
+      case "rectangle":
+        if (isNaN(v2)) return alert("Enter Value 2");
+        result = v1 * v2;
+        break;
+      case "triangle":
+        if (isNaN(v2)) return alert("Enter Value 2");
+        result = 0.5 * v1 * v2;
+        break;
+      case "circle":
+        result = Math.PI * v1 * v1;
+        break;
+      case "square":
+        result = v1 * v1;
+        break;
+      case "perimeterSquare":
+        result = 4 * v1;
+        break;
+      case "perimeterRectangle":
+        if (isNaN(v2)) return alert("Enter Value 2");
+        result = 2 * (v1 + v2);
+        break;
+      case "cubeVolume":
+        result = v1 * v1 * v1;
+        break;
+      case "cylinderVolume":
+        if (isNaN(v2)) return alert("Enter Height");
+        result = Math.PI * v1 * v1 * v2;
+        break;
+      default:
+        alert("Select a shape");
+        return;
+    }
+
+    left = result.toFixed(4).toString();
+    operator = "";
+    right = "";
+    currentExpression = left;
+    calculateResult();
+    closeGeometry();
+  }
+
+  function updateGeometryInputs() {
+    let shape = document.getElementById("shapeSelect").value;
+    let input2 = document.getElementById("input2");
+
+    if (
+      shape === "circle" ||
+      shape === "square" ||
+      shape === "perimeterSquare" ||
+      shape === "cubeVolume"
+    ) {
+      input2.style.display = "none";
+    } else {
+      input2.style.display = "block";
+    }
+  }
+
+  // The Cube Root Function
+  function cubeRootResult() {
+    if (currentExpression.length === 0) return;
+    const num = parseFloat(currentExpression);
+    const cbrt =
+      num < 0 ? -Math.pow(Math.abs(num), 1 / 3) : Math.pow(num, 1 / 3);
+
+    const tolerance = 1e-10;
+    const rounded =
+      Math.abs(cbrt - Math.round(cbrt)) < tolerance ? Math.round(cbrt) : cbrt;
+
+    currentExpression = rounded.toString();
+    operator = "";
+    right = "";
+    updateResult();
+  }
+
+  // ============================================
+  // PERCENTAGE CHANGE CALCULATOR FUNCTIONS
+  // ============================================
+  function calculatePercentageChange() {
+    // Get input values
+    const original = parseFloat(document.getElementById("pc-original").value);
+    const newValue = parseFloat(document.getElementById("pc-new").value);
+
+    // Validation
+    if (isNaN(original) || isNaN(newValue)) {
+      alert("Please enter valid numbers");
+      return;
+    }
+
+    if (original === 0) {
+      alert("Original value cannot be zero");
+      return;
+    }
+
+    // Calculate percentage change
+    const absoluteChange = newValue - original;
+    const percentageChange = (absoluteChange / Math.abs(original)) * 100;
+
+    // Determine description
+    let description = "";
+    if (percentageChange > 0) {
+      description = `an increase of ${Math.abs(percentageChange).toFixed(2)}%`;
+    } else if (percentageChange < 0) {
+      description = `a decrease of ${Math.abs(percentageChange).toFixed(2)}%`;
+    } else {
+      description = "no change";
+    }
+
+    // Display results
+    const resultDiv = document.getElementById("pc-result");
+    document.getElementById("pc-change-value").textContent =
+      percentageChange.toFixed(2);
+    document.getElementById("pc-absolute-change").textContent =
+      Math.abs(absoluteChange).toFixed(2);
+    document.getElementById("pc-description").textContent =
+      `From ${original} to ${newValue} is ${description}`;
+    resultDiv.style.display = "block";
+
+    // Update main calculator display with the result
+    left = percentageChange.toFixed(2).toString();
+    operator = "";
+    right = "";
+    updateResult();
+  }
+
+  function clearPercentageChange() {
+    // Clear input fields
+    document.getElementById("pc-original").value = "100";
+    document.getElementById("pc-new").value = "150";
+
+    // Hide result
+    document.getElementById("pc-result").style.display = "none";
+
+    // Clear calculator display
+    left = "";
+    operator = "";
+    right = "";
+    updateResult();
+  }
+
+  // Function to calculate the 2x2 determinant
+  function calculateMatrix() {
+    // 1. Fetch values (default to 0 if empty)
+    const a = parseFloat(document.getElementById("m11").value) || 0;
+    const b = parseFloat(document.getElementById("m12").value) || 0;
+    const c = parseFloat(document.getElementById("m21").value) || 0;
+    const d = parseFloat(document.getElementById("m22").value) || 0;
+
+    // 2. Determinant Formula: (a * d) - (b * c)
+    const detResult = a * d - b * c;
+
+    // 3. Update the UI Result
+    document.getElementById("matrix-result").innerText = detResult;
+
+    // 4. Sync with main calculator display
+    currentExpression = detResult.toString();
+    updateResult();
+
+    // 5. Automatically trigger word translation and speech if needed
+    if (typeof numberToWords === "function") {
+      const words = numberToWords(detResult);
+      const wordArea = document.getElementById("word-area");
+      const wordText =
+        document.getElementById("word-result-text") ||
+        document.getElementById("word-result");
+
+      if (wordText) wordText.innerHTML = words;
+      if (wordArea) wordArea.style.display = "flex";
+      enableSpeakButton();
+    }
+  }
+
+  function redoCalculation() {
+    var calcHistory = localStorage.getItem("calcHistory");
+    if (!calcHistory) return;
+    var History;
+    try {
+      History = JSON.parse(calcHistory);
+    } catch (e) {
+      return;
+    }
+    if (!History || History.length === 0) return;
+    // Cap at last 5 entries; cycle through on repeated presses
+    var maxSteps = Math.min(5, History.length);
+    redoIndex = (redoIndex + 1) % maxSteps;
+    var entry = History[History.length - 1 - redoIndex];
+    if (!entry) return;
+    var displayExpr = entry.expression || "";
+    var displayAnswer =
+      entry.answer !== undefined && entry.answer !== null ? entry.answer : "";
+    // Show full expression = answer (preserves sin/cos/tan/sqrt/! etc.)
+    var resultDisplay = document.getElementById("result");
+    if (resultDisplay) {
+      resultDisplay.value =
+        displayAnswer !== ""
+          ? displayExpr + " = " + displayAnswer
+          : displayExpr;
+    }
+    // Update the English word display area
+    if (entry.words) {
+      var wordResult = document.getElementById("word-result");
+      var wordArea = document.getElementById("word-area");
+      if (wordResult) wordResult.innerHTML = entry.words;
+      if (wordArea) wordArea.style.display = "flex";
+    }
+    // Update button label with current step indicator
+    var redoBtn = document.getElementById("redoBtn");
+  }
+
+  // Reset redo pointer when a new calculation is made
+  function resetRedoIndex() {
+    redoIndex = -1;
+    var redoBtn = document.getElementById("redoBtn");
+    if (redoBtn) redoBtn.value = "↻ REDO";
+  }
+
+  function enableRedo() {
+    const redoBtn = document.getElementById("redoBtn");
+    if (redoBtn) redoBtn.disabled = false;
+  }
+
+  function disableRedo() {
+    const redoBtn = document.getElementById("redoBtn");
+    if (redoBtn) redoBtn.disabled = true;
+  }
+
+  // ============================================
+  // QUADRATIC EQUATION SOLVER FUNCTIONS
+  // ============================================
+
+  function solveQuadratic() {
+    // Get input values
+    const a = parseFloat(document.getElementById("quad-a").value);
+    const b = parseFloat(document.getElementById("quad-b").value);
+    const c = parseFloat(document.getElementById("quad-c").value);
+
+    // Validation
+    if (isNaN(a) || isNaN(b) || isNaN(c)) {
+      alert("Please enter valid numbers for a, b, and c");
+      return;
+    }
+
+    if (a === 0) {
+      alert(' "a" cannot be 0 in a quadratic equation (ax² + bx + c = 0)');
+      return;
+    }
+
+    // Calculate discriminant (D = b² - 4ac)
+    const discriminant = b * b - 4 * a * c;
+
+    let roots = "";
+    let description = "";
+
+    if (discriminant > 0) {
+      const root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+      const root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+      roots = `x₁ = ${root1.toFixed(4)}, x₂ = ${root2.toFixed(4)}`;
+      description = "Two distinct real roots";
+    } else if (discriminant === 0) {
+      const root = -b / (2 * a);
+      roots = `x = ${root.toFixed(4)} (repeated)`;
+      description = "One repeated real root";
+    } else {
+      const realPart = (-b / (2 * a)).toFixed(4);
+      const imaginaryPart = (Math.sqrt(-discriminant) / (2 * a)).toFixed(4);
+      roots = `x₁ = ${realPart} + ${imaginaryPart}i, x₂ = ${realPart} - ${imaginaryPart}i`;
+      description = "Two complex/imaginary roots";
+    }
+
+    // Display results
+    const resultDiv = document.getElementById("quad-result");
+    document.getElementById("quad-roots-value").textContent = roots;
+    document.getElementById("quad-discriminant").textContent =
+      discriminant.toFixed(4);
+    document.getElementById("quad-description").textContent = description;
+    resultDiv.style.display = "block";
+
+    // Update main calculator display with the discriminant (or root if real)
+    currentExpression = discriminant.toString();
+    updateResult();
+  }
+
+  function clearQuadratic() {
+    // Clear input fields
+    document.getElementById("quad-a").value = "1";
+    document.getElementById("quad-b").value = "5";
+    document.getElementById("quad-c").value = "6";
+
+    // Hide result
+    document.getElementById("quad-result").style.display = "none";
+
+    // Clear calculator display
+    currentExpression = "";
+    updateResult();
+  }
+
+  // ================= MEMORY SYSTEM =================
+
+  const display = document.getElementById("result");
+  let memory = 0;
+
+  window.updateMemoryIndicator = function () {
+    const indicator = document.getElementById("memoryIndicator");
+    if (!indicator) return;
+    indicator.style.visibility = memory !== 0 ? "visible" : "hidden";
+  };
+
+  window.memoryClear = function () {
+    memory = 0;
+    updateMemoryIndicator();
+  };
+
+  window.memoryRecall = function () {
+    display.value = memory.toString();
+  };
+
+  window.memoryAdd = function () {
+    const value = parseFloat(display.value) || 0;
+    memory += value;
+    updateMemoryIndicator();
+  };
+
+  window.memorySubtract = function () {
+    const value = parseFloat(display.value) || 0;
+    memory -= value;
+    updateMemoryIndicator();
+  };
+  // Subtracts the current display value from the memory
+  function memorySubtract() {
+    const value = parseFloat(display.value) || 0;
+    memory -= value;
+    updateMemoryIndicator();
+  }
+  // ------------------------------
+  // Answer Preview (live result before = is pressed)
+  // ------------------------------
+  function updateAnswerPreview() {
+    const previewEl = document.getElementById("answer-preview");
+    if (!previewEl) return;
+
+    const expr = currentExpression.trim();
+
+    if (!expr || expr === "Error") {
+      previewEl.textContent = "";
+      return;
+    }
+
+    try {
+      const permMatch = expr.match(/^(\d+)P(\d+)$/i);
+      const combMatch = expr.match(/^(\d+)C(\d+)$/i);
+      let result;
+
+      if (permMatch) {
+        const n = parseInt(permMatch[1]);
+        const r = parseInt(permMatch[2]);
+        if (n >= r && n >= 0 && r >= 0) {
+          result = factorial(n) / factorial(n - r);
+        }
+      } else if (combMatch) {
+        const n = parseInt(combMatch[1]);
+        const r = parseInt(combMatch[2]);
+        if (n >= r && n >= 0 && r >= 0) {
+          result = factorial(n) / (factorial(r) * factorial(n - r));
+        }
+      } else {
+        result = eval(normalizeExpression(expr));
+      }
+
+      if (
+        result !== undefined &&
+        !isNaN(result) &&
+        isFinite(result) &&
+        expr !== result.toString()
+      ) {
+        const formatted =
+          Math.abs(result - Math.round(result)) < 1e-10
+            ? Math.round(result).toString()
+            : parseFloat(result.toFixed(6)).toString();
+        previewEl.textContent = "ANSWER PREVIEW = " + formatted;
+      } else {
+        previewEl.textContent = "";
+      }
+    } catch (e) {
+      previewEl.textContent = "";
+    }
+  }
+  document.addEventListener("keydown", function (event) {
+    const key = event.key;
+
+    if (!isNaN(key)) {
+      // Check if the key is a number
+      appendToResult(key);
+    } else if (key === "+" || key === "-" || key === "*" || key === "/") {
+      operatorToResult(key);
+    } else if (key === "Enter") {
+      calculateResult();
+    } else if (key === "Backspace") {
+      backspace();
+    } else if (key === "Escape") {
+      clearResult();
+    } else if (key === "(" || key === ")") {
+      bracketToResult(key);
+    } else if (key === ".") {
+      appendToResult(key);
+    } else if (key === "s") {
+      trigButtonPressed("sin");
+    } else if (key === "c") {
+      trigButtonPressed("cos");
+    } else if (key === "t") {
+      trigButtonPressed("tan");
+    } else if (key === "i") {
+      toggleInverseMode();
+    } else if (key === "A") {
+      trigButtonPressed("sin");
+    } else if (key === "C") {
+      trigButtonPressed("cos");
+    } else if (key === "T") {
+      trigButtonPressed("tan");
+    }
+  });
+
+  // ============================================
+  // PORTUGUESE LANGUAGE TRANSLATOR
+  // ============================================
+
+  function numberToPortuguese(num) {
+    if (num === "Error") return "Erro";
+
+    const ones = [
+      "",
+      "Um",
+      "Dois",
+      "Três",
+      "Quatro",
+      "Cinco",
+      "Seis",
+      "Sete",
+      "Oito",
+      "Nove",
+    ];
+    const tens = [
+      "",
+      "",
+      "Vinte",
+      "Trinta",
+      "Quarenta",
+      "Cinquenta",
+      "Sessenta",
+      "Setenta",
+      "Oitenta",
+      "Noventa",
+    ];
+    const teens = [
+      "Dez",
+      "Onze",
+      "Doze",
+      "Treze",
+      "Quatorze",
+      "Quinze",
+      "Dezesseis",
+      "Dezessete",
+      "Dezoito",
+      "Dezenove",
+    ];
+    const scales = ["", "Mil", "Milhão", "Bilhão", "Trilhão"];
+
+    function convertGroup(val) {
+      let res = "";
+      if (val >= 100) {
+        res += ones[Math.floor(val / 100)] + " Cento ";
+        val %= 100;
+      }
+      if (val >= 10 && val <= 19) {
+        res += teens[val - 10] + " ";
+      } else if (val >= 20) {
+        res += tens[Math.floor(val / 10)];
+        if (val % 10 !== 0) res += " e " + ones[val % 10];
+        res += " ";
+      } else if (val > 0) {
+        res += ones[val] + " ";
+      }
+      return res.trim();
+    }
+
+    let n = parseFloat(num);
+    if (isNaN(n)) return "";
+    if (n === 0) return "Zero";
+
+    let sign = n < 0 ? "Negativo " : "";
+    let absN = Math.abs(n);
+    let parts = absN.toString().split(".");
+    let integerPart = parseInt(parts[0]);
+    let decimalPart = parts[1];
+
+    let wordArr = [];
+
+    if (integerPart === 0) {
+      wordArr.push("Zero");
+    } else {
+      let scaleIdx = 0;
+      while (integerPart > 0) {
+        let chunk = integerPart % 1000;
+        if (chunk > 0) {
+          let chunkWords = convertGroup(chunk);
+          wordArr.unshift(
+            chunkWords + (scales[scaleIdx] ? " " + scales[scaleIdx] : ""),
+          );
+        }
+        integerPart = Math.floor(integerPart / 1000);
+        scaleIdx++;
+      }
+    }
+
+    let result = sign + wordArr.join(", ").trim();
+
+    if (decimalPart) {
+      result += " Vírgula";
+      for (let digit of decimalPart) {
+        result += " " + (digit === "0" ? "Zero" : ones[parseInt(digit)]);
+      }
+    }
+
+    return result.trim();
+  }
+
+  function translateToPortuguese() {
+    if (!currentExpression) return;
+
+    const portuguese = numberToPortuguese(currentExpression);
+    const wordResult = document.getElementById("word-result");
+
+    wordResult.innerHTML =
+      '<span class="small-label">Resultado em Português</span><strong>' +
+      portuguese +
+      "</strong>";
+  }
+
+  // ============================================
+  // CUBIC EQUATION SOLVER FUNCTIONS
+  // ============================================
+
+  function solveCubic() {
+    // Get input values
+    const a = parseFloat(document.getElementById("cubic-a").value);
+    const b = parseFloat(document.getElementById("cubic-b").value);
+    const c = parseFloat(document.getElementById("cubic-c").value);
+    const d = parseFloat(document.getElementById("cubic-d").value);
+
+    // Validation
+    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d)) {
+      alert("Please enter valid numbers for a, b, c, and d");
+      return;
+    }
+
+    if (a === 0) {
+      alert('"a" cannot be 0 in a cubic equation (ax³ + bx² + cx + d = 0)');
+      return;
+    }
+
+    // Normalize the equation: convert to form t³ + pt + q = 0
+    const a2 = b / a,
+      a3 = c / a,
+      a4 = d / a;
+    const p = a3 - (a2 * a2) / 3;
+    const q = a4 + (2 * a2 * a2 * a2) / 27 - (a2 * a3) / 3;
+
+    // Cardano's formula
+    const discriminant = -(4 * p * p * p + 27 * q * q);
+    const innerVal = (q / 2) ** 2 + (p / 3) ** 3;
+
+    let roots = [];
+    let description = "";
+
+    if (Math.abs(innerVal) < 1e-10) {
+      // Multiple roots case
+      if (Math.abs(p) < 1e-10 && Math.abs(q) < 1e-10) {
+        // Triple root
+        roots = [(-a2 / 3).toFixed(4)];
+        description = "One triple real root";
+      } else {
+        // One single and one double root
+        const root1 = ((3 * q) / p - a2 / 3).toFixed(4);
+        const root2 = ((-3 * q) / (2 * p) - a2 / 3).toFixed(4);
+        roots = [root1, root2, root2];
+        description = "One single and one double real root";
+      }
+    } else if (innerVal > 0) {
+      // One real root, two complex
+      const sqrtInner = Math.sqrt(innerVal);
+      const cbrtVal1 = Math.cbrt(-q / 2 + sqrtInner);
+      const cbrtVal2 = Math.cbrt(-q / 2 - sqrtInner);
+      const realRoot = (cbrtVal1 + cbrtVal2 - a2 / 3).toFixed(4);
+
+      roots = [realRoot];
+      description = "One real root and two complex conjugate roots";
+    } else {
+      // Three distinct real roots (trigonometric solution)
+      const m = 2 * Math.sqrt(-p / 3);
+      const theta = (1 / 3) * Math.acos((3 * q) / (p * m));
+      const offset = a2 / 3;
+
+      const root1 = (m * Math.cos(theta) - offset).toFixed(4);
+      const root2 = (m * Math.cos(theta + (2 * Math.PI) / 3) - offset).toFixed(
+        4,
+      );
+      const root3 = (m * Math.cos(theta + (4 * Math.PI) / 3) - offset).toFixed(
+        4,
+      );
+
+      roots = [root1, root2, root3];
+      description = "Three distinct real roots";
+    }
+
+    // Display results
+    const resultDiv = document.getElementById("cubic-result");
+    document.getElementById("cubic-roots-value").textContent = roots.join(", ");
+    document.getElementById("cubic-description").textContent = description;
+    resultDiv.style.display = "block";
+
+    // Update main calculator display
+    currentExpression = roots[0];
+    updateResult();
+  }
+
+  function clearCubic() {
+    // Clear input fields
+    document.getElementById("cubic-a").value = "1";
+    document.getElementById("cubic-b").value = "0";
+    document.getElementById("cubic-c").value = "-7";
+    document.getElementById("cubic-d").value = "6";
+
+    // Hide result
+    document.getElementById("cubic-result").style.display = "none";
+
+    // Clear calculator display
+    currentExpression = "";
+    updateResult();
+  }
+
+  // ============================================
+  // QUARTIC EQUATION SOLVER FUNCTIONS
+  // ============================================
+
+  function solveQuartic() {
+    // Get input values
+    const a = parseFloat(document.getElementById("quartic-a").value);
+    const b = parseFloat(document.getElementById("quartic-b").value);
+    const c = parseFloat(document.getElementById("quartic-c").value);
+    const d = parseFloat(document.getElementById("quartic-d").value);
+    const e = parseFloat(document.getElementById("quartic-e").value);
+
+    // Validation
+    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d) || isNaN(e)) {
+      alert("Please enter valid numbers for a, b, c, d, and e");
+      return;
+    }
+
+    if (a === 0) {
+      alert(
+        '"a" cannot be 0 in a quartic equation (ax⁴ + bx³ + cx² + dx + e = 0)',
+      );
+      return;
+    }
+
+    // Using Ferrari's method - convert to depressed quartic
+    const p = c / a;
+    const q = d / a;
+    const r = e / a;
+    const bOverA = b / a;
+
+    // Calculate resolvent cubic coefficients
+    const p2 = p * p;
+    const resolventA = 1;
+    const resolventB = -p;
+    const resolventC = q * q - 4 * r;
+    const resolventD = 4 * p * r - q * q - bOverA * bOverA;
+
+    // Solve cubic to get y
+    let y;
+    const discriminant = -(4 * resolventC ** 3 + 27 * resolventD ** 2);
+
+    // Simple cubic solver for resolvent
+    const innerVal = (resolventD / 2) ** 2 + (resolventC / 3) ** 3;
+
+    if (innerVal >= 0) {
+      const sqrtInner = Math.sqrt(innerVal);
+      const cbrt1 = Math.cbrt(-resolventD / 2 + sqrtInner);
+      const cbrt2 = Math.cbrt(-resolventD / 2 - sqrtInner);
+      const yVal = cbrt1 + cbrt2 - resolventB / 3;
+      y = yVal >= 0 ? yVal : 0;
+    } else {
+      y = Math.abs(resolventC) / 3;
+    }
+
+    // Calculate roots using y
+    const sqrt_y = Math.sqrt(Math.max(0, y));
+    const sqrt_term = Math.sqrt(
+      Math.max(0, p + 2 * y - q / (2 * sqrt_y + 1e-10)),
+    );
+
+    const root1 = (-bOverA / 4 + sqrt_y / 2 + sqrt_term / 2).toFixed(4);
+    const root2 = (-bOverA / 4 + sqrt_y / 2 - sqrt_term / 2).toFixed(4);
+    const root3 = (
+      -bOverA / 4 -
+      sqrt_y / 2 +
+      Math.sqrt(Math.max(0, p + 2 * y + q / (2 * sqrt_y + 1e-10))) / 2
+    ).toFixed(4);
+    const root4 = (
+      -bOverA / 4 -
+      sqrt_y / 2 -
+      Math.sqrt(Math.max(0, p + 2 * y + q / (2 * sqrt_y + 1e-10))) / 2
+    ).toFixed(4);
+
+    const roots = [root1, root2, root3, root4];
+    const description = "Four potential roots (may include complex values)";
+
+    // Display results
+    const resultDiv = document.getElementById("quartic-result");
+    document.getElementById("quartic-roots-value").textContent =
+      roots.join(", ");
+    document.getElementById("quartic-description").textContent = description;
+    resultDiv.style.display = "block";
+
+    // Update main calculator display
+    currentExpression = root1;
+    updateResult();
+  }
+
+  function clearQuartic() {
+    // Clear input fields
+    document.getElementById("quartic-a").value = "1";
+    document.getElementById("quartic-b").value = "0";
+    document.getElementById("quartic-c").value = "-13";
+    document.getElementById("quartic-d").value = "0";
+    document.getElementById("quartic-e").value = "36";
+
+    // Hide result
+    document.getElementById("quartic-result").style.display = "none";
+
+    // Clear calculator display
+    currentExpression = "";
+    updateResult();
+  }
+  // ============================================
+  // PROBABILITY CALCULATOR FUNCTIONS
+  // ============================================
+
+  /**
+   * Updates the input fields based on the selected probability calculation type.
+   */
+  function updateProbabilityInputs() {
+    const probType = document.getElementById("probability-type").value;
+    const container = document.getElementById("probability-inputs-container");
+    const resultDiv = document.getElementById("probability-result");
+
+    // Clear previous inputs and hide result
+    container.innerHTML = "";
+    resultDiv.style.display = "none";
+
+    if (!probType) return;
+
+    let inputsHTML = "";
+
+    switch (probType) {
+      case "single":
+        inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Favorable Outcomes</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-favorable" placeholder="e.g., 1" step="any" min="0" value="1">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Total Possible Outcomes</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-total" placeholder="e.g., 6" step="any" min="1" value="6">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(A) = Favorable / Total</div>
+            `;
+        break;
+
+      case "and":
+        inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Event A (P(A))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-a" placeholder="e.g., 0.5" step="0.01" min="0" max="1" value="0.5">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Event B (P(B))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-b" placeholder="e.g., 0.5" step="0.01" min="0" max="1" value="0.5">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(A and B) = P(A) × P(B) (for independent events)</div>
+            `;
+        break;
+
+      case "or":
+        inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Event A (P(A))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-a-or" placeholder="e.g., 0.25" step="0.01" min="0" max="1" value="0.25">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Event B (P(B))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-b-or" placeholder="e.g., 0.25" step="0.01" min="0" max="1" value="0.25">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(A or B) = P(A) + P(B) (for mutually exclusive events)</div>
+            `;
+        break;
+
+      case "conditional":
+        inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Probability of A and B (P(A∩B))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-a-and-b" placeholder="e.g., 0.1" step="0.01" min="0" max="1" value="0.1">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Probability of B (P(B))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-b-cond" placeholder="e.g., 0.2" step="0.01" min="0" max="1" value="0.2">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(A|B) = P(A∩B) / P(B)</div>
+            `;
+        break;
+
+      case "binomial":
+        inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Number of Trials (n)</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-trials" placeholder="e.g., 5" step="1" min="1" value="5">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Number of Successes (k)</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-successes" placeholder="e.g., 3" step="1" min="0" value="3">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Success per Trial (p)</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-p" placeholder="e.g., 0.5" step="0.01" min="0" max="1" value="0.5">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(X=k) = C(n,k) × pᵏ × (1-p)ⁿ⁻ᵏ</div>
+            `;
+        break;
+
+      case "complement":
+        inputsHTML = `
+                <div class="mb-2">
+                    <label class="form-label small">Probability of Event (P(A))</label>
+                    <input type="number" class="form-control form-control-sm" id="prob-a-comp" placeholder="e.g., 0.3" step="0.01" min="0" max="1" value="0.3">
+                </div>
+                <div class="alert alert-warning py-1 px-2 mb-0 small">P(A') = 1 - P(A)</div>
+            `;
+        break;
+    }
+
+    container.innerHTML = inputsHTML;
+  }
+
+  /**
+   * Helper function to calculate combinations (nCr)
+   */
+  function combination(n, k) {
+    if (k < 0 || k > n) return 0;
+    if (k === 0 || k === n) return 1;
+
+    // Use the multiplicative formula to avoid large numbers
+    k = Math.min(k, n - k);
+    let result = 1;
+    for (let i = 1; i <= k; i++) {
+      result *= (n - k + i) / i;
+    }
+    return result;
+  }
+
+  /**
+   * Main function to perform the probability calculation based on user input.
+   */
+  function calculateProbability() {
+    const probType = document.getElementById("probability-type").value;
+    const resultDiv = document.getElementById("probability-result");
+    const probValueSpan = document.getElementById("probability-value");
+    const formulaSpan = document.getElementById("probability-formula");
+    const explanationSpan = document.getElementById("probability-explanation");
+
+    if (!probType) {
+      alert("Please select a calculation type.");
+      return;
+    }
+
+    let result = null;
+    let formula = "";
+    let explanation = "";
+
+    try {
+      switch (probType) {
+        case "single": {
+          const favorable = parseFloat(
+            document.getElementById("prob-favorable").value,
+          );
+          const total = parseFloat(document.getElementById("prob-total").value);
+
+          if (isNaN(favorable) || isNaN(total) || total <= 0 || favorable < 0) {
+            throw new Error(
+              "Invalid input. Please ensure Favorable Outcomes is >= 0 and Total Outcomes is > 0.",
+            );
+          }
+          result = favorable / total;
+          formula = `P(A) = Favorable / Total = ${favorable} / ${total}`;
+          explanation = `The probability of the event occurring is ${result.toFixed(4)}.`;
+          break;
+        }
+
+        case "and": {
+          const pA = parseFloat(document.getElementById("prob-a").value);
+          const pB = parseFloat(document.getElementById("prob-b").value);
+
+          if (isNaN(pA) || isNaN(pB) || pA < 0 || pA > 1 || pB < 0 || pB > 1) {
+            throw new Error("Probabilities must be between 0 and 1.");
+          }
+          result = pA * pB;
+          formula = `P(A and B) = P(A) × P(B) = ${pA.toFixed(4)} × ${pB.toFixed(4)}`;
+          explanation = `The probability of both independent events occurring is ${result.toFixed(4)}.`;
+          break;
+        }
+
+        case "or": {
+          const pA = parseFloat(document.getElementById("prob-a-or").value);
+          const pB = parseFloat(document.getElementById("prob-b-or").value);
+
+          if (isNaN(pA) || isNaN(pB) || pA < 0 || pA > 1 || pB < 0 || pB > 1) {
+            throw new Error("Probabilities must be between 0 and 1.");
+          }
+          result = pA + pB;
+          if (result > 1) result = 1; // Cap at 1 for mutually exclusive events that might be incorrectly input
+          formula = `P(A or B) = P(A) + P(B) = ${pA.toFixed(4)} + ${pB.toFixed(4)}`;
+          explanation = `The probability of either event occurring (mutually exclusive) is ${result.toFixed(4)}.`;
+          break;
+        }
+
+        case "conditional": {
+          const pAandB = parseFloat(
+            document.getElementById("prob-a-and-b").value,
+          );
+          const pB = parseFloat(document.getElementById("prob-b-cond").value);
+
+          if (
+            isNaN(pAandB) ||
+            isNaN(pB) ||
+            pAandB < 0 ||
+            pAandB > 1 ||
+            pB <= 0 ||
+            pB > 1
+          ) {
+            throw new Error(
+              "P(A∩B) must be between 0 and 1, and P(B) must be between >0 and 1.",
+            );
+          }
+          result = pAandB / pB;
+          if (result > 1) result = 1; // Cap at 1
+          formula = `P(A|B) = P(A∩B) / P(B) = ${pAandB.toFixed(4)} / ${pB.toFixed(4)}`;
+          explanation = `The probability of event A given that B has occurred is ${result.toFixed(4)}.`;
+          break;
+        }
+
+        case "binomial": {
+          const n = parseInt(document.getElementById("prob-trials").value);
+          const k = parseInt(document.getElementById("prob-successes").value);
+          const p = parseFloat(document.getElementById("prob-p").value);
+
+          if (
+            isNaN(n) ||
+            isNaN(k) ||
+            isNaN(p) ||
+            n < 1 ||
+            k < 0 ||
+            k > n ||
+            p < 0 ||
+            p > 1
+          ) {
+            throw new Error(
+              "Invalid input. Ensure n >= 1, 0 <= k <= n, and 0 <= p <= 1.",
+            );
+          }
+          const comb = combination(n, k);
+          result = comb * Math.pow(p, k) * Math.pow(1 - p, n - k);
+          formula = `P(X=${k}) = C(${n}, ${k}) × ${p.toFixed(2)}^${k} × (1-${p.toFixed(2)})^${n - k}`;
+          explanation = `The probability of getting exactly ${k} successes in ${n} trials is ${result.toFixed(6)}.`;
+          break;
+        }
+
+        case "complement": {
+          const pA = parseFloat(document.getElementById("prob-a-comp").value);
+
+          if (isNaN(pA) || pA < 0 || pA > 1) {
+            throw new Error("Probability must be between 0 and 1.");
+          }
+          result = 1 - pA;
+          formula = `P(A') = 1 - P(A) = 1 - ${pA.toFixed(4)}`;
+          explanation = `The probability of the event NOT occurring is ${result.toFixed(4)}.`;
+          break;
+        }
+      }
+
+      // Display the result
+      if (result !== null) {
+        probValueSpan.textContent = result.toFixed(6);
+        formulaSpan.textContent = formula;
+        explanationSpan.textContent = explanation;
+        resultDiv.style.display = "block";
+
+        // Update main calculator display with the result (optional)
+        // currentExpression = result.toString();
+        // updateResult();
+      }
+    } catch (error) {
+      alert("Error: " + error.message);
+      resultDiv.style.display = "none";
+    }
+  }
+
+  /**
+   * Clears the probability calculator inputs and hides the result.
+   */
+  function clearProbabilityCalculator() {
+    document.getElementById("probability-type").value = "";
+    document.getElementById("probability-inputs-container").innerHTML = "";
+    document.getElementById("probability-result").style.display = "none";
+  }
+
+  // ============================================
+  // BMI CALCULATOR FUNCTIONS
+  // ============================================
+
+  /**
+   * Calculates the Body Mass Index (BMI) based on weight and height.
+   */
+  function calculateBMI() {
+    const weight = parseFloat(document.getElementById("bmi-weight").value);
+    const heightCm = parseFloat(document.getElementById("bmi-height").value);
+    const resultDiv = document.getElementById("bmi-result");
+    const bmiValueSpan = document.getElementById("bmi-value");
+    const bmiCategorySpan = document.getElementById("bmi-category");
+    const bmiNoteSpan = document.getElementById("bmi-note");
+
+    if (isNaN(weight) || isNaN(heightCm) || weight <= 0 || heightCm <= 0) {
+      alert("Please enter valid positive numbers for weight and height.");
+      return;
+    }
+
+    // Formula: BMI = weight (kg) / [height (m)]^2
+    const heightM = heightCm / 100;
+    const bmi = weight / (heightM * heightM);
+    const bmiRounded = bmi.toFixed(2);
+
+    let category = "";
+    let note = "";
+
+    if (bmi < 18.5) {
+      category = "Underweight";
+      note =
+        "It is important to eat a balanced diet and consult a healthcare provider.";
+    } else if (bmi >= 18.5 && bmi < 25) {
+      category = "Normal weight";
+      note =
+        "Great job! Maintain a healthy lifestyle with balanced nutrition and exercise.";
+    } else if (bmi >= 25 && bmi < 30) {
+      category = "Overweight";
+      note =
+        "Consider a more active lifestyle and balanced diet to reach a healthier range.";
+    } else {
+      category = "Obese";
+      note =
+        "It is recommended to consult a healthcare provider for personalized advice.";
+    }
+
+    // Display the result
+    bmiValueSpan.textContent = bmiRounded;
+    bmiCategorySpan.textContent = category;
+    bmiNoteSpan.textContent = note;
+    resultDiv.style.display = "block";
+
+    // Update main calculator display with the result
+    currentExpression = bmiRounded;
+    updateResult();
+  }
+
+  /**
+   * Clears the BMI calculator inputs and hides the result.
+   */
+  function clearBMICalculator() {
+    document.getElementById("bmi-weight").value = "";
+    document.getElementById("bmi-height").value = "";
+    document.getElementById("bmi-result").style.display = "none";
+  }
+
+  // ============================================
+  // STATISTICAL CALCULATOR FUNCTIONS
+  // ============================================
+  function calculateStatistics() {
+    const input = document.getElementById("stats-data-input").value.trim();
+
+    if (!input) {
+      alert("Please enter data values");
+      return;
+    }
+
+    const dataArray = input
+      .split(",")
+      .map((val) => {
+        const num = parseFloat(val.trim());
+        return isNaN(num) ? null : num;
+      })
+      .filter((val) => val !== null);
+
+    if (dataArray.length === 0) {
+      alert("No valid numbers found. Please enter comma-separated numbers.");
+      return;
+    }
+
+    const stats = {
+      count: dataArray.length,
+      sum: dataArray.reduce((a, b) => a + b, 0),
+      min: Math.min(...dataArray),
+      max: Math.max(...dataArray),
+      mean: 0,
+      median: 0,
+      mode: "N/A",
+      stddev: 0,
+    };
+
+    stats.mean = stats.sum / stats.count;
+
+    const sorted = [...dataArray].sort((a, b) => a - b);
+    if (stats.count % 2 === 0) {
+      stats.median =
+        (sorted[stats.count / 2 - 1] + sorted[stats.count / 2]) / 2;
+    } else {
+      stats.median = sorted[Math.floor(stats.count / 2)];
+    }
+
+    const frequency = {};
+    let maxFreq = 0;
+    let modes = [];
+
+    dataArray.forEach((num) => {
+      frequency[num] = (frequency[num] || 0) + 1;
+      if (frequency[num] > maxFreq) {
+        maxFreq = frequency[num];
+      }
+    });
+
+    Object.keys(frequency).forEach((key) => {
+      if (frequency[key] === maxFreq) {
+        modes.push(parseFloat(key));
+      }
+    });
+
+    if (modes.length === dataArray.length) {
+      stats.mode = "No mode";
+    } else if (modes.length === 1) {
+      stats.mode = modes[0].toFixed(4);
+    } else {
+      stats.mode = modes.map((m) => m.toFixed(4)).join(", ");
+    }
+
+    const variance =
+      dataArray.reduce((sum, val) => sum + Math.pow(val - stats.mean, 2), 0) /
+      stats.count;
+    stats.stddev = Math.sqrt(variance);
+
+    displayStatisticsResults(stats);
+  }
+
+  function displayStatisticsResults(stats) {
+    const resultDiv = document.getElementById("stats-result");
+    document.getElementById("stat-count").textContent = stats.count;
+    document.getElementById("stat-sum").textContent = stats.sum.toFixed(2);
+    document.getElementById("stat-mean").textContent = stats.mean.toFixed(4);
+    document.getElementById("stat-median").textContent =
+      stats.median.toFixed(4);
+    document.getElementById("stat-mode").textContent = stats.mode;
+    document.getElementById("stat-min").textContent = stats.min.toFixed(2);
+    document.getElementById("stat-max").textContent = stats.max.toFixed(2);
+    document.getElementById("stat-stddev").textContent =
+      stats.stddev.toFixed(4);
+    resultDiv.style.display = "block";
+  }
+
+  function clearStatistics() {
+    document.getElementById("stats-data-input").value = "";
+    document.getElementById("stats-result").style.display = "none";
+  }
+
+  // ------------------------------
+  // ROUND UP TO DECIMAL PLACES
+  // ------------------------------
+  let currentDP = 2;
+
+  function setDP(dp) {
+    currentDP = dp;
+    document.getElementById("dpLabel").textContent = dp + "dp";
+    document.getElementById("dpDropdownMenu").style.display = "none";
+    roundToDecimal(dp);
+  }
+
+  function roundToDecimal(dp) {
+    const val = parseFloat(document.getElementById("result").value);
+    if (isNaN(val)) return;
+    document.getElementById("result").value = val.toFixed(dp);
+  }
+
+  function toggleDPDropdown(event) {
+    event.stopPropagation();
+    const menu = document.getElementById("dpDropdownMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  }
+
+  // Close when clicking anywhere outside the dropdown
+  document.addEventListener("click", function () {
+    const menu = document.getElementById("dpDropdownMenu");
+    if (menu) menu.style.display = "none";
+  });
+
+  // ========================================================
+  // ================= FORMULA CALCULATOR ===================
+  // ========================================================
+
+  const formulas = {
+    geometry: {
+      circleArea: {
+        name: "Area of Circle",
+        inputs: ["Radius"],
+        calc: (v) => Math.PI * v[0] * v[0],
+      },
+      circleCircumference: {
+        name: "Circumference of Circle",
+        inputs: ["Radius"],
+        calc: (v) => 2 * Math.PI * v[0],
+      },
+      triangleArea: {
+        name: "Area of Triangle",
+        inputs: ["Base", "Height"],
+        calc: (v) => 0.5 * v[0] * v[1],
+      },
+      rectangleArea: {
+        name: "Area of Rectangle",
+        inputs: ["Length", "Width"],
+        calc: (v) => v[0] * v[1],
+      },
+      squareArea: {
+        name: "Area of Square",
+        inputs: ["Side"],
+        calc: (v) => v[0] * v[0],
+      },
+      cubeVolume: {
+        name: "Volume of Cube",
+        inputs: ["Side"],
+        calc: (v) => v[0] ** 3,
+      },
+      sphereVolume: {
+        name: "Volume of Sphere",
+        inputs: ["Radius"],
+        calc: (v) => (4 / 3) * Math.PI * v[0] ** 3,
+      },
+      cylinderVolume: {
+        name: "Volume of Cylinder",
+        inputs: ["Radius", "Height"],
+        calc: (v) => Math.PI * v[0] ** 2 * v[1],
+      },
+      pythagoras: {
+        name: "Pythagorean Theorem",
+        inputs: ["a", "b"],
+        calc: (v) => Math.sqrt(v[0] ** 2 + v[1] ** 2),
+      },
+      sphereSurface: {
+        name: "Surface Area of Sphere",
+        inputs: ["Radius"],
+        calc: (v) => 4 * Math.PI * v[0] ** 2,
+      },
+    },
+    finance: {
+      simpleInterest: {
+        name: "Simple Interest",
+        inputs: ["Principal", "Rate", "Time"],
+        calc: (v) => (v[0] * v[1] * v[2]) / 100,
+      },
+      compoundInterest: {
+        name: "Compound Interest",
+        inputs: ["Principal", "Rate", "Time", "n"],
+        calc: (v) => v[0] * (1 + v[1] / 100 / v[3]) ** (v[3] * v[2]),
+      },
+      percentage: {
+        name: "Percentage",
+        inputs: ["Value", "Total"],
+        calc: (v) => (v[0] / v[1]) * 100,
+      },
+      discount: {
+        name: "Discount Price",
+        inputs: ["Original Price", "Discount %"],
+        calc: (v) => v[0] - (v[1] / 100) * v[0],
+      },
+      profit: {
+        name: "Profit/Loss",
+        inputs: ["Selling Price", "Cost Price"],
+        calc: (v) => v[0] - v[1],
+      },
+    },
+    algebra: {
+      slope: {
+        name: "Slope of Line",
+        inputs: ["x1", "y1", "x2", "y2"],
+        calc: (v) => (v[3] - v[1]) / (v[2] - v[0]),
+      },
+      distance: {
+        name: "Distance Between Points",
+        inputs: ["x1", "y1", "x2", "y2"],
+        calc: (v) => Math.sqrt((v[2] - v[0]) ** 2 + (v[3] - v[1]) ** 2),
+      },
+      average: {
+        name: "Average",
+        inputs: ["Sum", "Count"],
+        calc: (v) => v[0] / v[1],
+      },
+      speed: {
+        name: "Speed",
+        inputs: ["Distance", "Time"],
+        calc: (v) => v[0] / v[1],
+      },
+      quadratic: {
+        name: "Quadratic Formula",
+        inputs: ["a", "b", "c"],
+        calc: (v) =>
+          (-v[1] + Math.sqrt(v[1] ** 2 - 4 * v[0] * v[2])) / (2 * v[0]),
+      },
+    },
+  };
+
+  // Populate formulas
+  document.addEventListener("DOMContentLoaded", () => {
+    const category = document.getElementById("formulaCategory");
+    const select = document.getElementById("formulaSelect");
+    const container = document.getElementById("formulaInputs");
+
+    if (!category) return;
+
+    category.addEventListener("change", () => {
+      select.innerHTML = '<option value="">Select Formula</option>';
+      container.innerHTML = "";
+      if (!category.value) return;
+
+      Object.entries(formulas[category.value]).forEach(([key, f]) => {
+        select.innerHTML += `<option value="${key}">${f.name}</option>`;
+      });
+    });
+
+    select.addEventListener("change", () => {
+      container.innerHTML = "";
+      const f = formulas[category.value]?.[select.value];
+      if (!f) return;
+
+      f.inputs.forEach((label, i) => {
+        container.innerHTML += `
+        <input type="number" class="form-control mb-2"
+        placeholder="${label}" id="f${i}">
+      `;
+      });
+    });
+  });
+
+  // Calculate formula
+  function calculateFormula() {
+    const category = document.getElementById("formulaCategory").value;
+    const key = document.getElementById("formulaSelect").value;
+    if (!category || !key) return;
+
+    const formula = formulas[category][key];
+    let values = [];
+
+    for (let i = 0; i < formula.inputs.length; i++)
+      values.push(parseFloat(document.getElementById("f" + i).value) || 0);
+
+    const result = formula.calc(values);
+
+    // Display inside Formula Calculator
+    document.getElementById("formula-result").innerHTML =
+      `<div class="alert alert-success mt-2">
+       Result: <strong>${result}</strong>
+     </div>`;
+  }
+
+  // ============================================
+  // GCD & LCM CALCULATOR FUNCTIONS
+  // ============================================
+
+  /**
+   * Calculate Greatest Common Divisor using Euclidean algorithm
+   */
+  function findGCD(a, b) {
+    a = Math.abs(a);
+    b = Math.abs(b);
+    while (b !== 0) {
+      const temp = b;
+      b = a % b;
+      a = temp;
+    }
+    return a;
+  }
+
+  /**
+   * Calculate Least Common Multiple using the formula: LCM(a,b) = (a * b) / GCD(a,b)
+   */
+  function findLCM(a, b) {
+    return Math.abs(a * b) / findGCD(a, b);
+  }
+
+  /**
+   * Main function to calculate GCD and LCM
+   */
+  function calculateGCDLCM() {
+    const num1Input = document.getElementById("gcd-num1");
+    const num2Input = document.getElementById("gcd-num2");
+    const resultDiv = document.getElementById("gcd-lcm-result");
+
+    if (!num1Input.value || !num2Input.value) {
+      alert("Please enter both numbers");
+      return;
+    }
+
+    const num1 = parseInt(num1Input.value);
+    const num2 = parseInt(num2Input.value);
+
+    if (isNaN(num1) || isNaN(num2) || num1 <= 0 || num2 <= 0) {
+      alert("Please enter valid positive integers");
+      return;
+    }
+
+    const gcd = findGCD(num1, num2);
+    const lcm = findLCM(num1, num2);
+
+    // Display results
+    document.getElementById("gcd-value").textContent = gcd;
+    document.getElementById("lcm-value").textContent = lcm;
+    resultDiv.style.display = "block";
+
+    // Add to history
+    calculationHistory.push({
+      expression: `GCD(${num1}, ${num2}) = ${gcd}; LCM(${num1}, ${num2}) = ${lcm}`,
+      words: `GCD: ${numberToWords(gcd)}, LCM: ${numberToWords(lcm)}`,
+      time: new Date().toLocaleTimeString(),
+    });
+
+    if (calculationHistory.length > 20) {
+      calculationHistory.shift();
+    }
+
+    localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+    renderHistory();
+    resetRedoIndex();
+  }
+
+  /**
+   * Clear GCD & LCM calculator inputs and results
+   */
+  function clearGCDLCM() {
+    document.getElementById("gcd-num1").value = "";
+    document.getElementById("gcd-num2").value = "";
+    document.getElementById("gcd-lcm-result").style.display = "none";
+  }
+
+  // ===============================
+  // FIBONACCI SEQUENCE CALCULATOR
+  // ===============================
+
+  /**
+   * Generate Fibonacci sequence up to n terms
+   * @param {number} n - Number of terms to generate
+   * @returns {array} Array of Fibonacci numbers
+   */
+  function generateFibonacci(n) {
+    if (n <= 0) return [];
+    if (n === 1) return [0];
+
+    const fib = [0, 1];
+    for (let i = 2; i < n; i++) {
+      fib.push(fib[i - 1] + fib[i - 2]);
+    }
+    return fib.slice(0, n);
+  }
+
+  /**
+   * Calculate and display Fibonacci sequence
+   */
+  function calculateFibonacci() {
+    const nInput = document.getElementById("fib-terms");
+    const resultDiv = document.getElementById("fib-result");
+
+    if (!nInput.value) {
+      alert("Please enter the number of terms");
+      return;
+    }
+
+    const n = parseInt(nInput.value);
+
+    if (isNaN(n) || n <= 0) {
+      alert("Please enter a valid positive integer");
+      return;
+    }
+
+    if (n > 50) {
+      alert("Maximum 50 terms allowed to prevent performance issues");
+      return;
+    }
+
+    const fibSequence = generateFibonacci(n);
+    const sequenceStr = fibSequence.join(", ");
+
+    // Display results
+    document.getElementById("fib-sequence").textContent = sequenceStr;
+    document.getElementById("fib-sum").textContent = fibSequence.reduce(
+      (a, b) => a + b,
+      0,
+    );
+    document.getElementById("fib-count").textContent = fibSequence.length;
+    if (fibSequence.length > 0) {
+      document.getElementById("fib-last").textContent =
+        fibSequence[fibSequence.length - 1];
+    }
+
+    resultDiv.style.display = "block";
+
+    // Add to history
+    calculationHistory.push({
+      expression: `Fibonacci(${n}) = ${sequenceStr.substring(0, 50)}${sequenceStr.length > 50 ? "..." : ""}`,
+      words: `First ${n} Fibonacci numbers: ${sequenceStr.substring(0, 50)}${sequenceStr.length > 50 ? "..." : ""}`,
+      time: new Date().toLocaleTimeString(),
+    });
+
+    if (calculationHistory.length > 20) {
+      calculationHistory.shift();
+    }
+
+    localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+    renderHistory();
+    resetRedoIndex();
+  }
+
+  /**
+   * Find the nth Fibonacci number
+   */
+  function findNthFibonacci() {
+    const nInput = document.getElementById("fib-nth-input");
+    const resultDiv = document.getElementById("fib-nth-result");
+
+    if (!nInput.value) {
+      alert("Please enter the term number (n)");
+      return;
+    }
+
+    const n = parseInt(nInput.value);
+
+    if (isNaN(n) || n < 0) {
+      alert("Please enter a valid non-negative integer");
+      return;
+    }
+
+    if (n > 80) {
+      alert("Maximum 80th term allowed");
+      return;
+    }
+
+    // Calculate nth Fibonacci using closed form or iterative method
+    let fib;
+    if (n === 0) {
+      fib = 0;
+    } else if (n === 1) {
+      fib = 1;
+    } else {
+      let a = 0,
+        b = 1;
+      for (let i = 2; i <= n; i++) {
+        [a, b] = [b, a + b];
+      }
+      fib = b;
+    }
+
+    // Display result
+    document.getElementById("fib-nth-value").textContent = fib;
+    resultDiv.style.display = "block";
+
+    // Add to history
+    calculationHistory.push({
+      expression: `F(${n}) = ${fib}`,
+      words: `${n}th Fibonacci number is ${numberToWords(fib)}`,
+      time: new Date().toLocaleTimeString(),
+    });
+
+    if (calculationHistory.length > 20) {
+      calculationHistory.shift();
+    }
+
+    localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+    renderHistory();
+    resetRedoIndex();
+  }
+
+  /**
+   * Check if a number is a Fibonacci number
+   */
+  function checkFibonacciNumber() {
+    const numInput = document.getElementById("fib-check-input");
+    const resultDiv = document.getElementById("fib-check-result");
+
+    if (!numInput.value) {
+      alert("Please enter a number to check");
+      return;
+    }
+
+    const num = parseInt(numInput.value);
+
+    if (isNaN(num) || num < 0) {
+      alert("Please enter a valid non-negative integer");
+      return;
+    }
+
+    // Check if number is Fibonacci using the property:
+    // A number is Fibonacci if one or both of (5*n^2 + 4) or (5*n^2 - 4) is a perfect square
+    function isPerfectSquare(x) {
+      const sqrt = Math.sqrt(x);
+      return sqrt === Math.floor(sqrt);
+    }
+
+    const isFib =
+      isPerfectSquare(5 * num * num + 4) || isPerfectSquare(5 * num * num - 4);
+
+    // Display result
+    document.getElementById("fib-check-value").textContent = num;
+    document.getElementById("fib-check-answer").textContent = isFib
+      ? "YES ✓"
+      : "NO ✗";
+    document.getElementById("fib-check-answer").style.color = isFib
+      ? "#198754"
+      : "#dc3545";
+    resultDiv.style.display = "block";
+
+    // Add to history
+    calculationHistory.push({
+      expression: `Is ${num} a Fibonacci number?`,
+      words: `${num} is ${isFib ? "" : "not "}a Fibonacci number`,
+      time: new Date().toLocaleTimeString(),
+    });
+
+    if (calculationHistory.length > 20) {
+      calculationHistory.shift();
+    }
+
+    localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+    renderHistory();
+    resetRedoIndex();
+  }
+
+  /**
+   * Clear Fibonacci calculator inputs and results
+   */
+  function clearFibonacci() {
+    document.getElementById("fib-terms").value = "";
+    document.getElementById("fib-result").style.display = "none";
+    document.getElementById("fib-nth-input").value = "";
+    document.getElementById("fib-nth-result").style.display = "none";
+    document.getElementById("fib-check-input").value = "";
+    document.getElementById("fib-check-result").style.display = "none";
+  }
+  /* Clear bitwise calculator
+   */
+  function clearBitwise() {
+    document.getElementById("bitwise-num1").value = "5";
+    document.getElementById("bitwise-num2").value = "3";
+    document.getElementById("bitwise-result").style.display = "none";
+  }
+
+  function appendPi() {
+    const piDisplay = "π"; // what the user sees
+    const piEval = "Math.PI"; // what eval() will use
+
+    // Reference to your display input
+    const displayEl = document.getElementById("result");
+
+    // Determine last character in the display
+    const lastChar = displayEl.value.slice(-1);
+
+    // If display is empty or ends with an operator → just append π
+    if (/[+\-×*/^]$/.test(lastChar)) {
+      currentExpression += piEval;
+      displayEl.value += piDisplay;
+    } else if (!displayEl.value) {
+      currentExpression = piEval;
+      displayEl.value += piDisplay;
+    } else {
+      // Otherwise assume multiplication between number and π
+      currentExpression += "*" + piEval;
+      displayEl.value += "×" + piDisplay;
+    }
+
+    // Optional: update word-area preview if you have it
+    const wordResult = document.getElementById("word-result");
+    const wordArea = document.getElementById("word-area");
+
+    if (wordResult && wordArea) {
+      wordResult.innerHTML =
+        '<span class="small-label">Result in words</span><strong>' +
+        numberToWords(Math.PI) +
+        "</strong>";
+      wordArea.style.display = "flex";
+    }
+  }
+
+  // ===============================
+  // BASE CONVERTER & BITWISE OPERATIONS
+  // ===============================
+
+  /**
+   * Convert decimal number to binary, hex, and octal
+   */
+  function convertDecimal() {
+    const decimalInput = document.getElementById("decimal-input");
+    const value = parseInt(decimalInput.value);
+
+    if (isNaN(value) || value < 0) {
+      document.getElementById("binary-result").textContent = "0";
+      document.getElementById("hex-result").textContent = "0x0";
+      document.getElementById("octal-result").textContent = "0";
+      document.getElementById("decimal-result").textContent = "0";
+      return;
+    }
+
+    const binary = value.toString(2);
+    const hex = "0x" + value.toString(16).toUpperCase();
+    const octal = "0" + value.toString(8);
+
+    document.getElementById("binary-result").textContent = binary;
+    document.getElementById("hex-result").textContent = hex;
+    document.getElementById("octal-result").textContent = octal;
+    document.getElementById("decimal-result").textContent = value.toString();
+  }
+
+  /**
+   * Convert binary to decimal
+   */
+  function convertFromBinary() {
+    const binaryInput = document.getElementById("binary-input").value.trim();
+
+    if (!binaryInput) {
+      document.getElementById("binary-to-decimal").textContent = "0";
+      return;
+    }
+
+    // Validate binary input (only 0 and 1)
+    if (!/^[01]+$/.test(binaryInput)) {
+      document.getElementById("binary-to-decimal").textContent =
+        "Invalid binary";
+      return;
+    }
+
+    const decimal = parseInt(binaryInput, 2);
+    document.getElementById("binary-to-decimal").textContent =
+      decimal.toString();
+  }
+
+  /**
+   * Convert hexadecimal to decimal
+   */
+  function convertFromHex() {
+    const hexInput = document.getElementById("hex-input").value.trim();
+
+    if (!hexInput) {
+      document.getElementById("hex-to-decimal").textContent = "0";
+      return;
+    }
+
+    // Validate hex input
+    if (!/^[0-9A-Fa-f]+$/.test(hexInput)) {
+      document.getElementById("hex-to-decimal").textContent = "Invalid hex";
+      return;
+    }
+
+    const decimal = parseInt(hexInput, 16);
+    document.getElementById("hex-to-decimal").textContent = decimal.toString();
+  }
+
+  /**
+   * Convert octal to decimal
+   */
+  function convertFromOctal() {
+    const octalInput = document.getElementById("octal-input").value.trim();
+
+    if (!octalInput) {
+      document.getElementById("octal-to-decimal").textContent = "0";
+      return;
+    }
+
+    // Validate octal input (only 0-7)
+    if (!/^[0-7]+$/.test(octalInput)) {
+      document.getElementById("octal-to-decimal").textContent = "Invalid octal";
+      return;
+    }
+
+    const decimal = parseInt(octalInput, 8);
+    document.getElementById("octal-to-decimal").textContent =
+      decimal.toString();
+  }
+
+  /**
+   * Bitwise AND operation
+   */
+  function bitwiseAND() {
+    const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+    const num2 = parseInt(document.getElementById("bitwise-num2").value) || 0;
+
+    const result = num1 & num2;
+    displayBitwiseResult(`${num1} & ${num2}`, result);
+  }
+
+  /**
+   * Bitwise OR operation
+   */
+  function bitwiseOR() {
+    const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+    const num2 = parseInt(document.getElementById("bitwise-num2").value) || 0;
+
+    const result = num1 | num2;
+    displayBitwiseResult(`${num1} | ${num2}`, result);
+  }
+
+  /**
+   * Bitwise XOR operation
+   */
+  function bitwiseXOR() {
+    const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+    const num2 = parseInt(document.getElementById("bitwise-num2").value) || 0;
+
+    const result = num1 ^ num2;
+    displayBitwiseResult(`${num1} ^ ${num2}`, result);
+  }
+
+  /**
+   * Bitwise NOT operation
+   */
+  function bitwiseNOT() {
+    const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+
+    // JavaScript's NOT (~) operator works on 32-bit signed integers
+    // We'll use only the first number for NOT operation
+    const result = ~num1;
+    displayBitwiseResult(`~${num1}`, result);
+  }
+
+  /**
+   * Left Shift operation
+   */
+  function leftShift() {
+    const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+    const num2 = parseInt(document.getElementById("bitwise-num2").value) || 0;
+
+    const result = num1 << num2;
+    displayBitwiseResult(`${num1} << ${num2}`, result);
+  }
+
+  /**
+   * Right Shift operation
+   */
+  function rightShift() {
+    const num1 = parseInt(document.getElementById("bitwise-num1").value) || 0;
+    const num2 = parseInt(document.getElementById("bitwise-num2").value) || 0;
+
+    const result = num1 >> num2;
+    displayBitwiseResult(`${num1} >> ${num2}`, result);
+  }
+
+  /**
+   * Display bitwise operation results
+   */
+  function displayBitwiseResult(operation, result) {
+    const resultDiv = document.getElementById("bitwise-result");
+    document.getElementById("bitwise-op").textContent = operation;
+    document.getElementById("bitwise-decimal").textContent = result;
+    document.getElementById("bitwise-binary").textContent = result.toString(2);
+    resultDiv.style.display = "block";
+
+    // Add to history
+    calculationHistory.push({
+      expression: `${operation} = ${result}`,
+      words: `Bitwise operation: ${numberToWords(result)}`,
+      time: new Date().toLocaleTimeString(),
+    });
+
+    if (calculationHistory.length > 20) {
+      calculationHistory.shift();
+    }
+
+    localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+    renderHistory();
+    resetRedoIndex();
+  }
+
+  // ============================================
+  // 🏛️ ROMAN NUMERAL CONVERTER
+  // ============================================
+
+  const romanNumeralMap = [
+    { value: 1000, symbol: "M" },
+    { value: 900, symbol: "CM" },
+    { value: 500, symbol: "D" },
+    { value: 400, symbol: "CD" },
+    { value: 100, symbol: "C" },
+    { value: 90, symbol: "XC" },
+    { value: 50, symbol: "L" },
+    { value: 40, symbol: "XL" },
+    { value: 10, symbol: "X" },
+    { value: 9, symbol: "IX" },
+    { value: 5, symbol: "V" },
+    { value: 4, symbol: "IV" },
+    { value: 1, symbol: "I" },
+  ];
+
+  function arabicToRoman(num) {
+    if (!Number.isInteger(num) || num < 1 || num > 3999) {
+      throw new RangeError("Number must be an integer between 1 and 3,999.");
+    }
+    let remaining = num;
+    let roman = "";
+    const parts = [];
+    for (const { value, symbol } of romanNumeralMap) {
+      while (remaining >= value) {
+        roman += symbol;
+        parts.push(symbol + " (" + value + ")");
+        remaining -= value;
+      }
+    }
+    return { roman, breakdown: parts.join(" + ") + " = " + num };
+  }
+
+  function romanToArabic(str) {
+    const input = str.trim().toUpperCase();
+    if (!input) throw new Error("Please enter a Roman numeral.");
+    if (!/^[IVXLCDM]+$/.test(input)) {
+      throw new Error(
+        "Invalid character. Only I, V, X, L, C, D, M are allowed.",
+      );
+    }
+    const symbolValues = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+    let total = 0;
+    for (let i = 0; i < input.length; i++) {
+      const curr = symbolValues[input[i]];
+      const next = symbolValues[input[i + 1]] || 0;
+      total += curr < next ? -curr : curr;
+    }
+    if (total < 1 || total > 3999) {
+      throw new RangeError("Result out of range (1–3,999). Check your input.");
+    }
+    const { roman } = arabicToRoman(total);
+    if (roman !== input) {
+      throw new Error(
+        '"' +
+          input +
+          '" is not a standard Roman numeral. Did you mean "' +
+          roman +
+          '"?',
+      );
+    }
+    return total;
+  }
+
+  function convertArabicToRoman() {
+    const raw = document.getElementById("arabic-input").value.trim();
+    const outputEl = document.getElementById("roman-output");
+    const breakdownEl = document.getElementById("roman-breakdown");
+    if (!raw) {
+      outputEl.value = "";
+      breakdownEl.style.display = "none";
+      return;
+    }
+    const num = parseInt(raw, 10);
+    try {
+      const { roman, breakdown } = arabicToRoman(num);
+      outputEl.value = roman;
+      breakdownEl.innerHTML = "<strong>Breakdown:</strong> " + breakdown;
+      breakdownEl.style.display = "block";
+      breakdownEl.className = "alert alert-info py-2 px-3 mb-0 small";
+    } catch (e) {
+      outputEl.value = "";
+      breakdownEl.innerHTML = "⚠️ " + e.message;
+      breakdownEl.style.display = "block";
+      breakdownEl.className = "alert alert-warning py-2 px-3 mb-0 small";
+    }
+  }
+
+  function convertRomanToArabic() {
+    const raw = document.getElementById("roman-input").value;
+    const outputEl = document.getElementById("arabic-output");
+    const errorEl = document.getElementById("roman-error");
+    if (!raw.trim()) {
+      outputEl.value = "";
+      errorEl.style.display = "none";
+      return;
+    }
+    try {
+      const result = romanToArabic(raw);
+      outputEl.value = result.toLocaleString();
+      errorEl.style.display = "none";
+    } catch (e) {
+      outputEl.value = "";
+      errorEl.textContent = "⚠️ " + e.message;
+      errorEl.style.display = "block";
+    }
+  }
+
+  function useCalcResultForRoman() {
+    const resultEl = document.getElementById("result");
+    const val = parseFloat(resultEl.value);
+    if (isNaN(val)) {
+      alert("No valid number in the calculator display.");
+      return;
+    }
+    const intVal = Math.trunc(val);
+    document.getElementById("arabic-input").value = intVal;
+    convertArabicToRoman();
+    const collapseEl = document.getElementById("collapseRoman");
+    if (collapseEl && !collapseEl.classList.contains("show")) {
+      new bootstrap.Collapse(collapseEl, { toggle: true });
+    }
+    collapseEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function clearRomanConverter() {
+    document.getElementById("arabic-input").value = "";
+    document.getElementById("roman-output").value = "";
+    document.getElementById("roman-input").value = "";
+    document.getElementById("arabic-output").value = "";
+    document.getElementById("roman-breakdown").style.display = "none";
+    document.getElementById("roman-error").style.display = "none";
+  }
+
+  const resultDiv = document.getElementById("bitwise-result");
+  document.getElementById("bitwise-op").textContent = operation;
+  document.getElementById("bitwise-decimal").textContent = result;
+  document.getElementById("bitwise-binary").textContent = result.toString(2);
+  resultDiv.style.display = "block";
+
+  // Add to history
+  calculationHistory.push({
+    expression: `${operation} = ${result}`,
+    words: `Bitwise operation: ${numberToWords(result)}`,
+    time: new Date().toLocaleTimeString(),
+  });
+
+  if (calculationHistory.length > 20) {
+    calculationHistory.shift();
+  }
+
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+}
+
+// ============================================
+// 🏛️ ROMAN NUMERAL CONVERTER
+// ============================================
+
+const romanNumeralMap = [
+  { value: 1000, symbol: "M" },
+  { value: 900, symbol: "CM" },
+  { value: 500, symbol: "D" },
+  { value: 400, symbol: "CD" },
+  { value: 100, symbol: "C" },
+  { value: 90, symbol: "XC" },
+  { value: 50, symbol: "L" },
+  { value: 40, symbol: "XL" },
+  { value: 10, symbol: "X" },
+  { value: 9, symbol: "IX" },
+  { value: 5, symbol: "V" },
+  { value: 4, symbol: "IV" },
+  { value: 1, symbol: "I" },
+];
+
+function arabicToRoman(num) {
+  if (!Number.isInteger(num) || num < 1 || num > 3999) {
+    throw new RangeError("Number must be an integer between 1 and 3,999.");
+  }
+  let remaining = num;
+  let roman = "";
+  const parts = [];
+  for (const { value, symbol } of romanNumeralMap) {
+    while (remaining >= value) {
+      roman += symbol;
+      parts.push(symbol + " (" + value + ")");
+      remaining -= value;
+    }
+  }
+  return { roman, breakdown: parts.join(" + ") + " = " + num };
+}
+
+function romanToArabic(str) {
+  const input = str.trim().toUpperCase();
+  if (!input) throw new Error("Please enter a Roman numeral.");
+  if (!/^[IVXLCDM]+$/.test(input)) {
+    throw new Error("Invalid character. Only I, V, X, L, C, D, M are allowed.");
+  }
+  const symbolValues = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+  let total = 0;
+  for (let i = 0; i < input.length; i++) {
+    const curr = symbolValues[input[i]];
+    const next = symbolValues[input[i + 1]] || 0;
+    total += curr < next ? -curr : curr;
+  }
+  if (total < 1 || total > 3999) {
+    throw new RangeError("Result out of range (1–3,999). Check your input.");
+  }
+  const { roman } = arabicToRoman(total);
+  if (roman !== input) {
+    throw new Error(
+      '"' +
+        input +
+        '" is not a standard Roman numeral. Did you mean "' +
+        roman +
+        '"?',
+    );
+  }
+  return total;
+}
+
+function convertArabicToRoman() {
+  const raw = document.getElementById("arabic-input").value.trim();
+  const outputEl = document.getElementById("roman-output");
+  const breakdownEl = document.getElementById("roman-breakdown");
+  if (!raw) {
+    outputEl.value = "";
+    breakdownEl.style.display = "none";
+    return;
+  }
+  const num = parseInt(raw, 10);
+  try {
+    const { roman, breakdown } = arabicToRoman(num);
+    outputEl.value = roman;
+    breakdownEl.innerHTML = "<strong>Breakdown:</strong> " + breakdown;
+    breakdownEl.style.display = "block";
+    breakdownEl.className = "alert alert-info py-2 px-3 mb-0 small";
+  } catch (e) {
+    outputEl.value = "";
+    breakdownEl.innerHTML = "⚠️ " + e.message;
+    breakdownEl.style.display = "block";
+    breakdownEl.className = "alert alert-warning py-2 px-3 mb-0 small";
+  }
+}
+
+function convertRomanToArabic() {
+  const raw = document.getElementById("roman-input").value;
+  const outputEl = document.getElementById("arabic-output");
+  const errorEl = document.getElementById("roman-error");
+  if (!raw.trim()) {
+    outputEl.value = "";
+    errorEl.style.display = "none";
+    return;
+  }
+  try {
+    const result = romanToArabic(raw);
+    outputEl.value = result.toLocaleString();
+    errorEl.style.display = "none";
+  } catch (e) {
+    outputEl.value = "";
+    errorEl.textContent = "⚠️ " + e.message;
+    errorEl.style.display = "block";
+  }
+}
+
+function useCalcResultForRoman() {
+  const resultEl = document.getElementById("result");
+  const val = parseFloat(resultEl.value);
+  if (isNaN(val)) {
+    alert("No valid number in the calculator display.");
+    return;
+  }
+  const intVal = Math.trunc(val);
+  document.getElementById("arabic-input").value = intVal;
+  convertArabicToRoman();
+  const collapseEl = document.getElementById("collapseRoman");
+  if (collapseEl && !collapseEl.classList.contains("show")) {
+    new bootstrap.Collapse(collapseEl, { toggle: true });
+  }
+  collapseEl.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function clearRomanConverter() {
+  document.getElementById("arabic-input").value = "";
+  document.getElementById("roman-output").value = "";
+  document.getElementById("roman-input").value = "";
+  document.getElementById("arabic-output").value = "";
+  document.getElementById("roman-breakdown").style.display = "none";
+  document.getElementById("roman-error").style.display = "none";
+}
+
+// ===============================
+// 🌍 IGBO TRANSLATION FEATURE
+// ===============================
+
+function translateToIgbo() {
+  const display = document.getElementById("result").value;
+
+  if (!display || isNaN(display)) return;
+
+  const number = parseInt(display);
+
+  const igboNumbers = {
+    0: "efu",
+    1: "otu",
+    2: "abụọ",
+    3: "atọ",
+    4: "anọ",
+    5: "ise",
+    6: "isii",
+    7: "asaa",
+    8: "asatọ",
+    9: "itoolu",
+    10: "iri",
+    11: "iri na otu",
+    12: "iri na abụọ",
+    13: "iri na atọ",
+    14: "iri na anọ",
+    15: "iri na ise",
+    16: "iri na isii",
+    17: "iri na asaa",
+    18: "iri na asatọ",
+    19: "iri na itoolu",
+    20: "iri abụọ"
+  };
+
+  let resultText = "";
+
+  if (igboNumbers[number] !== undefined) {
+    resultText = igboNumbers[number];
+  } else {
+    resultText = "Nọmba a dị elu (Igbo support limited)";
+  }
+
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+
+  wordResult.innerHTML =
+    '<span class="small-label">Igbo Translation</span><strong>' +
+    resultText +
+    "</strong>";
+
+  wordArea.style.display = "flex";
+}
+// sounds
+const sounds = {
+  number: new Audio("assets/sounds/number.mp3"),
+  operator: new Audio("assets/sounds/operator.mp3"),
+  equals: new Audio("assets/sounds/equals.mp3"),
+  clear: new Audio("assets/sounds/clear.mp3"),
+};
+
+function playSound(type) {
+  if (sounds[type]) {
+    sounds[type].currentTime = 0; // rewind for rapid clicks
+    sounds[type].play();
+  }
+}
+
+// Select all buttons
+const buttons = document.querySelectorAll("button");
+
+// Add event listener to each button
+buttons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const value = button.innerText;
+
+    // Determine type of button
+    if (!isNaN(value)) {
+      playSound("number");
+    } else if (value === "=") {
+      playSound("equals");
+    } else if (value.toLowerCase() === "c" || value.toLowerCase() === "ac") {
+      playSound("clear");
+    } else {
+      playSound("operator");
+    }
+  });
+});
+
+
+
+// ===============================
+// 🏦 LOAN & MORTGAGE CALCULATOR
+// ===============================
+
+/**
+ * Format a number as a dollar currency string
+ * @param {number} n
+ * @returns {string}
+ */
+function loanFmt(n) {
+  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/**
+ * Calculate monthly payment using standard amortization formula
+ * @param {number} principal - Loan amount
+ * @param {number} annualRate - Annual interest rate as percentage
+ * @param {number} months - Total number of months
+ * @returns {number} Monthly payment amount
+ */
+function calcMonthlyPayment(principal, annualRate, months) {
+  if (annualRate === 0) return principal / months;
+  var r = annualRate / 100 / 12;
+  return principal * r * Math.pow(1 + r, months) / (Math.pow(1 + r, months) - 1);
+}
+
+/**
+ * Loan Calculator - calculates payment per period, total payment, and total interest
+ */
+function calcLoan() {
+  var principal = parseFloat(document.getElementById('loan-principal').value);
+  var rate = parseFloat(document.getElementById('loan-rate').value);
+  var termVal = parseFloat(document.getElementById('loan-term').value);
+  var termUnit = document.getElementById('loan-term-unit').value;
+  var freq = parseInt(document.getElementById('loan-freq').value);
+
+  if (isNaN(principal) || isNaN(rate) || isNaN(termVal) || principal <= 0 || termVal <= 0) {
+    document.getElementById('loan-result').style.display = 'none';
+    return;
+  }
+
+  var periods = termUnit === 'years' ? termVal * freq : termVal;
+  var periodRate = rate / 100 / freq;
+  var payment;
+
+  if (periodRate === 0) {
+    payment = principal / periods;
+  } else {
+    payment = principal * periodRate * Math.pow(1 + periodRate, periods) / (Math.pow(1 + periodRate, periods) - 1);
+  }
+
+  var total = payment * periods;
+  var interest = total - principal;
+  var principalPct = (principal / total * 100).toFixed(1);
+  var interestPct = (100 - parseFloat(principalPct)).toFixed(1);
+  var freqLabel = { '12': '/mo', '26': '/2wk', '52': '/wk', '1': '/yr' }[String(freq)] || '';
+
+  document.getElementById('loan-payment').textContent = loanFmt(payment) + freqLabel;
+  document.getElementById('loan-total').textContent = loanFmt(total);
+  document.getElementById('loan-interest').textContent = loanFmt(interest);
+  document.getElementById('loan-ratio').textContent = (interest / principal * 100).toFixed(1) + '%';
+  document.getElementById('loan-bar-principal').style.width = principalPct + '%';
+  document.getElementById('loan-bar-principal').textContent = 'Principal ' + principalPct + '%';
+  document.getElementById('loan-bar-interest').style.width = interestPct + '%';
+  document.getElementById('loan-bar-interest').textContent = 'Interest ' + interestPct + '%';
+  document.getElementById('loan-result').style.display = 'block';
+}
+
+/**
+ * Mortgage Calculator - calculates monthly P&I, PITI, total interest, and total cost
+ */
+function calcMortgage() {
+  var homePrice = parseFloat(document.getElementById('mort-home-price').value) || 0;
+  var down = parseFloat(document.getElementById('mort-down').value) || 0;
+  var rate = parseFloat(document.getElementById('mort-rate').value);
+  var termYears = parseInt(document.getElementById('mort-term').value);
+  var annualTax = parseFloat(document.getElementById('mort-tax').value) || 0;
+  var annualInsurance = parseFloat(document.getElementById('mort-insurance').value) || 0;
+
+  if (homePrice > 0) {
+    document.getElementById('mort-down-pct').textContent = (down / homePrice * 100).toFixed(1) + '%';
+  }
+
+  if (isNaN(rate) || homePrice <= 0 || down >= homePrice) {
+    document.getElementById('mort-result').style.display = 'none';
+    return;
+  }
+
+  var loanAmt = homePrice - down;
+  var months = termYears * 12;
+  var pi = calcMonthlyPayment(loanAmt, rate, months);
+  var totalPI = pi * months;
+  var totalInterest = totalPI - loanAmt;
+  var piti = pi + (annualTax + annualInsurance) / 12;
+  var totalCost = totalPI + down + annualTax * termYears + annualInsurance * termYears;
+
+  document.getElementById('mort-monthly-pi').textContent = loanFmt(pi);
+  document.getElementById('mort-monthly-total').textContent = loanFmt(piti);
+  document.getElementById('mort-total-interest').textContent = loanFmt(totalInterest);
+  document.getElementById('mort-total-cost').textContent = loanFmt(totalCost);
+  document.getElementById('mort-result').style.display = 'block';
+}
+
+/**
+ * Amortization Schedule - generates full month-by-month payment table
+ * Supports extra monthly payments and shows interest saved
+ */
+function calcAmortization() {
+  var principal = parseFloat(document.getElementById('amort-principal').value);
+  var rate = parseFloat(document.getElementById('amort-rate').value);
+  var termYears = parseFloat(document.getElementById('amort-term').value);
+  var extra = parseFloat(document.getElementById('amort-extra').value) || 0;
+
+  if (isNaN(principal) || isNaN(rate) || isNaN(termYears) || principal <= 0 || termYears <= 0) {
+    alert('Please fill in Loan Amount, Interest Rate, and Term.');
+    return;
+  }
+
+  var months = termYears * 12;
+  var basePayment = calcMonthlyPayment(principal, rate, months);
+  var standardTotalInterest = (basePayment * months) - principal;
+  var monthlyAmt = basePayment + extra;
+  var r = rate / 100 / 12;
+  var balance = principal;
+  var totalInterestPaid = 0;
+  var tbody = document.getElementById('amort-tbody');
+  tbody.innerHTML = '';
+  var month = 0;
+
+  while (balance > 0.005 && month < 1200) {
+    month++;
+    var interestCharge = balance * r;
+    var principalCharge = Math.min(monthlyAmt - interestCharge, balance);
+    if (principalCharge < 0) principalCharge = 0;
+    balance = Math.max(0, balance - principalCharge);
+    totalInterestPaid += interestCharge;
+
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + month + '</td>' +
+      '<td>' + loanFmt(principalCharge + interestCharge) + '</td>' +
+      '<td>' + loanFmt(principalCharge) + '</td>' +
+      '<td>' + loanFmt(interestCharge) + '</td>' +
+      '<td>' + loanFmt(balance) + '</td>';
+    tbody.appendChild(tr);
+  }
+
+  var py = Math.floor(month / 12);
+  var pm = month % 12;
+
+  document.getElementById('amort-payment-display').textContent = loanFmt(monthlyAmt);
+  document.getElementById('amort-payoff-time').textContent = (py > 0 ? py + 'y ' : '') + pm + 'mo';
+  document.getElementById('amort-total-interest').textContent = loanFmt(totalInterestPaid);
+  document.getElementById('amort-interest-saved').textContent = extra > 0 ? loanFmt(Math.max(0, standardTotalInterest - totalInterestPaid)) : '—';
+  document.getElementById('amort-summary').style.display = 'block';
+  document.getElementById('amort-table-wrapper').style.display = 'block';
 }

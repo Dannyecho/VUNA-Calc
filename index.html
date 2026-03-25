@@ -1,152 +1,2461 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calculator</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />    
-    <style>
-      .calculator {
-        border-radius: 10px;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --btn-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --btn-hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .calculator-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .calculator-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .display-container {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    #result {
+      text-align: right;
+      font-size: 38px;
+      font-weight: 600;
+      height: auto;
+      border: none;
+      background: transparent;
+      padding: 0;
+      color: #212529;
+      box-shadow: none;
+      width: 100%;
+    }
+
+    .word-display-area {
+      margin-top: 15px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 16px;
+      padding: 12px 18px;
+      border: 1px dashed rgba(13, 110, 253, 0.2);
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
       }
-      #result {
-        text-align: right;
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
-      #word-result{
-        background-color: #e9ecef;
-        border: solid 1px #ffcd39;
-        text-transform: capitalize;
-        font-weight: bold;
+    }
+
+    #word-result {
+      font-size: 14px;
+      color: #495057;
+      font-weight: 400;
+      line-height: 1.4;
+      word-wrap: break-word;
+      flex-grow: 1;
+    }
+
+    #word-result strong {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .small-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #adb5bd;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    #speak-btn {
+      background: var(--primary-color);
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+    }
+
+    #speak-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      background: #0b5ed7;
+    }
+
+    #speak-btn:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      box-shadow: none;
+    }
+
+    #speak-btn.speaking {
+      background: #fa5252;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(250, 82, 82, 0.4);
       }
-    </style>
-  </head>
-  <body class="bg-dark">
-    <div class="container">
-        <div class="row justify-content-center mt-5">
-            <div class="col-md-3">
-                <h4 class="text-white text-center">GROUP 2</h4>
-            </div>
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(250, 82, 82, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(250, 82, 82, 0);
+      }
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .calculator .btn {
+      height: 60px;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      border: none;
+      box-shadow: var(--btn-shadow);
+    }
+
+    .calculator .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--btn-hover-shadow);
+    }
+
+    .calculator .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-light {
+      background: #ffffff;
+      color: #495057;
+    }
+
+    .btn-light:hover {
+      background: #f1f3f5;
+    }
+
+    .btn-operator {
+      background: #e7f1ff;
+      color: var(--primary-color);
+    }
+
+    .btn-operator:hover {
+      background: #cfe2ff;
+    }
+
+    .btn-action {
+      background: #fff5f5;
+      color: #fa5252;
+    }
+
+    .btn-action:hover {
+      background: #ffe3e3;
+    }
+
+    .btn-equals {
+      background: var(--primary-color);
+      color: white;
+      grid-column: span 1;
+    }
+
+    .btn-equals:hover {
+      background: #0b5ed7;
+      color: white;
+    }
+
+    .btn-special {
+      background: #e7f6ed;
+      color: #198754;
+      font-size: 16px;
+    }
+
+    .btn-special:hover {
+      background: #d1f0dd;
+    }
+
+    .group-header {
+      color: #495057;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      font-size: 1.2rem;
+    }
+
+    .theme-toggle-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    body.dark-mode {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .calculator-card {
+      background: rgba(45, 45, 45, 0.9);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode .display-container {
+      background: #333333;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode #result {
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .btn-light {
+      background: #444444;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .btn-light:hover {
+      background: #555555;
+    }
+
+    body.dark-mode .accordion-button {
+      background-color: #444444;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .accordion-button:not(.collapsed) {
+      background-color: #555555;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+      background-color: #444444;
+      color: #e0e0e0;
+      border-color: #555555;
+    }
+
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+      background-color: #555555;
+      color: #e0e0e0;
+      border-color: #0d6efd;
+    }
+
+    #hausa-btn {
+      background: #198754;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
+    }
+
+    #hausa-btn:hover:not(:disabled) {
+      background: #157347;
+      transform: scale(1.05);
+    }
+
+    #hausa-btn:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      box-shadow: none;
+    }
+
+    #english-btn {
+      background: #0d6efd;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    #portuguese-btn {
+      background: #dc3545;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+    }
+
+    #portuguese-btn:hover:not(:disabled) {
+      background: #bb2d3b;
+      transform: scale(1.05);
+    }
+
+    #portuguese-btn:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      box-shadow: none;
+    }
+
+    #history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .history-item {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.5s ease;
+      opacity: 0;
+    }
+
+    .history-item.show {
+      opacity: 1;
+    }
+
+    .history-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .history-item-expression {
+      font-weight: 600;
+      color: #212529;
+      font-size: 16px;
+    }
+
+    .history-item-words {
+      font-style: italic;
+      color: #495057;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .history-item-time {
+      font-size: 12px;
+      color: #6c757d;
+      margin-top: 2px;
+      text-align: right;
+    }
+
+    #clear-history-btn {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      background: var(--primary-color);
+      border: none;
+      border-radius: 12px;
+      padding: 6px 0;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    #clear-history-btn:hover {
+      background: #0b5ed7;
+      transform: translateY(-2px);
+    }
+
+    #clear-history-btn:active {
+      transform: translateY(0);
+    }
+
+    .history-actions {
+      display: none;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .history-item:hover .history-actions {
+      display: flex;
+    }
+
+    .history-action-btn {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-delete {
+      background: #ffe3e3;
+      color: #fa5252;
+    }
+
+    .btn-delete:hover {
+      background: #ffc9c9;
+    }
+
+    .btn-remark {
+      background: #e7f1ff;
+      color: #0d6efd;
+    }
+
+    .btn-remark:hover {
+      background: #cfe2ff;
+    }
+
+    .remark-box {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .remark-box input {
+      flex: 1;
+      border-radius: 12px;
+      border: 1px solid #ced4da;
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+
+    .remark-text {
+      font-size: 13px;
+      color: #6c757d;
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    #scroll-to-calculator {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: rgba(13, 110, 253, 0.15);
+      color: var(--primary-color);
+      border: none;
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      opacity: 0.15;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+    }
+
+    body:hover #scroll-to-calculator {
+      opacity: 0.6;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    #scroll-to-calculator:hover {
+      opacity: 1;
+      background: var(--primary-color);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    #answer-preview {
+      padding: 0 16px;
+      border-radius: 16px;
+      background: #1d1d1e !important;
+      display: block;
+      font-size: 1.2rem;
+      color: #ffffff;
+      font-style: italic;
+      letter-spacing: 0.02em;
+      transition: opacity 0.2s ease;
+    }
+
+    #answer-preview:empty {
+      opacity: 0;
+    }
+
+    .currency-panel {
+      margin-top: 20px;
+    }
+
+    #igbo-btn {
+      background: #6f42c1;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(111, 66, 193, 0.2);
+    }
+
+    #igbo-btn:hover:not(:disabled) {
+      background: #5a32a3;
+      transform: scale(1.05);
+    }
+
+    #igbo-btn:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      box-shadow: none;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Theme Toggle Button -->
+  <button class="btn btn-outline-secondary theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()"
+    title="Toggle dark/light mode">
+    🌙
+  </button>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-md-10 col-sm-8">
+        <div class="border border-dotted border-3 rounded-3 p-3 mb-4 bg-white bg-opacity-50">
+          <h4 class="text-center group-header mb-0">VUNA CALCULATOR</h4>
+          <p class="text-center text-small text-muted">
+            <i>Created by set 2025/26 Software Engineering</i>
+          </p>
         </div>
-      <div class="row justify-content-center mt-3">
-        <div class="col-md-3">
-            <div class="card">
-              <div class="card-body">
+        <div class="row">
+          <div class="col-md-8">
+            <div class="card calculator-card">
+              <div class="card-body p-4">
                 <div class="calculator">
-                  <input
-                    type="text"
-                    class="form-control mb-2"
-                    id="result"
-                    disabled
-                  />
-                  <div id="word-result" class="px-3 py-2 mb-3 rounded"></div>
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="(" onclick="bracketToResult('(')" />
+                  <div class="display-container">
+                    <input type="text" class="form-control" id="result" placeholder="0" disabled />
+                    <span class="input-group-text" id="copy-icon" style="cursor:pointer;"
+                      onclick="copyResult()">📋</span>
+                  </div>
+                  <div id="memoryIndicator" style="font-weight:bold; visibility:hidden; margin:5px 10px;">
+                    M
+                  </div>
+                  <div class="word-display-area" id="word-area">
+                    <div id="word-result"></div>
+                    <button id="hausa-btn" onclick="translateToHausa()">HA</button>
+                    <button id="english-btn" onclick="backToEnglish()">EN</button>
+                    <button id="portuguese-btn" onclick="translateToPortuguese()">PT</button>
+                    <button id="igbo-btn" onclick="translateToIgbo()">IG</button>
+                    <button id="speak-btn" onclick="speakResult()" disabled title="Speak Result">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                          d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z" />
+                        <path
+                          d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z" />
+                        <path
+                          d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182l-.707.707A3.489 3.489 0 0 1 9.025 8a3.489 3.489 0 0 1-1.025 2.475l.707.707z" />
+                        <path
+                          d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="preview-panel">
+                    <div id="answer-preview"></div>
+                  </div>
+                  <div class="diff-panel">
+                    <div class="display-container my-3">
+                      <div class="col-md-12">
+                        <h4 class="group-header mb-0">Differentiate</h4>
+                        <div class="diff-controls row align-items-end">
+                          <div class="col-9">
+                            <input type="text" class="form-control diff-input" id="diff-input"
+                              placeholder="e.g., x^3 + 4x or sin(x)" />
+                          </div>
+                          <div class="col">
+                            <a class="btn btn-block btn-operator diff-btn" onclick="differentiateExpression()">
+                              d/dx
+                            </a>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value=")" onclick="bracketToResult(')')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="←" onclick="backspace()" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-warning btn-block"
-                          type="button"
-                          value="AC"
-                          onclick="clearResult()"
-                        />
-                    </div>
-                  </div>            
-                  <br /><br />
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="7" onclick="appendToResult(7)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="8" onclick="appendToResult(8)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="9" onclick="appendToResult(9)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="/"
-                          onclick="operatorToResult('/')"
-                        />
+                    <div id="diff-output" class="diff-outputx"></div>
+                  </div>
+
+                  <!-- Geometry Modal -->
+                  <div id="geometryModal"
+                    style="display:none;position:fixed;top:0; left:0;width:100%; height:100%;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999;">
+                    <div style="background:white;padding:20px;width:300px;border-radius:15px;">
+                      <h5 class="text-center mb-3">Geometry Formulas</h5>
+                      <select id="shapeSelect" class="form-control mb-2" onchange="updateGeometryInputs()">
+                        <option value="">Select Formula</option>
+                        <option value="rectangle">Area of Rectangle</option>
+                        <option value="triangle">Area of Triangle</option>
+                        <option value="circle">Area of Circle</option>
+                        <option value="square">Area of Square</option>
+                        <option value="perimeterSquare">Perimeter of Square</option>
+                        <option value="perimeterRectangle">Perimeter of Rectangle</option>
+                        <option value="cubeVolume">Volume of Cube</option>
+                        <option value="cylinderVolume">Volume of Cylinder</option>
+                      </select>
+                      <input type="number" id="input1" class="form-control mb-2" placeholder="Value 1">
+                      <input type="number" id="input2" class="form-control mb-2" placeholder="Value 2">
+                      <button class="btn btn-primary w-100 mb-2" onclick="calculateGeometry()">Calculate</button>
+                      <button class="btn btn-secondary w-100" onclick="closeGeometry()">Close</button>
                     </div>
                   </div>
-                  <br /><br />
+
+                  <div class="btn-grid">
+                    <!-- Row 1 -->
+                    <button class="btn btn-info" onclick="redoCalculation()" id="redoBtn">↻ REDO</button>
+                    <button class="btn btn-light" onclick="bracketToResult('(')">(</button>
+                    <button class="btn btn-light" onclick="bracketToResult(')')">)</button>
+                    <button class="btn btn-light" onclick="backspace()">←</button>
+
+                    <!-- Row trig -->
+                    <button class="btn btn-action" onclick="clearResult()">AC</button>
+                    <button id="sin-btn" class="btn btn-light" onclick="trigButtonPressed('sin')">sin</button>
+                    <button id="cos-btn" class="btn btn-light" onclick="trigButtonPressed('cos')">cos</button>
+                    <button id="tan-btn" class="btn btn-light" onclick="trigButtonPressed('tan')">tan</button>
+
+                    <!-- Row 2 -->
+                    <button id="" class="btn btn-operator" onclick="toggleInverseMode()">2nd</button>
+                    <button class="btn btn-light" onclick="appendToResult(7)">7</button>
+                    <button class="btn btn-light" onclick="appendToResult(8)">8</button>
+                    <button class="btn btn-light" onclick="appendToResult(9)">9</button>
+
+                    <!-- Row 3 -->
+                    <button class="btn btn-operator" onclick="operatorToResult('/')">÷</button>
+                    <button class="btn btn-light" onclick="appendToResult(4)">4</button>
+                    <button class="btn btn-light" onclick="appendToResult(5)">5</button>
+                    <button class="btn btn-light" onclick="appendToResult(6)">6</button>
+
+                    <!-- Row 4 -->
+                    <button class="btn btn-operator" onclick="operatorToResult('*')">×</button>
+                    <button class="btn btn-light" onclick="appendToResult(1)">1</button>
+                    <button class="btn btn-light" onclick="appendToResult(2)">2</button>
+                    <button class="btn btn-light" onclick="appendToResult(3)">3</button>
+
+                    <!-- Row 5 -->
+                    <button class="btn btn-operator" onclick="operatorToResult('+')">+</button>
+                    <button class="btn btn-light" onclick="appendToResult('.')">.</button>
+                    <button class="btn btn-light" onclick="appendToResult(0)">0</button>
+                    <button class="btn btn-operator" onclick="operatorToResult('-')">−</button>
+
+                    <!-- Row 6 -->
+                    <button class="btn btn-operator" onclick="percentToResult('%')">%</button>
+                    <button class="btn btn-special" onclick="operatorToResult('^')">x^y</button>
+                    <button class="btn btn-special" onclick="checkPrime()">Prime?</button>
+                    <button class="btn btn-power btn-special" onclick="calculateSquare()">x²</button>
+                    <button class="btn btn-power btn-special" onclick="calculateCube()">x³</button>
+                    <button class="btn btn-special" onclick="cubeRootResult()">∛x</button>
+
+                    <!-- Row 7 -->
+                    <button class="btn btn-special" onclick="calculateReciprocal()" title="Reciprocal: 1/x">1/x</button>
+                    <button class="btn btn-special" onclick="calculateSquareRoot()">√</button>
+                    <button class="btn btn-special" onclick="appendToResult('e')">e</button>
+                    <button class="btn btn-special" onclick="calculateExponential()">e^x</button>
+
+                    <!-- Row 7 - Permutation & Combination -->
+                    <button class="btn btn-action" onclick="factors()" stylex="grid-column: span 2;">Factors</button>
+                    <button class="btn btn-special" onclick="calculatePermutation()"
+                      title="Permutation: nPr = n!/(n-r)!">nPr</button>
+                    <button class="btn btn-special" onclick="calculateCombination()"
+                      title="Combination: nCr = n!/r!(n-r)!">nCr</button>
+                    <button class="btn btn-special" onclick="calculateFactorial()" title="Factorial: n!">n!</button>
+                    <button class="btn btn-action" onclick="applyLogarithm()">log</button>
+
+                    <!-- MEMORY CONTROLS -->
+                    <button class="btn btn-special" onclick="memoryClear()">MC</button>
+                    <button class="btn btn-special" onclick="memoryRecall()">MR</button>
+                    <button class="btn btn-special" onclick="memoryAdd()">M+</button>
+                    <button class="btn btn-special" onclick="memorySubtract()">M-</button>
+
+                    <!--  Row 8                  -->
+                    <div class="btn-group" role="" style="position:relative;">
+                      <button class="btn btn-special" id="dpMainBtn" onclick="toggleDPDropdown(event)">
+                        ⌃ <span id="dpLabel">2dp</span> ▾
+                      </button>
+
+                      <ul id="dpDropdownMenu"
+                        style="display:none; position:absolute; top:100%; left:0; list-style:none; padding:4px 0; margin:0; z-index:999; min-width:80px;">
+                        <li class="btn btn-special"><a href="#" onclick="setDP(1); return false;">⌃ 1dp</a></li>
+                        <li class="btn btn-special"><a href="#" onclick="setDP(2); return false;">⌃ 2dp</a></li>
+                        <li class="btn btn-special"><a href="#" onclick="setDP(3); return false;">⌃ 3dp</a></li>
+                      </ul>
+                    </div>
+                    <button class="btn btn-special" onclick="tenPower()">10<sup>x</sup></button>
+                    <button id="voice-input-btn" class="btn btn-special" aria-label="Speak calculation input"
+                      onclick="startVoiceInput()">🎙️</button>
+                    <button class="btn btn-operator" onclick="convertToHex()">HEX</button>
+                    <button class="btn btn-operator" onclick="openGeometry()">📐 Geo</button>
+                    <!-- Row 9 -->
+                    <button class="btn btn-equals" onclick="calculateResult()" stylex="grid-column: span 3;">=</button>
+                  </div>
+
                   <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="4" onclick="appendToResult(4)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="5" onclick="appendToResult(5)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="6" onclick="appendToResult(6)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="*"
-                          onclick="operatorToResult('*')"
-                          />
+                    <div class="col-md-12">
+                      <!-- Unit Converter Accordion -->
+                      <div class="accordion mt-4" id="converterAccordion">
+                        <!-- Unit Converter Item -->
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingConverter">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                              type="button" data-bs-toggle="collapse" data-bs-target="#collapseConverter"
+                              aria-expanded="false" aria-controls="collapseConverter">
+                              <span>🔄 Unit Converter</span>
+                            </button>
+                          </h2>
+                          <div id="collapseConverter" class="accordion-collapse collapse"
+                            aria-labelledby="headingConverter" data-bs-parent="#converterAccordion">
+                            <div class="accordion-body">
+                              <!-- Length Conversion -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Length</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="length-value" placeholder="Value"
+                                    value="1" oninput="convertUnit('length')">
+                                  <select class="form-select form-select-sm" id="from-length"
+                                    onchange="convertUnit('length')">
+                                    <option value="km">km</option>
+                                    <option value="m">m</option>
+                                    <option value="mile">miles</option>
+                                    <option value="yard">yards</option>
+                                    <option value="ft">feet</option>
+                                    <option value="inch">inches</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-length"
+                                    onchange="convertUnit('length')">
+                                    <option value="mile">miles</option>
+                                    <option value="km">km</option>
+                                    <option value="m">m</option>
+                                    <option value="yard">yards</option>
+                                    <option value="ft">feet</option>
+                                    <option value="inch">inches</option>
+                                  </select>
+                                  <span class="input-group-text" id="length-result">0</span>
+                                </div>
+                              </div>
+
+                              <!-- Weight Conversion -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Weight</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="weight-value" placeholder="Value"
+                                    value="1" oninput="convertUnit('weight')">
+                                  <select class="form-select form-select-sm" id="from-weight"
+                                    onchange="convertUnit('weight')">
+                                    <option value="kg">kg</option>
+                                    <option value="g">g</option>
+                                    <option value="lb">pounds</option>
+                                    <option value="oz">ounces</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-weight"
+                                    onchange="convertUnit('weight')">
+                                    <option value="lb">pounds</option>
+                                    <option value="kg">kg</option>
+                                    <option value="g">g</option>
+                                    <option value="oz">ounces</option>
+                                  </select>
+                                  <span class="input-group-text" id="weight-result">0</span>
+                                </div>
+                              </div>
+
+                              <!-- Temperature Conversion -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Temperature</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="temp-value" placeholder="Value"
+                                    value="0" oninput="convertUnit('temperature')">
+                                  <select class="form-select form-select-sm" id="from-temp"
+                                    onchange="convertUnit('temperature')">
+                                    <option value="C">°C</option>
+                                    <option value="F">°F</option>
+                                    <option value="K">K</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-temp"
+                                    onchange="convertUnit('temperature')">
+                                    <option value="F">°F</option>
+                                    <option value="C">°C</option>
+                                    <option value="K">K</option>
+                                  </select>
+                                  <span class="input-group-text" id="temp-result">0</span>
+                                </div>
+                              </div>
+
+                              <!-- Currency Conversion -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Currency</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="currency-value" placeholder="Amount"
+                                    value="1" oninput="convertUnit('currency')">
+                                  <select class="form-select form-select-sm" id="from-currency"
+                                    onchange="convertUnit('currency')">
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="JPY">JPY</option>
+                                    <option value="CAD">CAD</option>
+                                    <option value="AUD">AUD</option>
+                                    <option value="NGN">NGN</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-currency"
+                                    onchange="convertUnit('currency')">
+                                    <option value="EUR">EUR</option>
+                                    <option value="USD">USD</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="JPY">JPY</option>
+                                    <option value="CAD">CAD</option>
+                                    <option value="AUD">AUD</option>
+                                    <option value="NGN">NGN</option>
+                                  </select>
+                                  <span class="input-group-text" id="currency-result">0</span>
+                                  <button id="currency-refresh-btn" class="btn btn-sm btn-outline-info"
+                                    onclick="fetchCurrencyRates()" title="Refresh rates">🔄</button>
+                                </div>
+                                <small class="text-muted" id="currency-timestamp"></small>
+                              </div>
+                              <!-- Area Conversion -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Area</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="area-value" placeholder="Value"
+                                    value="1" oninput="convertUnit('area')">
+                                  <select class="form-select form-select-sm" id="from-area"
+                                    onchange="convertUnit('area')">
+                                    <option value="sqm">m²</option>
+                                    <option value="sqkm">km²</option>
+                                    <option value="sqmile">mi²</option>
+                                    <option value="sqyard">yd²</option>
+                                    <option value="sqft">ft²</option>
+                                    <option value="sqinch">in²</option>
+                                    <option value="hectare">hectare</option>
+                                    <option value="acre">acre</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-area"
+                                    onchange="convertUnit('area')">
+                                    <option value="sqmile">mi²</option>
+                                    <option value="sqm">m²</option>
+                                    <option value="sqkm">km²</option>
+                                    <option value="sqyard">yd²</option>
+                                    <option value="sqft">ft²</option>
+                                    <option value="sqinch">in²</option>
+                                    <option value="hectare">hectare</option>
+                                    <option value="acre">acre</option>
+                                  </select>
+                                  <span class="input-group-text" id="area-result">0</span>
+                                </div>
+                              </div>
+                              <!-- Data Storage Conversion -->
+                              <div class="mb-3">
+                                <label class="form-label small" style="font-weight: 600;">Data Storage</label>
+                                <div class="input-group input-group-sm">
+                                  <input type="number" class="form-control" id="data-value" placeholder="Value"
+                                    value="1" oninput="convertUnit('data')">
+                                  <select class="form-select form-select-sm" id="from-data"
+                                    onchange="convertUnit('data')">
+                                    <option value="bit">bit</option>
+                                    <option value="byte">B</option>
+                                    <option value="kb">KB</option>
+                                    <option value="mb">MB</option>
+                                    <option value="gb">GB</option>
+                                    <option value="tb">TB</option>
+                                  </select>
+                                  <span class="input-group-text">→</span>
+                                  <select class="form-select form-select-sm" id="to-data"
+                                    onchange="convertUnit('data')">
+                                    <option value="B">B</option>
+                                    <option value="bit">bit</option>
+                                    <option value="kb">KB</option>
+                                    <option value="mb">MB</option>
+                                    <option value="gb">GB</option>
+                                    <option value="tb">TB</option>
+                                  </select>
+                                  <span class="input-group-text" id="data-result">0</span>
+                                </div>
+                              </div>
+
+                              <!-- Quick Conversion Examples -->
+                              <div class="alert alert-info alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
+                                <strong>Examples:</strong> "5 km to miles" → <span id="example-result">3.11</span> | Add
+                                10 → <span id="example-add">13.11</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Formula Calculator Item -->
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingFormula">
+                            <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                              type="button" data-bs-toggle="collapse" data-bs-target="#collapseFormula"
+                              aria-expanded="false" aria-controls="collapseFormula">
+                              <span>🎯Formula Calculator</span>
+                            </button>
+                          </h2>
+                          <div id="collapseFormula" class="accordion-collapse collapse" aria-labelledby="headingFormula"
+                            data-bs-parent="#converterAccordion">
+                            <div class="accordion-body">
+                              <div class="mt-3">
+                                <select class="form-select mb-2" id="formulaCategory">
+                                  <option value="">Select Formula Category</option>
+                                  <option value="geometry">Geometry</option>
+                                  <option value="finance">Finance</option>
+                                  <option value="algebra">Algebra</option>
+                                </select>
+
+                                <select class="form-select mb-2" id="formulaSelect">
+                                  <option value="">Select Formula</option>
+                                </select>
+
+                                <div id="formulaInputs" class="mb-2"></div>
+
+                                <button class="btn btn-primary w-100" onclick="calculateFormula()">
+                                  Calculate Formula
+                                </button>
+                                <!-- Result Display -->
+                                <div id="formula-result"></div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Physics Calculator Accordion -->
+                          <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingPhysics">
+                              <button
+                                class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                type="button" data-bs-toggle="collapse" data-bs-target="#collapsePhysics"
+                                aria-expanded="false" aria-controls="collapsePhysics">
+                                <span>⚛️ Physics Calculator</span>
+                              </button>
+                            </h2>
+                            <div id="collapsePhysics" class="accordion-collapse collapse"
+                              aria-labelledby="headingPhysics" data-bs-parent="#converterAccordion">
+                              <div class="accordion-body">
+                                <!-- Category Selection -->
+                                <div class="mb-3">
+                                  <label class="form-label small" style="font-weight: 600;">Select Category</label>
+                                  <select class="form-select form-select-sm" id="physics-category"
+                                    onchange="updatePhysicsFormulas()">
+                                    <option value="">-- Select Category --</option>
+                                    <option value="mechanics">Mechanics</option>
+                                    <option value="electricity">Electricity</option>
+                                    <option value="thermodynamics">Thermodynamics</option>
+                                    <option value="waves">Waves</option>
+                                  </select>
+                                </div>
+
+                                <!-- Formula Selection -->
+                                <div class="mb-3">
+                                  <label class="form-label small" style="font-weight: 600;">Select Formula</label>
+                                  <select class="form-select form-select-sm" id="physics-formula"
+                                    onchange="updatePhysicsInputs()">
+                                    <option value="">-- Select Formula --</option>
+                                  </select>
+                                </div>
+
+                                <!-- Dynamic Inputs Container -->
+                                <div id="physics-inputs-container"></div>
+
+                                <!-- Calculate Button -->
+                                <div class="d-grid gap-2 mb-3">
+                                  <button class="btn btn-primary btn-sm" onclick="calculatePhysics()">Calculate</button>
+                                  <button class="btn btn-outline-secondary btn-sm"
+                                    onclick="clearPhysicsCalculator()">Clear</button>
+                                </div>
+                                <div id="physics-result"></div>
+                                <div class="calculator-display">
+                                  <input type="text" id="result" readonly>
+
+                                  <!-- Math Insight Feature -->
+                                  <div id="math-insight" class="math-insight-box" style="display:none;"></div>
+
+                                  <!--NEW FEATURE GOES HERE -->
+                                  <div id="expression-dna" class="math-insight-box" style="display:none;"></div>
+                                  <div id="expression-dna" class="math-insight-box" style="display:none;"></div>
+
+
+                                  <!-- Info Box -->
+                                  <div class="alert alert-info alert-sm py-2 px-3 mb-0" style="font-size: 0.85rem;">
+                                    <strong>💡 Tip:</strong> Select a category and formula to get started. Common
+                                    formulas
+                                    include velocity, force, electrical power, and wave speed.
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Percentage Change Calculator -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapsePercentageChange"
+                                  aria-expanded="false" aria-controls="collapsePercentageChange">
+                                  <span>📊 Percentage Change</span>
+                                </button>
+                              </h2>
+                              <div id="collapsePercentageChange" class="accordion-collapse collapse"
+                                aria-labelledby="matrix-calculator-tab" data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Calculate percentage increase or decrease between two
+                                    values</p>
+
+                                  <!-- Original Value -->
+                                  <div class="mb-3">
+                                    <label class="form-label small" style="font-weight: 600;">Original Value</label>
+                                    <input type="number" class="form-control" id="pc-original"
+                                      placeholder="Enter original value" value="100">
+                                  </div>
+                                  <div class="mb-3">
+                                    <label class="form-label small" style="font-weight: 600;">New Value</label>
+                                    <input type="number" class="form-control" id="pc-new" placeholder="Enter new value"
+                                      value="150">
+                                  </div>
+                                  <div class="d-grid gap-2 mb-3">
+                                    <button class="btn btn-primary btn-sm"
+                                      onclick="calculatePercentageChange()">Calculate
+                                      Change</button>
+                                    <button class="btn btn-outline-secondary btn-sm"
+                                      onclick="clearPercentageChange()">Clear</button>
+                                  </div>
+                                  <div id="pc-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
+                                    <div class="mb-2"><strong>Percentage Change:</strong> <span
+                                        id="pc-change-value">0</span>%</div>
+                                    <div class="mb-2"><strong>Absolute Change:</strong> <span
+                                        id="pc-absolute-change">0</span></div>
+                                    <div><strong>Description:</strong> <span id="pc-description"
+                                        style="font-style: italic; color: #555;"></span></div>
+                                  </div>
+                                  <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                    <strong>Examples:</strong><br>
+                                    • Original: 100, New: 150 → <strong>50% increase</strong><br>
+                                    • Original: 200, New: 150 → <strong>25% decrease</strong><br>
+                                    • Original: 50, New: 50 → <strong>0% (no change)</strong>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Quadratic Equation Solver -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingQuadratic">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuadratic"
+                                  aria-expanded="false" aria-controls="collapseQuadratic">
+                                  <span>📐 Quadratic Solver</span>
+                                </button>
+                              </h2>
+                              <div id="collapseQuadratic" class="accordion-collapse collapse"
+                                aria-labelledby="headingQuadratic" data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Solve quadratic equations in the form: ax² + bx + c =
+                                    0
+                                  </p>
+
+                                  <div class="row g-2 mb-3">
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">a</label>
+                                      <input type="number" class="form-control" id="quad-a" placeholder="1" value="1">
+                                    </div>
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">b</label>
+                                      <input type="number" class="form-control" id="quad-b" placeholder="5" value="5">
+                                    </div>
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">c</label>
+                                      <input type="number" class="form-control" id="quad-c" placeholder="6" value="6">
+                                    </div>
+                                  </div>
+
+                                  <!-- Calculate Button -->
+                                  <div class="d-grid gap-2 mb-3">
+                                    <button class="btn btn-primary btn-sm" onclick="solveQuadratic()">
+                                      Solve Equation
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="clearQuadratic()">
+                                      Clear
+                                    </button>
+                                  </div>
+
+                                  <!-- Result Display -->
+                                  <div id="quad-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
+                                    <div class="mb-2"><strong>Roots:</strong> <span id="quad-roots-value"></span></div>
+                                    <div class="mb-2"><strong>Discriminant (D):</strong> <span
+                                        id="quad-discriminant"></span></div>
+                                    <div><strong>Description:</strong> <span id="quad-description"
+                                        style="font-style: italic; color: #555;"></span></div>
+                                  </div>
+
+                                  <!-- Examples -->
+                                  <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                    <strong>Examples:</strong><br>
+                                    • x² - 5x + 6 = 0 → <strong>x = 3, 2</strong><br>
+                                    • x² + 2x + 1 = 0 → <strong>x = -1 (repeated)</strong><br>
+                                    • x² + 1 = 0 → <strong>Complex roots</strong>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Cubic Equation Solver -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingCubic">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseCubic"
+                                  aria-expanded="false" aria-controls="collapseCubic">
+                                  <span>📊 Cubic Solver (ax³ + bx² + cx + d = 0)</span>
+                                </button>
+                              </h2>
+                              <div id="collapseCubic" class="accordion-collapse collapse" aria-labelledby="headingCubic"
+                                data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Solve cubic equations in the form: ax³ + bx² + cx + d
+                                    = 0
+                                  </p>
+
+                                  <div class="row g-2 mb-3">
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">a</label>
+                                      <input type="number" class="form-control" id="cubic-a" placeholder="1" value="1">
+                                    </div>
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">b</label>
+                                      <input type="number" class="form-control" id="cubic-b" placeholder="0" value="0">
+                                    </div>
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">c</label>
+                                      <input type="number" class="form-control" id="cubic-c" placeholder="0" value="-7">
+                                    </div>
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">d</label>
+                                      <input type="number" class="form-control" id="cubic-d" placeholder="0" value="6">
+                                    </div>
+                                  </div>
+
+                                  <!-- Calculate Button -->
+                                  <div class="d-grid gap-2 mb-3">
+                                    <button class="btn btn-primary btn-sm" onclick="solveCubic()">
+                                      Solve Cubic Equation
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="clearCubic()">
+                                      Clear
+                                    </button>
+                                  </div>
+
+                                  <!-- Result Display -->
+                                  <div id="cubic-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
+                                    <div class="mb-2"><strong>Roots:</strong> <span id="cubic-roots-value"></span></div>
+                                    <div><strong>Description:</strong> <span id="cubic-description"
+                                        style="font-style: italic; color: #555;"></span></div>
+                                  </div>
+
+                                  <!-- Examples -->
+                                  <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                    <strong>Examples:</strong><br>
+                                    • x³ - 7x + 6 = 0 → <strong>x = 1, 2, -3</strong><br>
+                                    • x³ - 6x² + 11x - 6 = 0 → <strong>x = 1, 2, 3</strong><br>
+                                    • x³ + 1 = 0 → <strong>One real, two complex roots</strong>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Quartic Equation Solver -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingQuartic">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuartic"
+                                  aria-expanded="false" aria-controls="collapseQuartic">
+                                  <span>📈 Quartic Solver (ax⁴ + bx³ + cx² + dx + e = 0)</span>
+                                </button>
+                              </h2>
+                              <div id="collapseQuartic" class="accordion-collapse collapse"
+                                aria-labelledby="headingQuartic" data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Solve quartic equations: ax⁴ + bx³ + cx² + dx + e = 0
+                                  </p>
+
+                                  <div class="row g-2 mb-3">
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">a</label>
+                                      <input type="number" class="form-control" id="quartic-a" placeholder="1"
+                                        value="1">
+                                    </div>
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">b</label>
+                                      <input type="number" class="form-control" id="quartic-b" placeholder="0"
+                                        value="0">
+                                    </div>
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">c</label>
+                                      <input type="number" class="form-control" id="quartic-c" placeholder="0"
+                                        value="-13">
+                                    </div>
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">d</label>
+                                      <input type="number" class="form-control" id="quartic-d" placeholder="0"
+                                        value="0">
+                                    </div>
+                                    <div class="col">
+                                      <label class="form-label small" style="font-weight: 600;">e</label>
+                                      <input type="number" class="form-control" id="quartic-e" placeholder="0"
+                                        value="36">
+                                    </div>
+                                  </div>
+
+                                  <!-- Calculate Button -->
+                                  <div class="d-grid gap-2 mb-3">
+                                    <button class="btn btn-primary btn-sm" onclick="solveQuartic()">
+                                      Solve Quartic Equation
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="clearQuartic()">
+                                      Clear
+                                    </button>
+                                  </div>
+
+                                  <!-- Result Display -->
+                                  <div id="quartic-result" class="alert alert-info py-2 px-3 mb-0"
+                                    style="display: none;">
+                                    <div class="mb-2"><strong>Roots:</strong> <span id="quartic-roots-value"></span>
+                                    </div>
+                                    <div><strong>Description:</strong> <span id="quartic-description"
+                                        style="font-style: italic; color: #555;"></span></div>
+                                  </div>
+
+                                  <!-- Examples -->
+                                  <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                    <strong>Examples:</strong><br>
+                                    • x⁴ - 13x² + 36 = 0 → <strong>x = ±2, ±3</strong><br>
+                                    • x⁴ - 1 = 0 → <strong>x = ±1, ±i</strong><br>
+                                    • x⁴ + 2x² + 1 = 0 → <strong>Complex roots (repeated)</strong>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Solve Simulteneous Equation -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseSimultaneous"
+                                  aria-expanded="false" aria-controls="collapseSimultaneous">
+                                  <span>🔢 Solve Simultaneous Equation</span>
+                                </button>
+                              </h2>
+                              <div id="collapseSimultaneous" class="accordion-collapse collapse"
+                                data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <div class="card card-body p-3">
+                                    <div class="mb-2">
+                                      <label class="form-label small-label">Equation 1 (e.g. 2x+3y=6)</label>
+                                      <input type="text" class="form-control" id="eq1" placeholder="2x + 3y = 6">
+                                    </div>
+                                    <div class="mb-2">
+                                      <label class="form-label small-label">Equation 2 (e.g. x- y=1)</label>
+                                      <input type="text" class="form-control" id="eq2" placeholder="x - y = 1">
+                                    </div>
+                                    <button class="btn btn-operator w-100" id="solve-btn"
+                                      onclick="solveSimultaneous()">Solve</button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Matrix Calculator -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#matrix-calculator-body"
+                                  aria-expanded="false" aria-controls="matrix-calculator-body">
+                                  <span>🧮 2x2 Matrix Solver</span>
+                                </button>
+                              </h2>
+                              <div id="matrix-calculator-body" class="accordion-collapse collapse"
+                                data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <div id="matrix-content">
+                                    <div class="card-body pt-0">
+                                      <p class="text-muted small mb-3">Enter values for the determinant |A| = ad - bc
+                                      </p>
+
+                                      <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                          <input type="number" id="m11"
+                                            class="form-control form-control-lg text-center border-2" placeholder="a">
+                                        </div>
+                                        <div class="col-6">
+                                          <input type="number" id="m12"
+                                            class="form-control form-control-lg text-center border-2" placeholder="b">
+                                        </div>
+                                        <div class="col-6">
+                                          <input type="number" id="m21"
+                                            class="form-control form-control-lg text-center border-2" placeholder="c">
+                                        </div>
+                                        <div class="col-6">
+                                          <input type="number" id="m22"
+                                            class="form-control form-control-lg text-center border-2" placeholder="d">
+                                        </div>
+                                      </div>
+
+                                      <button class="btn btn-primary w-100 py-2 fw-bold rounded-3 mb-3"
+                                        onclick="calculateMatrix()">
+                                        Calculate Determinant
+                                      </button>
+
+                                      <div class="bg-light p-3 rounded-3 text-center">
+                                        <span class="small-label d-block mb-1">Resulting Determinant</span>
+                                        <h4 class="mb-0 fw-bold text-dark" id="matrix-result">0</h4>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- PROBABILITY CALCULATOR - NEW SECTION (Directly under Matrix Solver) -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingProbability">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseProbability"
+                                  aria-expanded="false" aria-controls="collapseProbability">
+                                  <span>🎲 Probability Calculator</span>
+                                </button>
+                              </h2>
+                              <div id="collapseProbability" class="accordion-collapse collapse"
+                                aria-labelledby="headingProbability" data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Calculate probabilities for common scenarios</p>
+
+                                  <!-- Probability Type Selection -->
+                                  <div class="mb-3">
+                                    <label class="form-label small" style="font-weight: 600;">Calculation Type</label>
+                                    <select class="form-select form-select-sm" id="probability-type"
+                                      onchange="updateProbabilityInputs()">
+                                      <option value="">-- Select Type --</option>
+                                      <option value="single">Probability of Single Event</option>
+                                      <option value="and">P(A and B) for Independent Events</option>
+                                      <option value="or">P(A or B) for Mutually Exclusive Events</option>
+                                      <option value="conditional">Conditional Probability P(A|B)</option>
+                                      <option value="binomial">Binomial Probability</option>
+                                      <option value="complement">Complement Probability (1 - P)</option>
+                                    </select>
+                                  </div>
+
+                                  <!-- Dynamic Inputs Container -->
+                                  <div id="probability-inputs-container"></div>
+
+                                  <!-- Calculate Button -->
+                                  <div class="d-grid gap-2 mb-3">
+                                    <button class="btn btn-primary btn-sm" onclick="calculateProbability()">
+                                      Calculate Probability
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm"
+                                      onclick="clearProbabilityCalculator()">
+                                      Clear
+                                    </button>
+                                  </div>
+
+                                  <!-- Result Display -->
+                                  <div id="probability-result" class="alert alert-info py-2 px-3 mb-0"
+                                    style="display: none;">
+                                    <div class="mb-2"><strong>Result:</strong> <span id="probability-value"></span>
+                                    </div>
+                                    <div class="mb-2"><strong>Formula Used:</strong> <span
+                                        id="probability-formula"></span>
+                                    </div>
+                                    <div><strong>Explanation:</strong> <span id="probability-explanation"
+                                        style="font-style: italic;"></span></div>
+                                  </div>
+
+                                  <!-- Examples -->
+                                  <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                    <strong>Examples:</strong><br>
+                                    • <strong>Single Event:</strong> Rolling a 6 on a fair die (P = 1/6 ≈ 0.1667)<br>
+                                    • <strong>P(A and B):</strong> Flipping heads twice in a row (0.5 * 0.5 = 0.25)<br>
+                                    • <strong>P(A or B):</strong> Drawing a heart or a diamond from a deck (13/52 +
+                                    13/52 =
+                                    0.5)<br>
+                                    • <strong>Binomial:</strong> Probability of exactly 3 heads in 5 coin flips ≈ 0.3125
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- END Probability Calculator Section -->
+
+                            <!-- Statistical Calculator -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingStatistics">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseStatistics"
+                                  aria-expanded="false" aria-controls="collapseStatistics">
+                                  <span>📈 Statistics Calculator</span>
+                                </button>
+                              </h2>
+                              <div id="collapseStatistics" class="accordion-collapse collapse"
+                                aria-labelledby="headingStatistics" data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Calculate mean, median, mode, standard deviation, and
+                                    more</p>
+                                  <div class="mb-3">
+                                    <label class="form-label small" style="font-weight: 600;">Enter Data
+                                      (comma-separated)</label>
+                                    <textarea class="form-control" id="stats-data-input"
+                                      placeholder="e.g., 10, 20, 30, 40, 50" rows="3"></textarea>
+                                    <small class="text-muted d-block mt-1">Separate numbers with commas</small>
+                                  </div>
+                                  <div class="d-grid gap-2 mb-3">
+                                    <button class="btn btn-primary btn-sm" onclick="calculateStatistics()">Calculate
+                                      Statistics</button>
+                                    <button class="btn btn-outline-secondary btn-sm"
+                                      onclick="clearStatistics()">Clear</button>
+                                  </div>
+                                  <div id="stats-result" class="alert alert-info py-3 px-3 mb-0"
+                                    style="display: none; font-size: 0.9rem;">
+                                    <div class="row">
+                                      <div class="col-md-6 mb-2">
+                                        <div><strong>Count:</strong> <span id="stat-count">0</span></div>
+                                        <div><strong>Sum:</strong> <span id="stat-sum">0</span></div>
+                                        <div><strong>Mean:</strong> <span id="stat-mean">0</span></div>
+                                        <div><strong>Median:</strong> <span id="stat-median">0</span></div>
+                                      </div>
+                                      <div class="col-md-6 mb-2">
+                                        <div><strong>Mode:</strong> <span id="stat-mode">N/A</span></div>
+                                        <div><strong>Min Value:</strong> <span id="stat-min">0</span></div>
+                                        <div><strong>Max Value:</strong> <span id="stat-max">0</span></div>
+                                        <div><strong>Std Dev:</strong> <span id="stat-stddev">0</span></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                    <strong>📌 Example:</strong> Input "10, 20, 30, 40, 50" to see all statistics
+                                    calculated
+                                    instantly.
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- END Statistical Calculator -->
+
+                            <!-- BMI CALCULATOR SECTION -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingBMI">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseBMI"
+                                  aria-expanded="false" aria-controls="collapseBMI">
+                                  <span>⚖️ BMI Calculator</span>
+                                </button>
+                              </h2>
+                              <div id="collapseBMI" class="accordion-collapse collapse" aria-labelledby="headingBMI"
+                                data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Calculate your Body Mass Index (BMI)</p>
+
+                                  <div class="mb-3">
+                                    <label class="form-label small" style="font-weight: 600;">Weight (kg)</label>
+                                    <input type="number" class="form-control form-control-sm" id="bmi-weight"
+                                      placeholder="e.g., 70" step="0.1" min="1">
+                                  </div>
+
+                                  <div class="mb-3">
+                                    <label class="form-label small" style="font-weight: 600;">Height (cm)</label>
+                                    <input type="number" class="form-control form-control-sm" id="bmi-height"
+                                      placeholder="e.g., 175" step="0.1" min="1">
+                                  </div>
+
+                                  <!-- Calculate Button -->
+                                  <div class="d-grid gap-2 mb-3">
+                                    <button class="btn btn-primary btn-sm" onclick="calculateBMI()">
+                                      Calculate BMI
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="clearBMICalculator()">
+                                      Clear
+                                    </button>
+                                  </div>
+
+                                  <!-- Result Display -->
+                                  <div id="bmi-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
+                                    <div class="mb-2"><strong>BMI:</strong> <span id="bmi-value"></span></div>
+                                    <div class="mb-2"><strong>Category:</strong> <span id="bmi-category"></span></div>
+                                    <div><strong>Health Note:</strong> <span id="bmi-note"
+                                        style="font-style: italic;"></span></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- END BMI Calculator Section -->
+
+                            <!-- GCD & LCM CALCULATOR SECTION -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingGCDLCM">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseGCDLCM"
+                                  aria-expanded="false" aria-controls="collapseGCDLCM">
+                                  <span>🔢 GCD & LCM Calculator</span>
+                                </button>
+                              </h2>
+                              <div id="collapseGCDLCM" class="accordion-collapse collapse"
+                                aria-labelledby="headingGCDLCM" data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Calculate Greatest Common Divisor (GCD) and Least
+                                    Common Multiple (LCM)</p>
+
+                                  <div class="mb-3">
+                                    <label class="form-label small" style="font-weight: 600;">First Number</label>
+                                    <input type="number" class="form-control form-control-sm" id="gcd-num1"
+                                      placeholder="e.g., 48" min="1" step="1">
+                                  </div>
+
+                                  <div class="mb-3">
+                                    <label class="form-label small" style="font-weight: 600;">Second Number</label>
+                                    <input type="number" class="form-control form-control-sm" id="gcd-num2"
+                                      placeholder="e.g., 18" min="1" step="1">
+                                  </div>
+
+                                  <!-- Calculate Button -->
+                                  <div class="d-grid gap-2 mb-3">
+                                    <button class="btn btn-primary btn-sm" onclick="calculateGCDLCM()">
+                                      Calculate GCD & LCM
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="clearGCDLCM()">
+                                      Clear
+                                    </button>
+                                  </div>
+
+                                  <!-- Result Display -->
+                                  <div id="gcd-lcm-result" class="alert alert-info py-2 px-3 mb-0"
+                                    style="display: none;">
+                                    <div class="mb-2"><strong>GCD (Greatest Common Divisor):</strong> <span
+                                        id="gcd-value"></span></div>
+                                    <div class="mb-2"><strong>LCM (Least Common Multiple):</strong> <span
+                                        id="lcm-value"></span></div>
+                                    <div class="small text-muted mt-2"><strong>💡 Tip:</strong> GCD is the largest
+                                      number that divides both numbers. LCM is the smallest number divisible by both.
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- END GCD & LCM Calculator Section -->
+
+                            <!-- FIBONACCI SEQUENCE CALCULATOR SECTION -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingFibonacci">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseFibonacci"
+                                  aria-expanded="false" aria-controls="collapseFibonacci">
+                                  <span>🔀 Fibonacci Sequence</span>
+                                </button>
+                              </h2>
+                              <div id="collapseFibonacci" class="accordion-collapse collapse"
+                                aria-labelledby="headingFibonacci" data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Generate Fibonacci sequences, find nth terms, and
+                                    check if numbers are Fibonacci</p>
+
+                                  <!-- Generate Sequence Section -->
+                                  <div class="mb-4">
+                                    <h6 class="text-secondary">📊 Generate Sequence</h6>
+                                    <div class="mb-3">
+                                      <label class="form-label small" style="font-weight: 600;">Number of Terms</label>
+                                      <input type="number" class="form-control form-control-sm" id="fib-terms"
+                                        placeholder="e.g., 10" min="1" max="50" step="1">
+                                      <small class="text-muted">Max 50 terms</small>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm w-100 mb-2" onclick="calculateFibonacci()">
+                                      Generate Sequence
+                                    </button>
+
+                                    <div id="fib-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
+                                      <div class="mb-2"><strong>Sequence:</strong> <span id="fib-sequence"
+                                          style="word-break: break-all;"></span></div>
+                                      <div class="mb-2"><strong>Sum:</strong> <span id="fib-sum"></span></div>
+                                      <div class="mb-2"><strong>Count:</strong> <span id="fib-count"></span></div>
+                                      <div><strong>Last Term:</strong> <span id="fib-last"></span></div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Find Nth Term Section -->
+                                  <div class="mb-4">
+                                    <h6 class="text-secondary">🎯 Find Nth Term</h6>
+                                    <div class="mb-3">
+                                      <label class="form-label small" style="font-weight: 600;">Term Number (n)</label>
+                                      <input type="number" class="form-control form-control-sm" id="fib-nth-input"
+                                        placeholder="e.g., 10" min="0" max="80" step="1">
+                                      <small class="text-muted">F(0)=0, F(1)=1, F(2)=1, F(3)=2, etc. Max n=80</small>
+                                    </div>
+                                    <button class="btn btn-info btn-sm w-100 mb-2" onclick="findNthFibonacci()">
+                                      Find Nth Fibonacci Term
+                                    </button>
+
+                                    <div id="fib-nth-result" class="alert alert-success py-2 px-3 mb-0"
+                                      style="display: none;">
+                                      <div><strong>F(n) =</strong> <span id="fib-nth-value"
+                                          style="font-size: 1.1em; font-weight: bold;"></span></div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Check if Fibonacci Section -->
+                                  <div class="mb-3">
+                                    <h6 class="text-secondary">✓ Check if Number is Fibonacci</h6>
+                                    <div class="mb-3">
+                                      <label class="form-label small" style="font-weight: 600;">Enter a Number</label>
+                                      <input type="number" class="form-control form-control-sm" id="fib-check-input"
+                                        placeholder="e.g., 13" min="0" step="1">
+                                    </div>
+                                    <div class="d-grid gap-2 mb-3">
+                                      <button class="btn btn-warning btn-sm" onclick="checkFibonacciNumber()">
+                                        Check if Fibonacci
+                                      </button>
+                                      <button class="btn btn-outline-secondary btn-sm" onclick="clearFibonacci()">
+                                        Clear All
+                                      </button>
+                                    </div>
+
+                                    <div id="fib-check-result" class="alert py-2 px-3 mb-0"
+                                      style="display: none; border-left: 4px solid #0d6efd;">
+                                      <div><strong>Number:</strong> <span id="fib-check-value"></span></div>
+                                      <div><strong>Is Fibonacci?</strong> <span id="fib-check-answer"
+                                          style="font-weight: bold;"></span></div>
+                                    </div>
+                                  </div>
+
+                                  <div class="small text-muted mt-3"><strong>💡 Tip:</strong> The Fibonacci sequence (0,
+                                    1, 1, 2, 3, 5, 8, 13, 21, ...) appears in nature, art, and mathematics!</div>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- END FIBONACCI Calculator Section -->
+                            <!-- 💰 CURRENCY CONVERTER -->
+                            <!-- <div class="currency-panel">
+                              <div class="display-container my-3">
+                                <div class="col-md-12">
+                                  <h4 class="group-header mb-0">Currency Converter</h4>
+
+                                  <div class="row g-2 mt-2">
+                                    <div class="col-4">
+                                      <input type="number" id="currency-value" class="form-control"
+                                        placeholder="Amount" />
+                                    </div>
+
+                                    <div class="col-4">
+                                      <select id="from-currency" class="form-select">
+                                        <option value="USD">USD</option>
+                                        <option value="NGN">NGN</option>
+                                        <option value="EUR">EUR</option>
+                                        <option value="GBP">GBP</option>
+                                      </select>
+                                    </div>
+
+                                    <div class="col-4">
+                                      <select id="to-currency" class="form-select">
+                                        <option value="NGN">NGN</option>
+                                        <option value="USD">USD</option>
+                                        <option value="EUR">EUR</option>
+                                        <option value="GBP">GBP</option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <button class="btn btn-success w-100 mt-2" onclick="convertUnit('currency')">
+                                    Convert
+                                  </button>
+
+                                  <div class="mt-2 text-center">
+                                    <strong id="currency-result">0</strong>
+                                  </div>
+
+                                  <div class="text-center mt-2">
+                                    <button class="btn btn-sm btn-primary" id="currency-refresh-btn"
+                                      onclick="fetchCurrencyRates()">
+                                      🔄 Refresh Rates
+                                    </button>
+                                    <div id="currency-timestamp" class="small text-muted mt-1"></div>
+                                  </div>
+
+                                </div>
+                              </div>
+                            </div> -->
+                            <!-- BASE CONVERTER SECTION (Binary, Hex, Octal) -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingBaseConverter">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseBaseConverter"
+                                  aria-expanded="false" aria-controls="collapseBaseConverter">
+                                  <span>💻 Base Converter (Binary • Hex • Octal)</span>
+                                </button>
+                              </h2>
+                              <div id="collapseBaseConverter" class="accordion-collapse collapse"
+                                aria-labelledby="headingBaseConverter" data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Convert between decimal, binary, hexadecimal, and
+                                    octal bases. Perfect for Computer Science!</p>
+
+                                  <!-- Input Section -->
+                                  <div class="mb-3">
+                                    <label class="form-label small" style="font-weight: 600;">Enter Decimal
+                                      Number</label>
+                                    <input type="number" class="form-control" id="decimal-input" placeholder="e.g., 255"
+                                      oninput="convertDecimal()">
+                                  </div>
+
+                                  <!-- Conversion Results -->
+                                  <div class="row mb-3">
+                                    <div class="col-md-6">
+                                      <div class="alert alert-light border py-2 px-3 mb-2">
+                                        <small class="text-muted d-block mb-1"><strong>Binary (Base 2)</strong></small>
+                                        <div id="binary-result" class="font-monospace fw-bold"
+                                          style="font-size: 0.95rem; word-break: break-all;">0</div>
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <div class="alert alert-light border py-2 px-3 mb-2">
+                                        <small class="text-muted d-block mb-1"><strong>Hexadecimal (Base
+                                            16)</strong></small>
+                                        <div id="hex-result" class="font-monospace fw-bold" style="font-size: 0.95rem;">
+                                          0x0</div>
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <div class="alert alert-light border py-2 px-3 mb-2">
+                                        <small class="text-muted d-block mb-1"><strong>Octal (Base 8)</strong></small>
+                                        <div id="octal-result" class="font-monospace fw-bold"
+                                          style="font-size: 0.95rem;">0</div>
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <div class="alert alert-light border py-2 px-3 mb-2">
+                                        <small class="text-muted d-block mb-1"><strong>Decimal (Base
+                                            10)</strong></small>
+                                        <div id="decimal-result" class="font-monospace fw-bold"
+                                          style="font-size: 0.95rem;">0</div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Conversion From Other Bases -->
+                                  <hr class="my-3">
+                                  <h6 class="mb-3">Convert From Other Bases to Decimal</h6>
+
+                                  <div class="row mb-2">
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Binary
+                                        Input</label>
+                                      <input type="text" class="form-control form-control-sm" id="binary-input"
+                                        placeholder="e.g., 11111111" oninput="convertFromBinary()">
+                                    </div>
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal
+                                        Result</label>
+                                      <div class="form-control form-control-sm bg-light" id="binary-to-decimal">0</div>
+                                    </div>
+                                  </div>
+
+                                  <div class="row mb-2">
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Hex Input</label>
+                                      <input type="text" class="form-control form-control-sm" id="hex-input"
+                                        placeholder="e.g., FF" oninput="convertFromHex()">
+                                    </div>
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal
+                                        Result</label>
+                                      <div class="form-control form-control-sm bg-light" id="hex-to-decimal">0</div>
+                                    </div>
+                                  </div>
+
+                                  <div class="row mb-3">
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Octal Input</label>
+                                      <input type="text" class="form-control form-control-sm" id="octal-input"
+                                        placeholder="e.g., 377" oninput="convertFromOctal()">
+                                    </div>
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal
+                                        Result</label>
+                                      <div class="form-control form-control-sm bg-light" id="octal-to-decimal">0</div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Bitwise Operations -->
+                                  <hr class="my-3">
+                                  <h6 class="mb-3">Bitwise Operations</h6>
+                                  <p class="text-muted small mb-2">Perform logical operations on the binary
+                                    representations</p>
+
+                                  <div class="mb-3">
+                                    <label class="form-label small mb-1" style="font-weight: 600;">First Number</label>
+                                    <input type="number" class="form-control form-control-sm" id="bitwise-num1"
+                                      placeholder="e.g., 5" value="5">
+                                  </div>
+
+                                  <div class="mb-3">
+                                    <label class="form-label small mb-1" style="font-weight: 600;">Second Number</label>
+                                    <input type="number" class="form-control form-control-sm" id="bitwise-num2"
+                                      placeholder="e.g., 3" value="3">
+                                  </div>
+
+                                  <div class="row">
+                                    <div class="col-6">
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2"
+                                        onclick="bitwiseAND()">AND (&)</button>
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="bitwiseOR()">OR
+                                        (|)</button>
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2"
+                                        onclick="bitwiseXOR()">XOR (^)</button>
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2"
+                                        onclick="bitwiseNOT()">NOT (~)</button>
+                                    </div>
+                                    <div class="col-6">
+                                      <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="leftShift()">Left
+                                        Shift (&lt;&lt;)</button>
+                                      <button class="btn btn-outline-info btn-sm w-100 mb-2"
+                                        onclick="rightShift()">Right Shift (&gt;&gt;)</button>
+                                      <button class="btn btn-outline-secondary btn-sm w-100 mb-2"
+                                        onclick="clearBitwise()">Clear</button>
+                                    </div>
+                                  </div>
+
+                                  <!-- Bitwise Result Display -->
+                                  <div id="bitwise-result" class="alert alert-info py-2 px-3 mt-3 mb-0"
+                                    style="display: none;">
+                                    <div class="mb-2"><strong>Operation:</strong> <span id="bitwise-op"></span></div>
+                                    <div class="mb-2"><strong>Result (Decimal):</strong> <span
+                                        id="bitwise-decimal"></span></div>
+                                    <div><strong>Result (Binary):</strong> <code id="bitwise-binary"></code></div>
+                                  </div>
+
+                                  <!-- Examples -->
+                                  <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.85rem;">
+                                    <strong>📌 Examples:</strong><br>
+                                    • <strong>Decimal 255 =</strong> Binary: 11111111, Hex: FF, Octal: 377<br>
+                                    • <strong>Bitwise AND:</strong> 5 (101) & 3 (011) = 1 (001)<br>
+                                    • <strong>Bitwise OR:</strong> 5 (101) | 3 (011) = 7 (111)<br>
+                                    • <strong>Bitwise XOR:</strong> 5 (101) ^ 3 (011) = 6 (110)
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- END Base Converter Section -->
+
+                            <!-- ROMAN NUMERAL CONVERTER SECTION -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingRoman">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseRoman"
+                                  aria-expanded="false" aria-controls="collapseRoman">
+                                  <span>🏛️ Roman Numeral Converter</span>
+                                </button>
+                              </h2>
+                              <div id="collapseRoman" class="accordion-collapse collapse" aria-labelledby="headingRoman"
+                                data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Convert between Arabic numbers and Roman numerals (1
+                                    – 3,999)</p>
+
+                                  <!-- Arabic → Roman -->
+                                  <div class="mb-4">
+                                    <h6 class="text-secondary mb-2">🔢 Arabic → Roman Numeral</h6>
+                                    <div class="input-group input-group-sm mb-2">
+                                      <input type="number" class="form-control" id="arabic-input"
+                                        placeholder="e.g., 2026" min="1" max="3999" oninput="convertArabicToRoman()">
+                                      <span class="input-group-text">→</span>
+                                      <input type="text" class="form-control fw-bold font-monospace bg-light"
+                                        id="roman-output" placeholder="Roman numeral" readonly>
+                                    </div>
+                                    <div id="roman-breakdown" class="alert alert-info py-2 px-3 mb-0 small"
+                                      style="display:none;"></div>
+                                  </div>
+
+                                  <!-- Roman → Arabic -->
+                                  <div class="mb-4">
+                                    <h6 class="text-secondary mb-2">🏛️ Roman Numeral → Arabic</h6>
+                                    <div class="input-group input-group-sm mb-2">
+                                      <input type="text" class="form-control font-monospace text-uppercase"
+                                        id="roman-input" placeholder="e.g., MMXXVI" oninput="convertRomanToArabic()">
+                                      <span class="input-group-text">→</span>
+                                      <input type="text" class="form-control fw-bold bg-light" id="arabic-output"
+                                        placeholder="Arabic number" readonly>
+                                    </div>
+                                    <div id="roman-error" class="alert alert-danger py-2 px-3 mb-0 small"
+                                      style="display:none;"></div>
+                                  </div>
+
+                                  <!-- Use Current Result Button -->
+                                  <button class="btn btn-outline-primary btn-sm w-100 mb-3"
+                                    onclick="useCalcResultForRoman()">
+                                    ⬆️ Use Current Calculator Result
+                                  </button>
+
+                                  <!-- Clear -->
+                                  <button class="btn btn-outline-secondary btn-sm w-100 mb-3"
+                                    onclick="clearRomanConverter()">
+                                    Clear
+                                  </button>
+
+                                  <!-- Reference Table -->
+                                  <hr class="my-2">
+                                  <h6 class="mb-2 text-secondary small">📖 Roman Numeral Reference</h6>
+                                  <div class="row g-1" style="font-size: 0.82rem;">
+                                    <div class="col-6">
+                                      <table class="table table-sm table-bordered mb-0">
+                                        <thead class="table-light">
+                                          <tr>
+                                            <th>Symbol</th>
+                                            <th>Value</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">I</td>
+                                            <td>1</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">IV</td>
+                                            <td>4</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">V</td>
+                                            <td>5</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">IX</td>
+                                            <td>9</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">X</td>
+                                            <td>10</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">XL</td>
+                                            <td>40</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">L</td>
+                                            <td>50</td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                    <div class="col-6">
+                                      <table class="table table-sm table-bordered mb-0">
+                                        <thead class="table-light">
+                                          <tr>
+                                            <th>Symbol</th>
+                                            <th>Value</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">XC</td>
+                                            <td>90</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">C</td>
+                                            <td>100</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">CD</td>
+                                            <td>400</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">D</td>
+                                            <td>500</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">CM</td>
+                                            <td>900</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">M</td>
+                                            <td>1,000</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">MMM</td>
+                                            <td>3,000</td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+
+                                  <!-- Examples -->
+                                  <div class="alert alert-light py-2 px-3 mt-3 mb-0 border" style="font-size: 0.82rem;">
+                                    <strong>📌 Examples:</strong><br>
+                                    • <strong>2026 → </strong> <span class="font-monospace">MMXXVI</span><br>
+                                    • <strong>1994 → </strong> <span class="font-monospace">MCMXCIV</span><br>
+                                    • <strong>XIV → </strong> 14 &nbsp;|&nbsp; <strong>XL → </strong> 40 &nbsp;|&nbsp;
+                                    <strong>XCIX → </strong> 99
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- END Roman Numeral Converter Section -->
+
+                            <!-- ===== LOAN & MORTGAGE CALCULATOR ===== -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingLoan">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseLoan"
+                                  aria-expanded="false" aria-controls="collapseLoan">
+                                  <span>🏦 Loan &amp; Mortgage Calculator</span>
+                                </button>
+                              </h2>
+                              <div id="collapseLoan" class="accordion-collapse collapse" aria-labelledby="headingLoan"
+                                data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <p class="text-muted small mb-3">Calculate monthly payments, total interest, and full
+                                    amortization schedules for loans and mortgages.</p>
+
+                                  <!-- Tabs -->
+                                  <ul class="nav nav-tabs mb-3" id="loanTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                      <button class="nav-link active" id="loan-tab" data-bs-toggle="tab"
+                                        data-bs-target="#loanPanel" type="button" role="tab">💳 Loan</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                      <button class="nav-link" id="mortgage-tab" data-bs-toggle="tab"
+                                        data-bs-target="#mortgagePanel" type="button" role="tab">🏠 Mortgage</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                      <button class="nav-link" id="amort-tab" data-bs-toggle="tab"
+                                        data-bs-target="#amortPanel" type="button" role="tab">📋 Amortization</button>
+                                    </li>
+                                  </ul>
+
+                                  <div class="tab-content" id="loanTabContent">
+
+                                    <!-- LOAN TAB -->
+                                    <div class="tab-pane fade show active" id="loanPanel" role="tabpanel">
+                                      <div class="row mb-2">
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Loan
+                                            Amount</label>
+                                          <div class="input-group input-group-sm">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="loan-principal"
+                                              placeholder="e.g., 10000" min="0" oninput="calcLoan()">
+                                          </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Annual Interest
+                                            Rate (%)</label>
+                                          <div class="input-group input-group-sm">
+                                            <input type="number" class="form-control" id="loan-rate"
+                                              placeholder="e.g., 5.5" min="0" step="0.01" oninput="calcLoan()">
+                                            <span class="input-group-text">%</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="row mb-3">
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Loan
+                                            Term</label>
+                                          <div class="input-group input-group-sm">
+                                            <input type="number" class="form-control" id="loan-term"
+                                              placeholder="e.g., 5" min="1" oninput="calcLoan()">
+                                            <select class="form-select form-select-sm" id="loan-term-unit"
+                                              onchange="calcLoan()">
+                                              <option value="years">Years</option>
+                                              <option value="months">Months</option>
+                                            </select>
+                                          </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Payment
+                                            Frequency</label>
+                                          <select class="form-select form-select-sm" id="loan-freq"
+                                            onchange="calcLoan()">
+                                            <option value="12">Monthly</option>
+                                            <option value="26">Bi-weekly</option>
+                                            <option value="52">Weekly</option>
+                                            <option value="1">Annually</option>
+                                          </select>
+                                        </div>
+                                      </div>
+                                      <button class="btn btn-primary btn-sm w-100 mb-3" onclick="calcLoan()">Calculate
+                                        Loan</button>
+                                      <div id="loan-result" style="display:none;">
+                                        <div class="row g-2 mb-2">
+                                          <div class="col-6">
+                                            <div class="alert alert-primary py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Payment per Period</small>
+                                              <strong id="loan-payment" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                          <div class="col-6">
+                                            <div class="alert alert-info py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Total Payment</small>
+                                              <strong id="loan-total" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                          <div class="col-6">
+                                            <div class="alert alert-warning py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Total Interest</small>
+                                              <strong id="loan-interest" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                          <div class="col-6">
+                                            <div class="alert alert-success py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Interest-to-Principal</small>
+                                              <strong id="loan-ratio" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <!-- Simple progress bar showing interest vs principal -->
+                                        <div class="mb-1"><small class="text-muted">Principal vs Interest
+                                            Breakdown</small></div>
+                                        <div class="progress mb-3" style="height:18px; border-radius:8px;">
+                                          <div id="loan-bar-principal" class="progress-bar bg-primary"
+                                            role="progressbar" style="width:50%">Principal</div>
+                                          <div id="loan-bar-interest" class="progress-bar bg-warning text-dark"
+                                            role="progressbar" style="width:50%">Interest</div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <!-- MORTGAGE TAB -->
+                                    <div class="tab-pane fade" id="mortgagePanel" role="tabpanel">
+                                      <div class="row mb-2">
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Home
+                                            Price</label>
+                                          <div class="input-group input-group-sm">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="mort-home-price"
+                                              placeholder="e.g., 300000" min="0" oninput="calcMortgage()">
+                                          </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Down
+                                            Payment</label>
+                                          <div class="input-group input-group-sm">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="mort-down"
+                                              placeholder="e.g., 60000" min="0" oninput="calcMortgage()">
+                                            <span class="input-group-text" id="mort-down-pct"
+                                              style="min-width:50px;">—</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="row mb-2">
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Annual Interest
+                                            Rate (%)</label>
+                                          <div class="input-group input-group-sm">
+                                            <input type="number" class="form-control" id="mort-rate"
+                                              placeholder="e.g., 6.5" min="0" step="0.01" oninput="calcMortgage()">
+                                            <span class="input-group-text">%</span>
+                                          </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Loan Term
+                                            (Years)</label>
+                                          <select class="form-select form-select-sm" id="mort-term"
+                                            onchange="calcMortgage()">
+                                            <option value="30">30 Years</option>
+                                            <option value="20">20 Years</option>
+                                            <option value="15">15 Years</option>
+                                            <option value="10">10 Years</option>
+                                          </select>
+                                        </div>
+                                      </div>
+                                      <div class="row mb-3">
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Property Tax
+                                            (Annual $)</label>
+                                          <div class="input-group input-group-sm">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="mort-tax"
+                                              placeholder="e.g., 3000" min="0" oninput="calcMortgage()">
+                                          </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Home Insurance
+                                            (Annual $)</label>
+                                          <div class="input-group input-group-sm">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="mort-insurance"
+                                              placeholder="e.g., 1200" min="0" oninput="calcMortgage()">
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <button class="btn btn-primary btn-sm w-100 mb-3"
+                                        onclick="calcMortgage()">Calculate Mortgage</button>
+                                      <div id="mort-result" style="display:none;">
+                                        <div class="row g-2 mb-2">
+                                          <div class="col-6">
+                                            <div class="alert alert-primary py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Monthly P&amp;I</small>
+                                              <strong id="mort-monthly-pi" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                          <div class="col-6">
+                                            <div class="alert alert-info py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Total Monthly (PITI)</small>
+                                              <strong id="mort-monthly-total" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                          <div class="col-6">
+                                            <div class="alert alert-warning py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Total Interest Paid</small>
+                                              <strong id="mort-total-interest" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                          <div class="col-6">
+                                            <div class="alert alert-success py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Total Cost of Home</small>
+                                              <strong id="mort-total-cost" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="alert alert-light border py-2 px-3 mb-0" style="font-size:0.85rem;">
+                                          <strong>📌 Note:</strong> PITI = Principal, Interest, Tax &amp; Insurance. PMI
+                                          may apply if down payment &lt; 20%.
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <!-- AMORTIZATION TAB -->
+                                    <div class="tab-pane fade" id="amortPanel" role="tabpanel">
+                                      <p class="text-muted small mb-3">Generate a full month-by-month payment schedule.
+                                      </p>
+                                      <div class="row mb-2">
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Loan
+                                            Amount</label>
+                                          <div class="input-group input-group-sm">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="amort-principal"
+                                              placeholder="e.g., 200000" min="0">
+                                          </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Annual Interest
+                                            Rate (%)</label>
+                                          <div class="input-group input-group-sm">
+                                            <input type="number" class="form-control" id="amort-rate"
+                                              placeholder="e.g., 5" min="0" step="0.01">
+                                            <span class="input-group-text">%</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div class="row mb-3">
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Loan Term
+                                            (Years)</label>
+                                          <input type="number" class="form-control form-control-sm" id="amort-term"
+                                            placeholder="e.g., 30" min="1" max="50">
+                                        </div>
+                                        <div class="col-md-6">
+                                          <label class="form-label small mb-1" style="font-weight:600;">Extra Monthly
+                                            Payment</label>
+                                          <div class="input-group input-group-sm">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="amort-extra" placeholder="0"
+                                              min="0" value="0">
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <button class="btn btn-primary btn-sm w-100 mb-3"
+                                        onclick="calcAmortization()">Generate Schedule</button>
+                                      <div id="amort-summary" style="display:none;" class="mb-3">
+                                        <div class="row g-2 mb-2">
+                                          <div class="col-6">
+                                            <div class="alert alert-primary py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Monthly Payment</small>
+                                              <strong id="amort-payment-display" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                          <div class="col-6">
+                                            <div class="alert alert-success py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Payoff Time</small>
+                                              <strong id="amort-payoff-time" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                          <div class="col-6">
+                                            <div class="alert alert-warning py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Total Interest</small>
+                                              <strong id="amort-total-interest" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                          <div class="col-6">
+                                            <div class="alert alert-info py-2 px-3 mb-0 text-center">
+                                              <small class="d-block text-muted mb-1">Interest Saved (Extra)</small>
+                                              <strong id="amort-interest-saved" style="font-size:1.1rem;">—</strong>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div id="amort-table-wrapper"
+                                        style="display:none; max-height:320px; overflow-y:auto;">
+                                        <table class="table table-sm table-bordered table-hover mb-0"
+                                          style="font-size:0.78rem;">
+                                          <thead class="table-primary sticky-top">
+                                            <tr>
+                                              <th>#</th>
+                                              <th>Payment</th>
+                                              <th>Principal</th>
+                                              <th>Interest</th>
+                                              <th>Balance</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody id="amort-tbody"></tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+
+                                  </div><!-- end tab-content -->
+                                </div>
+                              </div>
+                            </div>
+                            <!-- END Loan & Mortgage Calculator -->
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <br /><br />
-                  
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="1" onclick="appendToResult(1)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="2" onclick="appendToResult(2)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="3" onclick="appendToResult(3)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="button"
-                          value="+"
-                          onclick="operatorToResult('+')"
-                          />
-                    </div>
-                  </div>
-                  <br /><br />
-                  
-                  <div class="row">
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="." onclick="appendToResult('.')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="0" onclick="appendToResult(0)" />
-                    </div>
-                    <div class="col-md-3">
-                        <input class="btn btn-light btn-block" type="button" value="-" onclick="operatorToResult('-')" />
-                    </div>
-                    <div class="col-md-3">
-                        <input
-                        class="btn btn-secondary btn-block px-3"
-                          type="submit"
-                          value="="
-                          onclick="calculateResult()"
-                        />
-                    </div>
-                </div>
-                  <br /><br />
                 </div>
               </div>
             </div>
           </div>
+          <div class="col-md-4">
+            <button id="toggle-history-btn" class="btn btn-primary" style="text-align: center;"
+              onclick="toggleHistory()">Show History</button>
+            <div id="history-column" class="mt-3 d-none">
+              <div class="card bg-white bg-opacity-75 border-0 rounded-3">
+                <div class="card-body p-2">
+                  <div>
+                    <p class="text-muted mb-3" style="letter-spacing:1px; display: inline-block;">CALCULATION
+                      HISTORY <button id="clear-history-btn"
+                        style="color: red; outline: none; background-color: transparent; border: none;"
+                        onclick="clearHistory()">Clear All</button></p>
+                    <div id="history-list"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <template id="history-empty-template">
+              <div class="text-center text-muted py-5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor"
+                  class="bi bi-clock-history mb-2 opacity-25" viewBox="0 0 16 16">
+                  <path
+                    d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17l-1 .025zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155l-.964-.267c.046-.165.086-.332.12-.501zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038l-.845-.535zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432l-.707-.707z" />
+                  <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z" />
+                  <path
+                    d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z" />
+                </svg>
+                <p class="mb-0">No calculations yet</p>
+              </div>
+            </template>
+            <template id="history-item-template">
+              <div class="history-item">
+                <div class="history-item-expression"></div>
+                <div class="history-item-words"></div>
+                <div class="remark-text"></div>
+                <div class="history-actions">
+                  <button class="history-action-btn btn-delete">🗑 Delete</button>
+                  <button class="history-action-btn btn-remark">📝 Comment</button>
+                </div>
+                <div class="remark-box d-none">
+                  <input type="text" placeholder="Add remark..." />
+                  <button class="btn btn-sm btn-primary">Set</button>
+                  <button class="btn btn-sm btn-outline-secondary">✕</button>
+                </div>
+                <div class="history-item-time"></div>
+              </div>
+            </template>
+          </div>
+
+          <script src="assets/js/bootstrap.min.js"></script>
+          <script src="assets/js/script.js"></script>
+          <button id="scroll-to-calculator" title="Back to Calculator">↑</button>
+        </div>
       </div>
-    </div>
-    <script src="assets/js/bootstrap.min.js"></script>
-    <script src="assets/js/script.js"></script>
-  </body>
+</body>
+
+
 </html>
