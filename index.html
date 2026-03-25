@@ -543,6 +543,9 @@
     #answer-preview:empty {
       opacity: 0;
     }
+    .currency-panel {
+  margin-top: 20px;
+}
   </style>
 </head>
 
@@ -1665,6 +1668,55 @@
                               </div>
                             </div>
                             <!-- END FIBONACCI Calculator Section -->
+                             <!-- 💰 CURRENCY CONVERTER -->
+<div class="currency-panel">
+  <div class="display-container my-3">
+    <div class="col-md-12">
+      <h4 class="group-header mb-0">Currency Converter</h4>
+
+      <div class="row g-2 mt-2">
+        <div class="col-4">
+          <input type="number" id="currency-value" class="form-control" placeholder="Amount" />
+        </div>
+
+        <div class="col-4">
+          <select id="from-currency" class="form-select">
+            <option value="USD">USD</option>
+            <option value="NGN">NGN</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+
+        <div class="col-4">
+          <select id="to-currency" class="form-select">
+            <option value="NGN">NGN</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn btn-success w-100 mt-2" onclick="convertUnit('currency')">
+        Convert
+      </button>
+
+      <div class="mt-2 text-center">
+        <strong id="currency-result">0</strong>
+      </div>
+
+      <div class="text-center mt-2">
+        <button class="btn btn-sm btn-primary" id="currency-refresh-btn" onclick="fetchCurrencyRates()">
+          🔄 Refresh Rates
+        </button>
+        <div id="currency-timestamp" class="small text-muted mt-1"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+                             
                              
                             <!-- BASE CONVERTER SECTION (Binary, Hex, Octal) -->
                             <div class="accordion-item">
