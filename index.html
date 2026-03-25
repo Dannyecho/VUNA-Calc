@@ -545,34 +545,35 @@
     }
 
     .currency-panel {
-  margin-top: 20px;
+      margin-top: 20px;
     }
-  #igbo-btn {
-  background: #6f42c1;
-  border: none;
-  color: white;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(111, 66, 193, 0.2);
-}
 
-#igbo-btn:hover:not(:disabled) {
-  background: #5a32a3;
-  transform: scale(1.05);
-}
+    #igbo-btn {
+      background: #6f42c1;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(111, 66, 193, 0.2);
+    }
 
-#igbo-btn:disabled {
-  background: #e9ecef;
-  color: #adb5bd;
-  box-shadow: none;
-}
+    #igbo-btn:hover:not(:disabled) {
+      background: #5a32a3;
+      transform: scale(1.05);
+    }
+
+    #igbo-btn:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      box-shadow: none;
+    }
   </style>
 </head>
 
@@ -676,37 +677,37 @@
                     <button class="btn btn-light" onclick="bracketToResult('(')">(</button>
                     <button class="btn btn-light" onclick="bracketToResult(')')">)</button>
                     <button class="btn btn-light" onclick="backspace()">←</button>
-                    
+
                     <!-- Row trig -->
                     <button class="btn btn-action" onclick="clearResult()">AC</button>
                     <button id="sin-btn" class="btn btn-light" onclick="trigButtonPressed('sin')">sin</button>
                     <button id="cos-btn" class="btn btn-light" onclick="trigButtonPressed('cos')">cos</button>
                     <button id="tan-btn" class="btn btn-light" onclick="trigButtonPressed('tan')">tan</button>
-                    
+
                     <!-- Row 2 -->
                     <button id="" class="btn btn-operator" onclick="toggleInverseMode()">2nd</button>
                     <button class="btn btn-light" onclick="appendToResult(7)">7</button>
                     <button class="btn btn-light" onclick="appendToResult(8)">8</button>
                     <button class="btn btn-light" onclick="appendToResult(9)">9</button>
-                    
+
                     <!-- Row 3 -->
                     <button class="btn btn-operator" onclick="operatorToResult('/')">÷</button>
                     <button class="btn btn-light" onclick="appendToResult(4)">4</button>
                     <button class="btn btn-light" onclick="appendToResult(5)">5</button>
                     <button class="btn btn-light" onclick="appendToResult(6)">6</button>
-                    
+
                     <!-- Row 4 -->
                     <button class="btn btn-operator" onclick="operatorToResult('*')">×</button>
                     <button class="btn btn-light" onclick="appendToResult(1)">1</button>
                     <button class="btn btn-light" onclick="appendToResult(2)">2</button>
                     <button class="btn btn-light" onclick="appendToResult(3)">3</button>
-                    
+
                     <!-- Row 5 -->
                     <button class="btn btn-operator" onclick="operatorToResult('+')">+</button>
                     <button class="btn btn-light" onclick="appendToResult('.')">.</button>
                     <button class="btn btn-light" onclick="appendToResult(0)">0</button>
                     <button class="btn btn-operator" onclick="operatorToResult('-')">−</button>
-                    
+
                     <!-- Row 6 -->
                     <button class="btn btn-operator" onclick="percentToResult('%')">%</button>
                     <button class="btn btn-special" onclick="operatorToResult('^')">x^y</button>
@@ -714,13 +715,13 @@
                     <button class="btn btn-power btn-special" onclick="calculateSquare()">x²</button>
                     <button class="btn btn-power btn-special" onclick="calculateCube()">x³</button>
                     <button class="btn btn-special" onclick="cubeRootResult()">∛x</button>
-                    
+
                     <!-- Row 7 -->
                     <button class="btn btn-special" onclick="calculateReciprocal()" title="Reciprocal: 1/x">1/x</button>
                     <button class="btn btn-special" onclick="calculateSquareRoot()">√</button>
                     <button class="btn btn-light" onclick="appendToResult('e')">e</button>
                     <button class="btn btn-special" onclick="calculateExponential()">e^x</button>
-                    
+
                     <!-- Row 7 - Permutation & Combination -->
                     <button class="btn btn-action" onclick="factors()" stylex="grid-column: span 2;">Factors</button>
                     <button class="btn btn-special" onclick="calculatePermutation()"
@@ -1629,7 +1630,8 @@
                               <div id="collapseFibonacci" class="accordion-collapse collapse"
                                 aria-labelledby="headingFibonacci" data-bs-parent="#converterAccordion">
                                 <div class="accordion-body">
-                                  <p class="text-muted small mb-3">Generate Fibonacci sequences, find nth terms, and check if numbers are Fibonacci</p>
+                                  <p class="text-muted small mb-3">Generate Fibonacci sequences, find nth terms, and
+                                    check if numbers are Fibonacci</p>
 
                                   <!-- Generate Sequence Section -->
                                   <div class="mb-4">
@@ -1643,9 +1645,10 @@
                                     <button class="btn btn-primary btn-sm w-100 mb-2" onclick="calculateFibonacci()">
                                       Generate Sequence
                                     </button>
-                                    
+
                                     <div id="fib-result" class="alert alert-info py-2 px-3 mb-0" style="display: none;">
-                                      <div class="mb-2"><strong>Sequence:</strong> <span id="fib-sequence" style="word-break: break-all;"></span></div>
+                                      <div class="mb-2"><strong>Sequence:</strong> <span id="fib-sequence"
+                                          style="word-break: break-all;"></span></div>
                                       <div class="mb-2"><strong>Sum:</strong> <span id="fib-sum"></span></div>
                                       <div class="mb-2"><strong>Count:</strong> <span id="fib-count"></span></div>
                                       <div><strong>Last Term:</strong> <span id="fib-last"></span></div>
@@ -1664,9 +1667,11 @@
                                     <button class="btn btn-info btn-sm w-100 mb-2" onclick="findNthFibonacci()">
                                       Find Nth Fibonacci Term
                                     </button>
-                                    
-                                    <div id="fib-nth-result" class="alert alert-success py-2 px-3 mb-0" style="display: none;">
-                                      <div><strong>F(n) =</strong> <span id="fib-nth-value" style="font-size: 1.1em; font-weight: bold;"></span></div>
+
+                                    <div id="fib-nth-result" class="alert alert-success py-2 px-3 mb-0"
+                                      style="display: none;">
+                                      <div><strong>F(n) =</strong> <span id="fib-nth-value"
+                                          style="font-size: 1.1em; font-weight: bold;"></span></div>
                                     </div>
                                   </div>
 
@@ -1686,68 +1691,71 @@
                                         Clear All
                                       </button>
                                     </div>
-                                    
-                                    <div id="fib-check-result" class="alert py-2 px-3 mb-0" style="display: none; border-left: 4px solid #0d6efd;">
+
+                                    <div id="fib-check-result" class="alert py-2 px-3 mb-0"
+                                      style="display: none; border-left: 4px solid #0d6efd;">
                                       <div><strong>Number:</strong> <span id="fib-check-value"></span></div>
-                                      <div><strong>Is Fibonacci?</strong> <span id="fib-check-answer" style="font-weight: bold;"></span></div>
+                                      <div><strong>Is Fibonacci?</strong> <span id="fib-check-answer"
+                                          style="font-weight: bold;"></span></div>
                                     </div>
                                   </div>
 
-                                  <div class="small text-muted mt-3"><strong>💡 Tip:</strong> The Fibonacci sequence (0, 1, 1, 2, 3, 5, 8, 13, 21, ...) appears in nature, art, and mathematics!</div>
+                                  <div class="small text-muted mt-3"><strong>💡 Tip:</strong> The Fibonacci sequence (0,
+                                    1, 1, 2, 3, 5, 8, 13, 21, ...) appears in nature, art, and mathematics!</div>
                                 </div>
                               </div>
                             </div>
                             <!-- END FIBONACCI Calculator Section -->
-                             <!-- 💰 CURRENCY CONVERTER -->
-<div class="currency-panel">
-  <div class="display-container my-3">
-    <div class="col-md-12">
-      <h4 class="group-header mb-0">Currency Converter</h4>
+                            <!-- 💰 CURRENCY CONVERTER -->
+                            <!-- <div class="currency-panel">
+                              <div class="display-container my-3">
+                                <div class="col-md-12">
+                                  <h4 class="group-header mb-0">Currency Converter</h4>
 
-      <div class="row g-2 mt-2">
-        <div class="col-4">
-          <input type="number" id="currency-value" class="form-control" placeholder="Amount" />
-        </div>
+                                  <div class="row g-2 mt-2">
+                                    <div class="col-4">
+                                      <input type="number" id="currency-value" class="form-control"
+                                        placeholder="Amount" />
+                                    </div>
 
-        <div class="col-4">
-          <select id="from-currency" class="form-select">
-            <option value="USD">USD</option>
-            <option value="NGN">NGN</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-          </select>
-        </div>
+                                    <div class="col-4">
+                                      <select id="from-currency" class="form-select">
+                                        <option value="USD">USD</option>
+                                        <option value="NGN">NGN</option>
+                                        <option value="EUR">EUR</option>
+                                        <option value="GBP">GBP</option>
+                                      </select>
+                                    </div>
 
-        <div class="col-4">
-          <select id="to-currency" class="form-select">
-            <option value="NGN">NGN</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-          </select>
-        </div>
-      </div>
+                                    <div class="col-4">
+                                      <select id="to-currency" class="form-select">
+                                        <option value="NGN">NGN</option>
+                                        <option value="USD">USD</option>
+                                        <option value="EUR">EUR</option>
+                                        <option value="GBP">GBP</option>
+                                      </select>
+                                    </div>
+                                  </div>
 
-      <button class="btn btn-success w-100 mt-2" onclick="convertUnit('currency')">
-        Convert
-      </button>
+                                  <button class="btn btn-success w-100 mt-2" onclick="convertUnit('currency')">
+                                    Convert
+                                  </button>
 
-      <div class="mt-2 text-center">
-        <strong id="currency-result">0</strong>
-      </div>
+                                  <div class="mt-2 text-center">
+                                    <strong id="currency-result">0</strong>
+                                  </div>
 
-      <div class="text-center mt-2">
-        <button class="btn btn-sm btn-primary" id="currency-refresh-btn" onclick="fetchCurrencyRates()">
-          🔄 Refresh Rates
-        </button>
-        <div id="currency-timestamp" class="small text-muted mt-1"></div>
-      </div>
+                                  <div class="text-center mt-2">
+                                    <button class="btn btn-sm btn-primary" id="currency-refresh-btn"
+                                      onclick="fetchCurrencyRates()">
+                                      🔄 Refresh Rates
+                                    </button>
+                                    <div id="currency-timestamp" class="small text-muted mt-1"></div>
+                                  </div>
 
-    </div>
-  </div>
-</div>
-                             
-                             
+                                </div>
+                              </div>
+                            </div> -->
                             <!-- BASE CONVERTER SECTION (Binary, Hex, Octal) -->
                             <div class="accordion-item">
                               <h2 class="accordion-header" id="headingBaseConverter">
@@ -1761,13 +1769,15 @@
                               <div id="collapseBaseConverter" class="accordion-collapse collapse"
                                 aria-labelledby="headingBaseConverter" data-bs-parent="#converterAccordion">
                                 <div class="accordion-body">
-                                  <p class="text-muted small mb-3">Convert between decimal, binary, hexadecimal, and octal bases. Perfect for Computer Science!</p>
+                                  <p class="text-muted small mb-3">Convert between decimal, binary, hexadecimal, and
+                                    octal bases. Perfect for Computer Science!</p>
 
                                   <!-- Input Section -->
                                   <div class="mb-3">
-                                    <label class="form-label small" style="font-weight: 600;">Enter Decimal Number</label>
-                                    <input type="number" class="form-control" id="decimal-input" 
-                                      placeholder="e.g., 255" oninput="convertDecimal()">
+                                    <label class="form-label small" style="font-weight: 600;">Enter Decimal
+                                      Number</label>
+                                    <input type="number" class="form-control" id="decimal-input" placeholder="e.g., 255"
+                                      oninput="convertDecimal()">
                                   </div>
 
                                   <!-- Conversion Results -->
@@ -1775,25 +1785,31 @@
                                     <div class="col-md-6">
                                       <div class="alert alert-light border py-2 px-3 mb-2">
                                         <small class="text-muted d-block mb-1"><strong>Binary (Base 2)</strong></small>
-                                        <div id="binary-result" class="font-monospace fw-bold" style="font-size: 0.95rem; word-break: break-all;">0</div>
+                                        <div id="binary-result" class="font-monospace fw-bold"
+                                          style="font-size: 0.95rem; word-break: break-all;">0</div>
                                       </div>
                                     </div>
                                     <div class="col-md-6">
                                       <div class="alert alert-light border py-2 px-3 mb-2">
-                                        <small class="text-muted d-block mb-1"><strong>Hexadecimal (Base 16)</strong></small>
-                                        <div id="hex-result" class="font-monospace fw-bold" style="font-size: 0.95rem;">0x0</div>
+                                        <small class="text-muted d-block mb-1"><strong>Hexadecimal (Base
+                                            16)</strong></small>
+                                        <div id="hex-result" class="font-monospace fw-bold" style="font-size: 0.95rem;">
+                                          0x0</div>
                                       </div>
                                     </div>
                                     <div class="col-md-6">
                                       <div class="alert alert-light border py-2 px-3 mb-2">
                                         <small class="text-muted d-block mb-1"><strong>Octal (Base 8)</strong></small>
-                                        <div id="octal-result" class="font-monospace fw-bold" style="font-size: 0.95rem;">0</div>
+                                        <div id="octal-result" class="font-monospace fw-bold"
+                                          style="font-size: 0.95rem;">0</div>
                                       </div>
                                     </div>
                                     <div class="col-md-6">
                                       <div class="alert alert-light border py-2 px-3 mb-2">
-                                        <small class="text-muted d-block mb-1"><strong>Decimal (Base 10)</strong></small>
-                                        <div id="decimal-result" class="font-monospace fw-bold" style="font-size: 0.95rem;">0</div>
+                                        <small class="text-muted d-block mb-1"><strong>Decimal (Base
+                                            10)</strong></small>
+                                        <div id="decimal-result" class="font-monospace fw-bold"
+                                          style="font-size: 0.95rem;">0</div>
                                       </div>
                                     </div>
                                   </div>
@@ -1804,12 +1820,14 @@
 
                                   <div class="row mb-2">
                                     <div class="col-md-6">
-                                      <label class="form-label small mb-1" style="font-weight: 600;">Binary Input</label>
-                                      <input type="text" class="form-control form-control-sm" id="binary-input" 
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Binary
+                                        Input</label>
+                                      <input type="text" class="form-control form-control-sm" id="binary-input"
                                         placeholder="e.g., 11111111" oninput="convertFromBinary()">
                                     </div>
                                     <div class="col-md-6">
-                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal Result</label>
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal
+                                        Result</label>
                                       <div class="form-control form-control-sm bg-light" id="binary-to-decimal">0</div>
                                     </div>
                                   </div>
@@ -1817,11 +1835,12 @@
                                   <div class="row mb-2">
                                     <div class="col-md-6">
                                       <label class="form-label small mb-1" style="font-weight: 600;">Hex Input</label>
-                                      <input type="text" class="form-control form-control-sm" id="hex-input" 
+                                      <input type="text" class="form-control form-control-sm" id="hex-input"
                                         placeholder="e.g., FF" oninput="convertFromHex()">
                                     </div>
                                     <div class="col-md-6">
-                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal Result</label>
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal
+                                        Result</label>
                                       <div class="form-control form-control-sm bg-light" id="hex-to-decimal">0</div>
                                     </div>
                                   </div>
@@ -1829,11 +1848,12 @@
                                   <div class="row mb-3">
                                     <div class="col-md-6">
                                       <label class="form-label small mb-1" style="font-weight: 600;">Octal Input</label>
-                                      <input type="text" class="form-control form-control-sm" id="octal-input" 
+                                      <input type="text" class="form-control form-control-sm" id="octal-input"
                                         placeholder="e.g., 377" oninput="convertFromOctal()">
                                     </div>
                                     <div class="col-md-6">
-                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal Result</label>
+                                      <label class="form-label small mb-1" style="font-weight: 600;">Decimal
+                                        Result</label>
                                       <div class="form-control form-control-sm bg-light" id="octal-to-decimal">0</div>
                                     </div>
                                   </div>
@@ -1841,38 +1861,48 @@
                                   <!-- Bitwise Operations -->
                                   <hr class="my-3">
                                   <h6 class="mb-3">Bitwise Operations</h6>
-                                  <p class="text-muted small mb-2">Perform logical operations on the binary representations</p>
+                                  <p class="text-muted small mb-2">Perform logical operations on the binary
+                                    representations</p>
 
                                   <div class="mb-3">
                                     <label class="form-label small mb-1" style="font-weight: 600;">First Number</label>
-                                    <input type="number" class="form-control form-control-sm" id="bitwise-num1" 
+                                    <input type="number" class="form-control form-control-sm" id="bitwise-num1"
                                       placeholder="e.g., 5" value="5">
                                   </div>
 
                                   <div class="mb-3">
                                     <label class="form-label small mb-1" style="font-weight: 600;">Second Number</label>
-                                    <input type="number" class="form-control form-control-sm" id="bitwise-num2" 
+                                    <input type="number" class="form-control form-control-sm" id="bitwise-num2"
                                       placeholder="e.g., 3" value="3">
                                   </div>
 
                                   <div class="row">
                                     <div class="col-6">
-                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="bitwiseAND()">AND (&)</button>
-                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="bitwiseOR()">OR (|)</button>
-                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="bitwiseXOR()">XOR (^)</button>
-                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="bitwiseNOT()">NOT (~)</button>
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2"
+                                        onclick="bitwiseAND()">AND (&)</button>
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="bitwiseOR()">OR
+                                        (|)</button>
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2"
+                                        onclick="bitwiseXOR()">XOR (^)</button>
+                                      <button class="btn btn-outline-primary btn-sm w-100 mb-2"
+                                        onclick="bitwiseNOT()">NOT (~)</button>
                                     </div>
                                     <div class="col-6">
-                                      <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="leftShift()">Left Shift (&lt;&lt;)</button>
-                                      <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="rightShift()">Right Shift (&gt;&gt;)</button>
-                                      <button class="btn btn-outline-secondary btn-sm w-100 mb-2" onclick="clearBitwise()">Clear</button>
+                                      <button class="btn btn-outline-info btn-sm w-100 mb-2" onclick="leftShift()">Left
+                                        Shift (&lt;&lt;)</button>
+                                      <button class="btn btn-outline-info btn-sm w-100 mb-2"
+                                        onclick="rightShift()">Right Shift (&gt;&gt;)</button>
+                                      <button class="btn btn-outline-secondary btn-sm w-100 mb-2"
+                                        onclick="clearBitwise()">Clear</button>
                                     </div>
                                   </div>
 
                                   <!-- Bitwise Result Display -->
-                                  <div id="bitwise-result" class="alert alert-info py-2 px-3 mt-3 mb-0" style="display: none;">
+                                  <div id="bitwise-result" class="alert alert-info py-2 px-3 mt-3 mb-0"
+                                    style="display: none;">
                                     <div class="mb-2"><strong>Operation:</strong> <span id="bitwise-op"></span></div>
-                                    <div class="mb-2"><strong>Result (Decimal):</strong> <span id="bitwise-decimal"></span></div>
+                                    <div class="mb-2"><strong>Result (Decimal):</strong> <span
+                                        id="bitwise-decimal"></span></div>
                                     <div><strong>Result (Binary):</strong> <code id="bitwise-binary"></code></div>
                                   </div>
 
@@ -1888,7 +1918,7 @@
                               </div>
                             </div>
                             <!-- END Base Converter Section -->
-                             <!-- ROMAN NUMERAL CONVERTER SECTION -->
+                            <!-- ROMAN NUMERAL CONVERTER SECTION -->
                             <div class="accordion-item">
                               <h2 class="accordion-header" id="headingRoman">
                                 <button
@@ -1898,23 +1928,24 @@
                                   <span>🏛️ Roman Numeral Converter</span>
                                 </button>
                               </h2>
-                              <div id="collapseRoman" class="accordion-collapse collapse"
-                                aria-labelledby="headingRoman" data-bs-parent="#converterAccordion">
+                              <div id="collapseRoman" class="accordion-collapse collapse" aria-labelledby="headingRoman"
+                                data-bs-parent="#converterAccordion">
                                 <div class="accordion-body">
-                                  <p class="text-muted small mb-3">Convert between Arabic numbers and Roman numerals (1 – 3,999)</p>
+                                  <p class="text-muted small mb-3">Convert between Arabic numbers and Roman numerals (1
+                                    – 3,999)</p>
 
                                   <!-- Arabic → Roman -->
                                   <div class="mb-4">
                                     <h6 class="text-secondary mb-2">🔢 Arabic → Roman Numeral</h6>
                                     <div class="input-group input-group-sm mb-2">
                                       <input type="number" class="form-control" id="arabic-input"
-                                        placeholder="e.g., 2026" min="1" max="3999"
-                                        oninput="convertArabicToRoman()">
+                                        placeholder="e.g., 2026" min="1" max="3999" oninput="convertArabicToRoman()">
                                       <span class="input-group-text">→</span>
                                       <input type="text" class="form-control fw-bold font-monospace bg-light"
                                         id="roman-output" placeholder="Roman numeral" readonly>
                                     </div>
-                                    <div id="roman-breakdown" class="alert alert-info py-2 px-3 mb-0 small" style="display:none;"></div>
+                                    <div id="roman-breakdown" class="alert alert-info py-2 px-3 mb-0 small"
+                                      style="display:none;"></div>
                                   </div>
 
                                   <!-- Roman → Arabic -->
@@ -1922,13 +1953,13 @@
                                     <h6 class="text-secondary mb-2">🏛️ Roman Numeral → Arabic</h6>
                                     <div class="input-group input-group-sm mb-2">
                                       <input type="text" class="form-control font-monospace text-uppercase"
-                                        id="roman-input" placeholder="e.g., MMXXVI"
-                                        oninput="convertRomanToArabic()">
+                                        id="roman-input" placeholder="e.g., MMXXVI" oninput="convertRomanToArabic()">
                                       <span class="input-group-text">→</span>
-                                      <input type="text" class="form-control fw-bold bg-light"
-                                        id="arabic-output" placeholder="Arabic number" readonly>
+                                      <input type="text" class="form-control fw-bold bg-light" id="arabic-output"
+                                        placeholder="Arabic number" readonly>
                                     </div>
-                                    <div id="roman-error" class="alert alert-danger py-2 px-3 mb-0 small" style="display:none;"></div>
+                                    <div id="roman-error" class="alert alert-danger py-2 px-3 mb-0 small"
+                                      style="display:none;"></div>
                                   </div>
 
                                   <!-- Use Current Result Button -->
@@ -1949,29 +1980,81 @@
                                   <div class="row g-1" style="font-size: 0.82rem;">
                                     <div class="col-6">
                                       <table class="table table-sm table-bordered mb-0">
-                                        <thead class="table-light"><tr><th>Symbol</th><th>Value</th></tr></thead>
+                                        <thead class="table-light">
+                                          <tr>
+                                            <th>Symbol</th>
+                                            <th>Value</th>
+                                          </tr>
+                                        </thead>
                                         <tbody>
-                                          <tr><td class="font-monospace fw-bold">I</td><td>1</td></tr>
-                                          <tr><td class="font-monospace fw-bold">IV</td><td>4</td></tr>
-                                          <tr><td class="font-monospace fw-bold">V</td><td>5</td></tr>
-                                          <tr><td class="font-monospace fw-bold">IX</td><td>9</td></tr>
-                                          <tr><td class="font-monospace fw-bold">X</td><td>10</td></tr>
-                                          <tr><td class="font-monospace fw-bold">XL</td><td>40</td></tr>
-                                          <tr><td class="font-monospace fw-bold">L</td><td>50</td></tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">I</td>
+                                            <td>1</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">IV</td>
+                                            <td>4</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">V</td>
+                                            <td>5</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">IX</td>
+                                            <td>9</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">X</td>
+                                            <td>10</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">XL</td>
+                                            <td>40</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">L</td>
+                                            <td>50</td>
+                                          </tr>
                                         </tbody>
                                       </table>
                                     </div>
                                     <div class="col-6">
                                       <table class="table table-sm table-bordered mb-0">
-                                        <thead class="table-light"><tr><th>Symbol</th><th>Value</th></tr></thead>
+                                        <thead class="table-light">
+                                          <tr>
+                                            <th>Symbol</th>
+                                            <th>Value</th>
+                                          </tr>
+                                        </thead>
                                         <tbody>
-                                          <tr><td class="font-monospace fw-bold">XC</td><td>90</td></tr>
-                                          <tr><td class="font-monospace fw-bold">C</td><td>100</td></tr>
-                                          <tr><td class="font-monospace fw-bold">CD</td><td>400</td></tr>
-                                          <tr><td class="font-monospace fw-bold">D</td><td>500</td></tr>
-                                          <tr><td class="font-monospace fw-bold">CM</td><td>900</td></tr>
-                                          <tr><td class="font-monospace fw-bold">M</td><td>1,000</td></tr>
-                                          <tr><td class="font-monospace fw-bold">MMM</td><td>3,000</td></tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">XC</td>
+                                            <td>90</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">C</td>
+                                            <td>100</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">CD</td>
+                                            <td>400</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">D</td>
+                                            <td>500</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">CM</td>
+                                            <td>900</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">M</td>
+                                            <td>1,000</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="font-monospace fw-bold">MMM</td>
+                                            <td>3,000</td>
+                                          </tr>
                                         </tbody>
                                       </table>
                                     </div>
@@ -1982,7 +2065,8 @@
                                     <strong>📌 Examples:</strong><br>
                                     • <strong>2026 → </strong> <span class="font-monospace">MMXXVI</span><br>
                                     • <strong>1994 → </strong> <span class="font-monospace">MCMXCIV</span><br>
-                                    • <strong>XIV → </strong> 14 &nbsp;|&nbsp; <strong>XL → </strong> 40 &nbsp;|&nbsp; <strong>XCIX → </strong> 99
+                                    • <strong>XIV → </strong> 14 &nbsp;|&nbsp; <strong>XL → </strong> 40 &nbsp;|&nbsp;
+                                    <strong>XCIX → </strong> 99
                                   </div>
                                 </div>
                               </div>
