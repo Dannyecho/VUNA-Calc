@@ -22,6 +22,121 @@ function toggleTheme() {
     localStorage.setItem("theme", "light");
   }
 }
+// ===============================
+// AGE CALCULATOR FUNCTIONALITY
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+  const ageForm = document.getElementById("age-calc-form");
+  if (ageForm) {
+    const birthInput = document.getElementById("birth-date");
+    const targetInput = document.getElementById("target-date");
+    const customToggle = document.getElementById("custom-date-toggle");
+    customToggle.addEventListener("change", function () {
+      targetInput.disabled = !this.checked;
+      if (!this.checked) targetInput.value = "";
+    });
+    ageForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const birthDate = new Date(birthInput.value);
+      let targetDate = new Date();
+      if (customToggle.checked && targetInput.value) {
+        targetDate = new Date(targetInput.value);
+      }
+      if (!birthInput.value) return;
+      const result = calculateAgeDetails(birthDate, targetDate);
+      displayAgeResult(result);
+      logAgeCalculation(birthDate, targetDate, result);
+    });
+  }
+});
+
+function calculateAgeDetails(birthDate, targetDate) {
+  // Years, months, days
+  let years = targetDate.getFullYear() - birthDate.getFullYear();
+  let months = targetDate.getMonth() - birthDate.getMonth();
+  let days = targetDate.getDate() - birthDate.getDate();
+  if (days < 0) {
+    months--;
+    const prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
+    days += prevMonth.getDate();
+  }
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+  // Total days, weeks, hours
+  const diffMs = targetDate - birthDate;
+  const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const totalWeeks = Math.floor(totalDays / 7);
+  const totalMonths = (targetDate.getFullYear() - birthDate.getFullYear()) * 12 + (targetDate.getMonth() - birthDate.getMonth());
+  const totalHours = totalDays * 24;
+  // Next birthday
+  let nextBirthday = new Date(targetDate.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+  if (nextBirthday < targetDate) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+  const msToNextBday = nextBirthday - targetDate;
+  const daysToNextBday = Math.ceil(msToNextBday / (1000 * 60 * 60 * 24));
+  // Zodiac
+  const westernZodiac = getWesternZodiac(birthDate);
+  const chineseZodiac = getChineseZodiac(birthDate.getFullYear());
+  // Year progress
+  const startOfYear = new Date(targetDate.getFullYear(), 0, 1);
+  const endOfYear = new Date(targetDate.getFullYear() + 1, 0, 1);
+  const yearProgress = ((targetDate - startOfYear) / (endOfYear - startOfYear)) * 100;
+  return {
+    years, months, days, totalMonths, totalWeeks, totalDays, totalHours,
+    nextBirthday, daysToNextBday, westernZodiac, chineseZodiac, yearProgress
+  };
+}
+
+function displayAgeResult(result) {
+  document.getElementById("age-calc-result").style.display = "block";
+  document.getElementById("exact-age").textContent = `${result.years} years, ${result.months} months, ${result.days} days`;
+  document.getElementById("total-months").textContent = `Total Months: ${result.totalMonths}`;
+  document.getElementById("total-weeks").textContent = `Total Weeks: ${result.totalWeeks}`;
+  document.getElementById("total-days").textContent = `Total Days: ${result.totalDays}`;
+  document.getElementById("total-hours").textContent = `Total Hours: ${result.totalHours}`;
+  document.getElementById("next-birthday").innerHTML = `<b>Next Birthday:</b> in ${result.daysToNextBday} days (${result.nextBirthday.toLocaleDateString()})`;
+  document.getElementById("zodiac-signs").innerHTML = `<b>Western Zodiac:</b> ${result.westernZodiac} <br><b>Chinese Zodiac:</b> ${result.chineseZodiac}`;
+  document.getElementById("year-progress-bar").style.width = `${result.yearProgress.toFixed(1)}%`;
+  document.getElementById("year-progress-bar").textContent = `${result.yearProgress.toFixed(1)}%`;
+}
+
+function getWesternZodiac(date) {
+  const zodiacs = [
+    ["Capricorn", 1, 20], ["Aquarius", 2, 19], ["Pisces", 3, 21], ["Aries", 4, 20],
+    ["Taurus", 5, 21], ["Gemini", 6, 21], ["Cancer", 7, 23], ["Leo", 8, 23],
+    ["Virgo", 9, 23], ["Libra", 10, 23], ["Scorpio", 11, 22], ["Sagittarius", 12, 22], ["Capricorn", 12, 32]
+  ];
+  const m = date.getMonth() + 1, d = date.getDate();
+  for (let i = 0; i < zodiacs.length - 1; i++) {
+    const [sign, month, day] = zodiacs[i];
+    const [nextSign, nextMonth, nextDay] = zodiacs[i + 1];
+    if ((m === month && d >= day) || (m === nextMonth && d < nextDay)) return sign;
+  }
+  return "Capricorn";
+}
+
+function getChineseZodiac(year) {
+  const animals = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"];
+  return animals[(year - 4) % 12];
+}
+
+function logAgeCalculation(birthDate, targetDate, result) {
+  calculationHistory?.push({
+    expression: `Age from ${birthDate.toLocaleDateString()} to ${targetDate.toLocaleDateString()}`,
+    result: `${result.years}y ${result.months}m ${result.days}d (${result.totalDays} days)`,
+    time: new Date().toLocaleString(),
+    type: "age",
+    details: {
+      zodiac: `${result.westernZodiac}, ${result.chineseZodiac}`,
+      nextBirthday: result.nextBirthday.toLocaleDateString(),
+      daysToNextBday: result.daysToNextBday
+    }
+  });
+  if (calculationHistory.length > 20) calculationHistory.shift();
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  if (typeof renderHistory === "function") renderHistory();
+}
 
 var inverseMode = false;
 var currentExpression = "";

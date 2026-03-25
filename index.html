@@ -2611,6 +2611,60 @@
                               </div>
                             </div>
                             <!-- END Loan & Mortgage Calculator -->
+                                                  <!-- ===== AGE CALCULATOR ===== -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingAgeCalc">
+            <button
+              class="accordion-button collapsed d-flex justify-content-between align-items-center"
+              type="button" data-bs-toggle="collapse" data-bs-target="#collapseAgeCalc"
+              aria-expanded="false" aria-controls="collapseAgeCalc">
+              <span>🎂 Age Calculator</span>
+            </button>
+          </h2>
+          <div id="collapseAgeCalc" class="accordion-collapse collapse" aria-labelledby="headingAgeCalc"
+            data-bs-parent="#converterAccordion">
+            <div class="accordion-body">
+              <form id="age-calc-form" class="mb-3">
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-6">
+                    <label for="birth-date" class="form-label small" style="font-weight:600;">Birth Date</label>
+                    <input type="date" class="form-control" id="birth-date" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="target-date" class="form-label small" style="font-weight:600;">Target Date</label>
+                    <input type="date" class="form-control" id="target-date" disabled>
+                    <div class="form-check mt-1">
+                      <input class="form-check-input" type="checkbox" id="custom-date-toggle">
+                      <label class="form-check-label small" for="custom-date-toggle">Custom target date</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-grid mt-3">
+                  <button type="submit" class="btn btn-primary">Calculate Age</button>
+                </div>
+              </form>
+              <div id="age-calc-result" style="display:none;">
+                <h5>Exact Age</h5>
+                <div id="exact-age"></div>
+                <h6 class="mt-3">Totals</h6>
+                <ul class="list-group list-group-flush mb-2">
+                  <li class="list-group-item"><span id="total-months"></span></li>
+                  <li class="list-group-item"><span id="total-weeks"></span></li>
+                  <li class="list-group-item"><span id="total-days"></span></li>
+                  <li class="list-group-item"><span id="total-hours"></span></li>
+                </ul>
+                <div id="next-birthday"></div>
+                <div id="zodiac-signs" class="mt-2"></div>
+                <div class="mt-3">
+                  <label class="form-label small">Year Progress</label>
+                  <div class="progress">
+                    <div id="year-progress-bar" class="progress-bar" role="progressbar" style="width:0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
                           </div>
                         </div>
                       </div>
