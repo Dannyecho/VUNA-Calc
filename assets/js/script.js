@@ -9644,3 +9644,312 @@ function generateTable() {
     </div>
   `;
 }
+/* ══════════════════════════════════════════════════════
+   ⏱️  AGE & DATE MATH CALCULATOR  —  Script
+   Paste this entire <script> block into assets/js/script.js
+   ══════════════════════════════════════════════════════ */
+ 
+// ── Set today as max for DOB input ──────────────────────
+(function () {
+  const dobInput = document.getElementById('adc-dob');
+  if (dobInput) dobInput.max = new Date().toISOString().split('T')[0];
+})();
+ 
+// ── Tab switcher ────────────────────────────────────────
+function adcSwitchTab(name, btn) {
+  document.querySelectorAll('.adc-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.adc-tab').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('adc-pane-' + name);
+  if (pane) pane.classList.add('active');
+  if (btn)  btn.classList.add('active');
+}
+ 
+// ── Helpers ─────────────────────────────────────────────
+const DAYS  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+ 
+function adcIsLeap(y) {
+  return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+}
+function adcDaysInMonth(y, m) {           // m: 0-indexed
+  return new Date(y, m + 1, 0).getDate();
+}
+function adcDayOfYear(d) {
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - start) / 86400000);
+}
+function adcWeekNumber(d) {
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  return Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+}
+function adcComma(n) {
+  return Number(n).toLocaleString();
+}
+ 
+// Zodiac
+const ZODIAC = [
+  { name:'Capricorn', emoji:'♑', end:[1,19] },
+  { name:'Aquarius',  emoji:'♒', end:[2,18] },
+  { name:'Pisces',    emoji:'♓', end:[3,20] },
+  { name:'Aries',     emoji:'♈', end:[4,19] },
+  { name:'Taurus',    emoji:'♉', end:[5,20] },
+  { name:'Gemini',    emoji:'♊', end:[6,20] },
+  { name:'Cancer',    emoji:'♋', end:[7,22] },
+  { name:'Leo',       emoji:'♌', end:[8,22] },
+  { name:'Virgo',     emoji:'♍', end:[9,22] },
+  { name:'Libra',     emoji:'♎', end:[10,22] },
+  { name:'Scorpio',   emoji:'♏', end:[11,21] },
+  { name:'Sagittarius',emoji:'♐',end:[12,21] },
+  { name:'Capricorn', emoji:'♑', end:[12,31] },
+];
+function adcZodiac(month, day) {   // month: 1-indexed
+  for (const z of ZODIAC) {
+    if (month < z.end[0] || (month === z.end[0] && day <= z.end[1])) return z;
+  }
+  return ZODIAC[ZODIAC.length - 1];
+}
+ 
+// Life stage
+function adcLifeStage(age) {
+  if (age < 1)   return { stage:'Infant',       desc:'First year of life' };
+  if (age < 3)   return { stage:'Toddler',      desc:'Early development' };
+  if (age < 12)  return { stage:'Child',        desc:'Childhood years' };
+  if (age < 18)  return { stage:'Teenager',     desc:'Adolescence' };
+  if (age < 25)  return { stage:'Young Adult',  desc:'Early adulthood' };
+  if (age < 40)  return { stage:'Adult',        desc:'Prime working years' };
+  if (age < 60)  return { stage:'Middle-Aged',  desc:'Midlife phase' };
+  if (age < 80)  return { stage:'Senior',       desc:'Golden years' };
+  return { stage:'Elder', desc:'A life well-lived' };
+}
+ 
+// ── TAB 1: AGE CALCULATOR ───────────────────────────────
+function adcCalcAge() {
+  const errEl = document.getElementById('adc-age-err');
+  const resEl = document.getElementById('adc-age-results');
+  const val   = document.getElementById('adc-dob').value;
+  if (!val) { errEl.style.display='none'; resEl.style.display='none'; return; }
+ 
+  const dob = new Date(val);
+  const now = new Date();
+ 
+  if (dob >= now) {
+    errEl.style.display = 'block';
+    resEl.style.display = 'none';
+    return;
+  }
+  errEl.style.display = 'none';
+  resEl.style.display = 'block';
+ 
+  // Exact age
+  let years  = now.getFullYear() - dob.getFullYear();
+  let months = now.getMonth()    - dob.getMonth();
+  let days   = now.getDate()     - dob.getDate();
+ 
+  if (days < 0) {
+    months--;
+    days += adcDaysInMonth(now.getFullYear(), now.getMonth() - 1);
+  }
+  if (months < 0) { years--; months += 12; }
+ 
+  // Total figures
+  const totalDays   = Math.floor((now - dob) / 86400000);
+  const totalWeeks  = Math.floor(totalDays / 7);
+  const totalHours  = totalDays * 24;
+  const heartbeats  = Math.round(totalDays * 24 * 60 * 70 / 1_000_000);
+ 
+  // Next birthday
+  let nextBday = new Date(now.getFullYear(), dob.getMonth(), dob.getDate());
+  if (nextBday <= now) nextBday.setFullYear(now.getFullYear() + 1);
+  const daysToNext = Math.floor((nextBday - now) / 86400000);
+ 
+  // Zodiac
+  const zodiac = adcZodiac(dob.getMonth() + 1, dob.getDate());
+ 
+  // Life stage
+  const ls = adcLifeStage(years);
+ 
+  // Day-of-year progress
+  const doy     = adcDayOfYear(now);
+  const doyMax  = adcIsLeap(now.getFullYear()) ? 366 : 365;
+  const doyPct  = ((doy / doyMax) * 100).toFixed(1);
+ 
+  // Populate
+  document.getElementById('adc-years').textContent     = years;
+  document.getElementById('adc-months').textContent    = months;
+  document.getElementById('adc-days-age').textContent  = days;
+  document.getElementById('adc-hours').textContent     = adcComma(totalHours);
+  document.getElementById('adc-weeks').textContent     = adcComma(totalWeeks);
+  document.getElementById('adc-total-days').textContent= adcComma(totalDays);
+  document.getElementById('adc-heartbeats').textContent= adcComma(heartbeats);
+  document.getElementById('adc-next-bday').textContent = daysToNext === 0 ? '🎉 Today!' : daysToNext;
+ 
+  document.getElementById('adc-zodiac-emoji').textContent = zodiac.emoji;
+  document.getElementById('adc-zodiac-name').textContent  = zodiac.name;
+ 
+  document.getElementById('adc-life-stage').textContent = ls.stage;
+  document.getElementById('adc-life-desc').textContent  = ' · ' + ls.desc;
+ 
+  document.getElementById('adc-doy').textContent       = doy;
+  document.getElementById('adc-doy-pct').textContent   = doyPct + '%';
+  document.getElementById('adc-doy-bar').style.width   = doyPct + '%';
+ 
+  document.getElementById('adc-birth-weekday').textContent  = DAYS[dob.getDay()];
+  document.getElementById('adc-next-bday-day').textContent  = DAYS[nextBday.getDay()];
+ 
+  // Push result to main calculator display if available
+  if (typeof currentExpression !== 'undefined') {
+    currentExpression = String(totalDays);
+    if (typeof updateResult === 'function') updateResult();
+  }
+}
+ 
+// ── TAB 2: COUNTDOWN ────────────────────────────────────
+function adcCalcCountdown() {
+  const errEl = document.getElementById('adc-cd-err');
+  const resEl = document.getElementById('adc-cd-results');
+  const val   = document.getElementById('adc-event-date').value;
+  const name  = document.getElementById('adc-event-name').value.trim() || 'Your event';
+ 
+  if (!val) { errEl.style.display='none'; resEl.style.display='none'; return; }
+ 
+  const target = new Date(val);
+  target.setHours(0,0,0,0);
+  const now = new Date();
+  now.setHours(0,0,0,0);
+ 
+  if (target <= now) {
+    errEl.style.display='block';
+    resEl.style.display='none';
+    return;
+  }
+  errEl.style.display = 'none';
+  resEl.style.display = 'block';
+ 
+  const totalDays  = Math.floor((target - now) / 86400000);
+  const totalHours = totalDays * 24;
+  const totalMins  = totalHours * 60;
+  const totalWeeks = Math.floor(totalDays / 7);
+ 
+  // Months diff (approximate)
+  let mDiff = (target.getFullYear() - now.getFullYear()) * 12
+              + target.getMonth() - now.getMonth();
+  if (target.getDate() < now.getDate()) mDiff--;
+ 
+  // SVG ring — max 365 days = full circle
+  const pct    = Math.min(totalDays / 365, 1);
+  const circ   = 345.4;
+  const offset = circ * (1 - pct);
+  document.getElementById('adc-ring-fg').style.strokeDashoffset = offset;
+  document.getElementById('adc-ring-days').textContent = adcComma(totalDays);
+ 
+  document.getElementById('adc-cd-weeks').textContent  = adcComma(totalWeeks);
+  document.getElementById('adc-cd-months').textContent = mDiff;
+  document.getElementById('adc-cd-hours').textContent  = adcComma(totalHours);
+  document.getElementById('adc-cd-mins').textContent   = adcComma(totalMins);
+ 
+  document.getElementById('adc-cd-event-label').textContent = name;
+  document.getElementById('adc-cd-weekday').textContent     = DAYS[target.getDay()];
+ 
+  const plural = totalDays === 1 ? 'day' : 'days';
+  document.getElementById('adc-cd-daysstr').textContent = totalDays + ' ' + plural;
+}
+ 
+// ── TAB 3: DAY OF WEEK FINDER ───────────────────────────
+function adcCalcDOW() {
+  const val = document.getElementById('adc-dow-date').value;
+  const res = document.getElementById('adc-dow-results');
+  if (!val) { res.style.display='none'; return; }
+  res.style.display = 'block';
+ 
+  const d    = new Date(val);
+  const year = d.getFullYear();
+  const mon  = d.getMonth();  // 0-indexed
+  const day  = d.getDate();
+ 
+  const dayOfYear     = adcDayOfYear(d);
+  const weekNo        = adcWeekNumber(d);
+  const quarter       = Math.floor(mon / 3) + 1;
+  const daysInMonth   = adcDaysInMonth(year, mon);
+  const isLeap        = adcIsLeap(year);
+  const daysInYear    = isLeap ? 366 : 365;
+  const daysLeftYear  = daysInYear - dayOfYear;
+ 
+  document.getElementById('adc-dow-day').textContent          = DAYS[d.getDay()];
+  document.getElementById('adc-dow-doy').textContent          = dayOfYear;
+  document.getElementById('adc-dow-week').textContent         = weekNo;
+  document.getElementById('adc-dow-quarter').textContent      = 'Q' + quarter;
+  document.getElementById('adc-dow-leapyear').textContent     = isLeap ? '✅ Yes' : '❌ No';
+  document.getElementById('adc-dow-days-in-month').textContent= daysInMonth;
+  document.getElementById('adc-dow-days-left-year').textContent = daysLeftYear;
+ 
+  // Fun fact
+  const funFacts = [
+    `${MONTHS_SHORT[mon]} ${day}, ${year} falls in Q${quarter}.`,
+    `It's week ${weekNo} of ${year}.`,
+    `${year} has ${daysInYear} days — ${isLeap ? 'a leap year!' : 'not a leap year.'}`,
+    `There are ${daysInMonth} days in ${MONTHS_SHORT[mon]} ${year}.`,
+    `Only ${daysLeftYear} days remain in ${year} after this date.`
+  ];
+  document.getElementById('adc-dow-fun-fact').textContent =
+    funFacts[Math.floor(Math.random() * funFacts.length)];
+}
+ 
+// ── TAB 4: DATE DIFFERENCE ──────────────────────────────
+function adcCalcDiff() {
+  const errEl  = document.getElementById('adc-diff-err');
+  const resEl  = document.getElementById('adc-diff-results');
+  const startV = document.getElementById('adc-diff-start').value;
+  const endV   = document.getElementById('adc-diff-end').value;
+ 
+  if (!startV || !endV) { errEl.style.display='none'; resEl.style.display='none'; return; }
+ 
+  const start = new Date(startV);
+  const end   = new Date(endV);
+ 
+  if (end < start) {
+    errEl.style.display='block';
+    resEl.style.display='none';
+    return;
+  }
+  errEl.style.display = 'none';
+  resEl.style.display = 'block';
+ 
+  const totalDays  = Math.floor((end - start) / 86400000);
+  const totalWeeks = Math.floor(totalDays / 7);
+  const totalHours = totalDays * 24;
+  const totalMins  = totalHours * 60;
+ 
+  // Exact years / months / days
+  let years  = end.getFullYear() - start.getFullYear();
+  let months = end.getMonth()    - start.getMonth();
+  let days   = end.getDate()     - start.getDate();
+ 
+  if (days < 0) {
+    months--;
+    days += adcDaysInMonth(end.getFullYear(), end.getMonth() - 1);
+  }
+  if (months < 0) { years--; months += 12; }
+ 
+  document.getElementById('adc-diff-years').textContent      = years;
+  document.getElementById('adc-diff-months').textContent     = months;
+  document.getElementById('adc-diff-days').textContent       = days;
+  document.getElementById('adc-diff-total-days').textContent = adcComma(totalDays);
+  document.getElementById('adc-diff-total-weeks').textContent= adcComma(totalWeeks);
+  document.getElementById('adc-diff-total-hours').textContent= adcComma(totalHours);
+  document.getElementById('adc-diff-total-mins').textContent = adcComma(totalMins);
+ 
+  const summary = document.getElementById('adc-diff-summary');
+  const parts = [];
+  if (years  > 0) parts.push(years  + (years  === 1 ? ' year'  : ' years'));
+  if (months > 0) parts.push(months + (months === 1 ? ' month' : ' months'));
+  if (days   > 0) parts.push(days   + (days   === 1 ? ' day'   : ' days'));
+  summary.innerHTML = parts.length
+    ? `<strong>${DAYS[start.getDay()]}, ${startV}</strong> to <strong>${DAYS[end.getDay()]}, ${endV}</strong> is exactly <strong>${parts.join(', ')}</strong>.`
+    : `<strong>Same date selected.</strong>`;
+ 
+  // Push to main calculator
+  if (typeof currentExpression !== 'undefined') {
+    currentExpression = String(totalDays);
+    if (typeof updateResult === 'function') updateResult();
+  }
+}

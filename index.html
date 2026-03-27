@@ -574,6 +574,146 @@
       color: #adb5bd;
       box-shadow: none;
     }
+     .wrapper { width: 100%; max-width: 680px; }
+ 
+    /* ── Age / Date accordion card ── */
+    .adc-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.10);
+      overflow: hidden;
+    }
+    .adc-tabs {
+      display: flex;
+      background: #f1f3f5;
+      border-bottom: 2px solid #dee2e6;
+    }
+    .adc-tab {
+      flex: 1;
+      padding: 10px 6px;
+      text-align: center;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .3px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #6c757d;
+      transition: background .18s, color .18s;
+      border-bottom: 3px solid transparent;
+    }
+    .adc-tab.active {
+      background: white;
+      color: var(--primary-color);
+      border-bottom: 3px solid var(--primary-color);
+    }
+    .adc-tab:hover:not(.active) { background: #e9ecef; color: #495057; }
+ 
+    .adc-pane { display: none; padding: 20px; }
+    .adc-pane.active { display: block; }
+ 
+    /* Result chip strip */
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .chip {
+      background: #e7f1ff;
+      border-radius: 12px;
+      padding: 8px 14px;
+      text-align: center;
+      flex: 1 1 130px;
+    }
+    .chip .chip-val {
+      display: block;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      line-height: 1.1;
+    }
+    .chip .chip-lbl {
+      display: block;
+      font-size: .72rem;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-top: 2px;
+    }
+ 
+    /* Zodiac badge */
+    .zodiac-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: .9rem;
+      margin-top: 12px;
+    }
+    .zodiac-badge .z-emoji { font-size: 1.4rem; }
+ 
+    /* Highlight result box */
+    .highlight-box {
+      background: #f8f9fa;
+      border-left: 4px solid var(--primary-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 14px;
+      font-size: .9rem;
+    }
+    .highlight-box strong { color: var(--primary-color); }
+ 
+    /* Progress bar for day-of-year */
+    .year-bar-wrap { margin-top: 14px; }
+    .year-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .75rem;
+      color: #6c757d;
+      margin-bottom: 4px;
+    }
+    .year-bar .progress-bar { transition: width .5s ease; }
+ 
+    /* Countdown ring */
+    .countdown-ring-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 14px 0 8px;
+    }
+    .ring-svg { transform: rotate(-90deg); }
+    .ring-bg { fill: none; stroke: #e9ecef; stroke-width: 10; }
+    .ring-fg { fill: none; stroke: var(--primary-color); stroke-width: 10;
+               stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+    .ring-text {
+      font-size: .82rem;
+      font-weight: 700;
+      fill: #212529;
+      dominant-baseline: middle;
+      text-anchor: middle;
+    }
+    .ring-sub {
+      font-size: .55rem;
+      fill: #6c757d;
+      dominant-baseline: middle;
+      text-anchor: middle;
+    }
+ 
+    .section-title {
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #adb5bd;
+      margin-bottom: 8px;
+    }
+ 
+    /* error state */
+    .adc-error { color: #dc3545; font-size: .85rem; margin-top: 6px; display: none; }
   </style>
 </head>
 
@@ -2721,6 +2861,281 @@
                 <div class="history-item-time"></div>
               </div>
             </template>
+             <!-- ⏱️ AGE & DATE MATH CALCULATOR -->
+  <div class="wrapper">
+    <div class="accordion-item adc-card">
+    <h2 class="accordion-header" id="headingAgeDateMath">
+      <button
+        class="accordion-button collapsed d-flex justify-content-between align-items-center"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseAgeDateMath"
+        aria-expanded="false"
+        aria-controls="collapseAgeDateMath">
+        <span>⏱️ Age &amp; Date Math Calculator</span>
+      </button>
+    </h2>
+ 
+    <div id="collapseAgeDateMath" class="accordion-collapse collapse"
+         aria-labelledby="headingAgeDateMath">
+      <div class="accordion-body p-0">
+ 
+        <!-- Tab strip -->
+        <div class="adc-tabs" id="adcTabStrip">
+          <button class="adc-tab active" onclick="adcSwitchTab('age',this)">🎂 Age</button>
+          <button class="adc-tab" onclick="adcSwitchTab('countdown',this)">⏳ Countdown</button>
+          <button class="adc-tab" onclick="adcSwitchTab('dayofweek',this)">📅 Day Finder</button>
+          <button class="adc-tab" onclick="adcSwitchTab('diff',this)">📐 Date Diff</button>
+        </div>
+ 
+        <!-- ══════════ TAB 1: AGE ══════════ -->
+        <div class="adc-pane active" id="adc-pane-age">
+          <p class="text-muted small mb-3">Enter your date of birth to get a full breakdown.</p>
+ 
+          <label class="form-label small fw-bold">Date of Birth</label>
+          <input type="date" class="form-control mb-1" id="adc-dob"
+                 max="" oninput="adcCalcAge()" />
+          <div class="adc-error" id="adc-age-err">Please enter a valid past date.</div>
+ 
+          <!-- Results -->
+          <div id="adc-age-results" style="display:none;">
+ 
+            <div class="chip-row">
+              <div class="chip">
+                <span class="chip-val" id="adc-years">—</span>
+                <span class="chip-lbl">Years</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-months">—</span>
+                <span class="chip-lbl">Months</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-days-age">—</span>
+                <span class="chip-lbl">Days</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-hours">—</span>
+                <span class="chip-lbl">Hours lived</span>
+              </div>
+            </div>
+ 
+            <div class="chip-row">
+              <div class="chip">
+                <span class="chip-val" id="adc-weeks">—</span>
+                <span class="chip-lbl">Weeks lived</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-total-days">—</span>
+                <span class="chip-lbl">Total days</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-heartbeats">—</span>
+                <span class="chip-lbl">~Heartbeats (×M)</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-next-bday">—</span>
+                <span class="chip-lbl">Days to birthday</span>
+              </div>
+            </div>
+ 
+            <!-- Zodiac -->
+            <div class="section-title mt-3">Zodiac &amp; Life Stage</div>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+              <div class="zodiac-badge">
+                <span class="z-emoji" id="adc-zodiac-emoji">♈</span>
+                <span id="adc-zodiac-name">Aries</span>
+              </div>
+              <div class="highlight-box flex-grow-1 m-0">
+                <strong id="adc-life-stage">Young Adult</strong>
+                <span id="adc-life-desc" class="text-muted"> · —</span>
+              </div>
+            </div>
+ 
+            <!-- Year progress bar -->
+            <div class="year-bar-wrap">
+              <div class="year-bar-label">
+                <span>Day of year: <strong id="adc-doy">—</strong></span>
+                <span id="adc-doy-pct">—%</span>
+              </div>
+              <div class="progress year-bar" style="height:10px; border-radius:6px;">
+                <div class="progress-bar bg-primary" id="adc-doy-bar"
+                     role="progressbar" style="width:0%"></div>
+              </div>
+            </div>
+ 
+            <!-- Day of birth weekday -->
+            <div class="highlight-box mt-2">
+              You were born on a <strong id="adc-birth-weekday">—</strong>. 
+              Your next birthday falls on a <strong id="adc-next-bday-day">—</strong>.
+            </div>
+ 
+          </div><!-- /age-results -->
+        </div><!-- /pane-age -->
+ 
+        <!-- ══════════ TAB 2: COUNTDOWN ══════════ -->
+        <div class="adc-pane" id="adc-pane-countdown">
+          <p class="text-muted small mb-3">How far away is your event?</p>
+ 
+          <label class="form-label small fw-bold">Event Name (optional)</label>
+          <input type="text" class="form-control mb-2" id="adc-event-name"
+                 placeholder="e.g. Graduation, Wedding…" oninput="adcCalcCountdown()" />
+ 
+          <label class="form-label small fw-bold">Event Date</label>
+          <input type="date" class="form-control mb-1" id="adc-event-date"
+                 oninput="adcCalcCountdown()" />
+          <div class="adc-error" id="adc-cd-err">Please choose a future date.</div>
+ 
+          <div id="adc-cd-results" style="display:none;">
+            <!-- SVG ring -->
+            <div class="countdown-ring-wrap">
+              <svg class="ring-svg" width="130" height="130" viewBox="0 0 130 130">
+                <circle class="ring-bg" cx="65" cy="65" r="55"/>
+                <circle class="ring-fg" id="adc-ring-fg" cx="65" cy="65" r="55"
+                        stroke-dasharray="345.4" stroke-dashoffset="345.4"/>
+                <!-- text is not rotated, use transform on group -->
+                <g transform="rotate(90,65,65)">
+                  <text class="ring-text" x="65" y="60" id="adc-ring-days">—</text>
+                  <text class="ring-sub"  x="65" y="75">days left</text>
+                </g>
+              </svg>
+            </div>
+ 
+            <div class="chip-row">
+              <div class="chip">
+                <span class="chip-val" id="adc-cd-weeks">—</span>
+                <span class="chip-lbl">Weeks</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-cd-months">—</span>
+                <span class="chip-lbl">Months</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-cd-hours">—</span>
+                <span class="chip-lbl">Hours</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-cd-mins">—</span>
+                <span class="chip-lbl">Minutes</span>
+              </div>
+            </div>
+ 
+            <div class="highlight-box">
+              <strong id="adc-cd-event-label">Your event</strong> is on a
+              <strong id="adc-cd-weekday">—</strong>
+              — that's <strong id="adc-cd-daysstr">—</strong> away.
+            </div>
+          </div>
+        </div><!-- /pane-countdown -->
+ 
+        <!-- ══════════ TAB 3: DAY FINDER ══════════ -->
+        <div class="adc-pane" id="adc-pane-dayofweek">
+          <p class="text-muted small mb-3">Find the day of the week for any date in history or future.</p>
+ 
+          <label class="form-label small fw-bold">Enter Any Date</label>
+          <input type="date" class="form-control mb-2" id="adc-dow-date"
+                 oninput="adcCalcDOW()" />
+ 
+          <div id="adc-dow-results" style="display:none;">
+ 
+            <div class="chip-row">
+              <div class="chip" style="flex:2 1 180px; background:#e7f1ff;">
+                <span class="chip-val" style="font-size:1.7rem;" id="adc-dow-day">—</span>
+                <span class="chip-lbl">Day of week</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-dow-doy">—</span>
+                <span class="chip-lbl">Day of year</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-dow-week">—</span>
+                <span class="chip-lbl">Week №</span>
+              </div>
+            </div>
+ 
+            <div class="chip-row">
+              <div class="chip">
+                <span class="chip-val" id="adc-dow-quarter">—</span>
+                <span class="chip-lbl">Quarter</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-dow-leapyear">—</span>
+                <span class="chip-lbl">Leap Year?</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-dow-days-in-month">—</span>
+                <span class="chip-lbl">Days in month</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-dow-days-left-year">—</span>
+                <span class="chip-lbl">Days left in year</span>
+              </div>
+            </div>
+ 
+            <div class="highlight-box">
+              <span id="adc-dow-fun-fact"></span>
+            </div>
+          </div>
+        </div><!-- /pane-dayofweek -->
+ 
+        <!-- ══════════ TAB 4: DATE DIFF ══════════ -->
+        <div class="adc-pane" id="adc-pane-diff">
+          <p class="text-muted small mb-3">Calculate the exact difference between two dates.</p>
+ 
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="form-label small fw-bold">Start Date</label>
+              <input type="date" class="form-control" id="adc-diff-start"
+                     oninput="adcCalcDiff()" />
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">End Date</label>
+              <input type="date" class="form-control" id="adc-diff-end"
+                     oninput="adcCalcDiff()" />
+            </div>
+          </div>
+          <div class="adc-error" id="adc-diff-err">End date must be after start date.</div>
+ 
+          <div id="adc-diff-results" style="display:none;">
+            <div class="chip-row">
+              <div class="chip">
+                <span class="chip-val" id="adc-diff-years">—</span>
+                <span class="chip-lbl">Years</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-diff-months">—</span>
+                <span class="chip-lbl">Months</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-diff-days">—</span>
+                <span class="chip-lbl">Days</span>
+              </div>
+            </div>
+            <div class="chip-row">
+              <div class="chip">
+                <span class="chip-val" id="adc-diff-total-days">—</span>
+                <span class="chip-lbl">Total days</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-diff-total-weeks">—</span>
+                <span class="chip-lbl">Total weeks</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-diff-total-hours">—</span>
+                <span class="chip-lbl">Total hours</span>
+              </div>
+              <div class="chip">
+                <span class="chip-val" id="adc-diff-total-mins">—</span>
+                <span class="chip-lbl">Total minutes</span>
+              </div>
+            </div>
+            <div class="highlight-box" id="adc-diff-summary"></div>
+          </div>
+        </div><!-- /pane-diff -->
+ 
+      </div><!-- /accordion-body -->
+    </div><!-- /collapse -->
+  </div>
+  </div>
           </div>
 
           <script src="assets/js/bootstrap.min.js"></script>
