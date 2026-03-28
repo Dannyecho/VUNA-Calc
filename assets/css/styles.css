@@ -61,28 +61,7 @@ body {
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.diff-controls {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.diff-input {
-  font-size: 14px;
-  border-radius: 12px;
-}
-
-.diff-btn {
-  white-space: nowrap;
-}
-
-.diff-output {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #495057;
-  min-height: 22px;
-  word-break: break-word;
-}
+/* differentiation styles removed */
 
 #result {
   text-align: right;

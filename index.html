@@ -574,6 +574,77 @@
       color: #adb5bd;
       box-shadow: none;
     }
+
+    .camera-solver-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(15, 23, 42, 0.72);
+      padding: 20px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .camera-solver-modal.open {
+      display: flex;
+    }
+
+    .camera-solver-card {
+      width: min(720px, 100%);
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+    }
+
+    .camera-solver-preview {
+      width: 100%;
+      min-height: 280px;
+      max-height: 420px;
+      object-fit: cover;
+      background: #0f172a;
+      border-radius: 18px;
+      border: 1px solid rgba(13, 110, 253, 0.15);
+    }
+
+    .camera-solver-canvas {
+      display: none;
+    }
+
+    .camera-solver-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .camera-solver-status {
+      margin-top: 14px;
+      font-size: 14px;
+      color: #495057;
+      min-height: 21px;
+    }
+
+    .camera-solver-result {
+      margin-top: 14px;
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 14px 16px;
+      border: 1px solid rgba(13, 110, 253, 0.12);
+    }
+
+    .camera-solver-input {
+      width: 100%;
+      border: 1px solid rgba(13, 110, 253, 0.2);
+      border-radius: 12px;
+      padding: 10px 12px;
+      min-height: 88px;
+      resize: vertical;
+      font-size: 16px;
+      color: #0d6efd;
+      background: #ffffff;
+    }
   </style>
 </head>
 
@@ -628,25 +699,7 @@
                   <div class="preview-panel">
                     <div id="answer-preview"></div>
                   </div>
-                  <div class="diff-panel">
-                    <div class="display-container my-3">
-                      <div class="col-md-12">
-                        <h4 class="group-header mb-0">Differentiate</h4>
-                        <div class="diff-controls row align-items-end">
-                          <div class="col-9">
-                            <input type="text" class="form-control diff-input" id="diff-input"
-                              placeholder="e.g., x^3 + 4x or sin(x)" />
-                          </div>
-                          <div class="col">
-                            <a class="btn btn-block btn-operator diff-btn" onclick="differentiateExpression()">
-                              d/dx
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div id="diff-output" class="diff-outputx"></div>
-                  </div>
+                  <!-- Differentiate feature removed -->
 
                   <!-- Geometry Modal -->
                   <div id="geometryModal"
@@ -668,6 +721,37 @@
                       <input type="number" id="input2" class="form-control mb-2" placeholder="Value 2">
                       <button class="btn btn-primary w-100 mb-2" onclick="calculateGeometry()">Calculate</button>
                       <button class="btn btn-secondary w-100" onclick="closeGeometry()">Close</button>
+                    </div>
+                  </div>
+
+                  <div id="cameraSolverModal" class="camera-solver-modal" aria-hidden="true">
+                    <div class="camera-solver-card">
+                      <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                          <h5 class="mb-1">Camera Math Solver</h5>
+                          <p class="text-muted mb-0 small">Capture a printed expression, run OCR, then send it into the calculator.</p>
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="closeCameraSolver()">Close</button>
+                      </div>
+
+                      <video id="cameraSolverVideo" class="camera-solver-preview" autoplay playsinline muted></video>
+                      <canvas id="cameraSolverCanvas" class="camera-solver-canvas"></canvas>
+
+                      <div class="camera-solver-toolbar">
+                        <button class="btn btn-primary btn-sm" onclick="startCameraSolver()">Start Camera</button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="captureCameraSolverFrame()">Capture</button>
+                        <button class="btn btn-success btn-sm" onclick="solveCapturedCameraMath()">Read Image</button>
+                        <button class="btn btn-warning btn-sm" onclick="applyCameraSolverExpression()">Solve Edited</button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('cameraSolverUpload').click()">Upload Image</button>
+                      </div>
+
+                      <input id="cameraSolverUpload" type="file" accept="image/*" class="d-none" onchange="loadCameraSolverImage(event)">
+
+                      <div id="cameraSolverStatus" class="camera-solver-status">Camera is idle.</div>
+                      <div id="cameraSolverResult" class="camera-solver-result d-none">
+                        <div class="small text-muted mb-1">Recognized expression</div>
+                        <textarea id="cameraSolverExpression" class="camera-solver-input" rows="3" placeholder="OCR result will appear here for editing"></textarea>
+                      </div>
                     </div>
                   </div>
 
@@ -753,6 +837,7 @@
                     <button class="btn btn-special" onclick="tenPower()">10<sup>x</sup></button>
                     <button id="voice-input-btn" class="btn btn-special" aria-label="Speak calculation input"
                       onclick="startVoiceInput()">🎙️</button>
+                    <button class="btn btn-special" onclick="openCameraSolver()" title="Scan an expression with the camera">CAM</button>
                     <button class="btn btn-operator" onclick="convertToHex()">HEX</button>
                     <button class="btn btn-operator" onclick="openGeometry()">📐 Geo</button>
                     <!-- Row 9 -->
@@ -2188,7 +2273,7 @@
                                     <div class="col-md-6">
                                       <label class="form-label small mb-1" style="font-weight:600;">Find</label>
                                       <div class="btn-group btn-group-sm w-100">
-                                        <button class="btn btn-outline-primary" onclick="findDerivative()">d/dx</button>
+                                        <!--<button class="btn btn-outline-primary" onclick="findDerivative()">d/dx</button>-->
                                         <button class="btn btn-outline-primary" onclick="findIntegral()">∫</button>
                                         <button class="btn btn-outline-primary" onclick="findRoots()">Roots</button>
                                         <button class="btn btn-outline-primary" onclick="findExtrema()">Min/Max</button>
@@ -2204,7 +2289,7 @@
                                         <div><strong>Value:</strong> <span id="point-value"></span></div>
                                       </div>
                                       <div class="col-md-6">
-                                        <div><strong>Derivative:</strong> <span id="point-derivative"></span></div>
+                                        <!--<div><strong>Derivative:</strong> <span id="point-derivative"></span></div>-->
                                         <div><strong>Analysis:</strong> <span id="point-analysis"></span></div>
                                       </div>
                                     </div>
@@ -2669,6 +2754,7 @@
           </div>
 
           <script src="assets/js/bootstrap.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
           <script src="assets/js/script.js"></script>
           <button id="scroll-to-calculator" title="Back to Calculator">↑</button>
         </div>

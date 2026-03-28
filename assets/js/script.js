@@ -843,66 +843,7 @@ Parser.prototype.parsePrimary = function () {
   throw new Error("Invalid token in expression.");
 };
 
-function differentiate(node) {
-  switch (node.type) {
-    case "number":
-      return { type: "number", value: 0 };
-    case "constant":
-      return { type: "number", value: 0 };
-    case "variable":
-      return { type: "number", value: 1 };
-    case "unary":
-      return { type: "unary", op: "-", value: differentiate(node.value) };
-    case "binary":
-      return differentiateBinary(node);
-    case "func":
-      return differentiateFunction(node);
-    default:
-      throw new Error("Unsupported expression.");
-  }
-}
-
-function differentiateBinary(node) {
-  const left = node.left;
-  const right = node.right;
-  const dLeft = differentiate(left);
-  const dRight = differentiate(right);
-
-  switch (node.op) {
-    case "+":
-      return { type: "binary", op: "+", left: dLeft, right: dRight };
-    case "-":
-      return { type: "binary", op: "-", left: dLeft, right: dRight };
-    case "*":
-      return {
-        type: "binary",
-        op: "+",
-        left: { type: "binary", op: "*", left: dLeft, right: right },
-        right: { type: "binary", op: "*", left: left, right: dRight },
-      };
-    case "/":
-      return {
-        type: "binary",
-        op: "/",
-        left: {
-          type: "binary",
-          op: "-",
-          left: { type: "binary", op: "*", left: dLeft, right: right },
-          right: { type: "binary", op: "*", left: left, right: dRight },
-        },
-        right: {
-          type: "binary",
-          op: "^",
-          left: right,
-          right: { type: "number", value: 2 },
-        },
-      };
-    case "^":
-      return differentiatePower(left, right);
-    default:
-      throw new Error("Unsupported operator.");
-  }
-}
+// Symbolic differentiation feature removed.
 
 function convertToFraction() {
   const display = document.getElementById("result");
@@ -939,186 +880,9 @@ function convertToFraction() {
   currentExpression = display.value;
 }
 
-function differentiatePower(base, exponent) {
-  if (exponent.type === "number") {
-    return {
-      type: "binary",
-      op: "*",
-      left: {
-        type: "binary",
-        op: "*",
-        left: { type: "number", value: exponent.value },
-        right: {
-          type: "binary",
-          op: "^",
-          left: base,
-          right: { type: "number", value: exponent.value - 1 },
-        },
-      },
-      right: differentiate(base),
-    };
-  }
+// differentiatePower removed.
 
-  if (base.type === "constant" || base.type === "number") {
-    return {
-      type: "binary",
-      op: "*",
-      left: { type: "binary", op: "^", left: base, right: exponent },
-      right: {
-        type: "binary",
-        op: "*",
-        left: { type: "func", name: "ln", arg: base },
-        right: differentiate(exponent),
-      },
-    };
-  }
-
-  throw new Error("Unsupported exponent form for differentiation.");
-}
-
-function differentiateFunction(node) {
-  const arg = node.arg;
-  const dArg = differentiate(arg);
-
-  switch (node.name) {
-    case "sin":
-      return {
-        type: "binary",
-        op: "*",
-        left: { type: "func", name: "cos", arg },
-        right: dArg,
-      };
-    case "cos":
-      return {
-        type: "binary",
-        op: "*",
-        left: {
-          type: "unary",
-          op: "-",
-          value: { type: "func", name: "sin", arg },
-        },
-        right: dArg,
-      };
-    case "tan":
-      return {
-        type: "binary",
-        op: "*",
-        left: {
-          type: "binary",
-          op: "/",
-          left: { type: "number", value: 1 },
-          right: {
-            type: "binary",
-            op: "^",
-            left: { type: "func", name: "cos", arg },
-            right: { type: "number", value: 2 },
-          },
-        },
-        right: dArg,
-      };
-    case "ln":
-      return {
-        type: "binary",
-        op: "*",
-        left: {
-          type: "binary",
-          op: "/",
-          left: { type: "number", value: 1 },
-          right: arg,
-        },
-        right: dArg,
-      };
-    case "log":
-      return {
-        type: "binary",
-        op: "*",
-        left: {
-          type: "binary",
-          op: "/",
-          left: { type: "number", value: 1 },
-          right: {
-            type: "binary",
-            op: "*",
-            left: arg,
-            right: {
-              type: "func",
-              name: "ln",
-              arg: { type: "number", value: 10 },
-            },
-          },
-        },
-        right: dArg,
-      };
-    case "exp":
-      return {
-        type: "binary",
-        op: "*",
-        left: { type: "func", name: "exp", arg },
-        right: dArg,
-      };
-    default:
-      throw new Error(`Unsupported function: ${node.name}`);
-  }
-}
-
-function simplify(node) {
-  if (!node) return node;
-
-  if (node.type === "unary") {
-    const value = simplify(node.value);
-    if (value.type === "number") {
-      return { type: "number", value: -value.value };
-    }
-    return { type: "unary", op: node.op, value };
-  }
-
-  if (node.type === "binary") {
-    const left = simplify(node.left);
-    const right = simplify(node.right);
-
-    if (left.type === "number" && right.type === "number") {
-      return {
-        type: "number",
-        value: evaluateBinary(node.op, left.value, right.value),
-      };
-    }
-
-    switch (node.op) {
-      case "+":
-        if (isZero(left)) return right;
-        if (isZero(right)) return left;
-        break;
-      case "-":
-        if (isZero(right)) return left;
-        if (isZero(left)) return { type: "unary", op: "-", value: right };
-        break;
-      case "*":
-        if (isZero(left) || isZero(right)) return { type: "number", value: 0 };
-        if (isOne(left)) return right;
-        if (isOne(right)) return left;
-        break;
-      case "/":
-        if (isZero(left)) return { type: "number", value: 0 };
-        if (isOne(right)) return left;
-        break;
-      case "^":
-        if (isZero(right)) return { type: "number", value: 1 };
-        if (isOne(right)) return left;
-        if (isZero(left)) return { type: "number", value: 0 };
-        if (isOne(left)) return { type: "number", value: 1 };
-        break;
-    }
-
-    return { type: "binary", op: node.op, left, right };
-  }
-
-  if (node.type === "func") {
-    return { type: "func", name: node.name, arg: simplify(node.arg) };
-  }
-
-  return node;
-}
-
+// Symbolic differentiation removed.
 function evaluateBinary(op, left, right) {
   switch (op) {
     case "+":
@@ -4875,66 +4639,6 @@ function displayBitwiseResult(operation, result) {
     throw new Error("Invalid token in expression.");
   };
 
-  function differentiate(node) {
-    switch (node.type) {
-      case "number":
-        return { type: "number", value: 0 };
-      case "constant":
-        return { type: "number", value: 0 };
-      case "variable":
-        return { type: "number", value: 1 };
-      case "unary":
-        return { type: "unary", op: "-", value: differentiate(node.value) };
-      case "binary":
-        return differentiateBinary(node);
-      case "func":
-        return differentiateFunction(node);
-      default:
-        throw new Error("Unsupported expression.");
-    }
-  }
-
-  function differentiateBinary(node) {
-    const left = node.left;
-    const right = node.right;
-    const dLeft = differentiate(left);
-    const dRight = differentiate(right);
-
-    switch (node.op) {
-      case "+":
-        return { type: "binary", op: "+", left: dLeft, right: dRight };
-      case "-":
-        return { type: "binary", op: "-", left: dLeft, right: dRight };
-      case "*":
-        return {
-          type: "binary",
-          op: "+",
-          left: { type: "binary", op: "*", left: dLeft, right: right },
-          right: { type: "binary", op: "*", left: left, right: dRight },
-        };
-      case "/":
-        return {
-          type: "binary",
-          op: "/",
-          left: {
-            type: "binary",
-            op: "-",
-            left: { type: "binary", op: "*", left: dLeft, right: right },
-            right: { type: "binary", op: "*", left: left, right: dRight },
-          },
-          right: {
-            type: "binary",
-            op: "^",
-            left: right,
-            right: { type: "number", value: 2 },
-          },
-        };
-      case "^":
-        return differentiatePower(left, right);
-      default:
-        throw new Error("Unsupported operator.");
-    }
-  }
 
   function convertToFraction() {
     const display = document.getElementById("result");
@@ -4971,127 +4675,7 @@ function displayBitwiseResult(operation, result) {
     currentExpression = display.value;
   }
 
-  function differentiatePower(base, exponent) {
-    if (exponent.type === "number") {
-      return {
-        type: "binary",
-        op: "*",
-        left: {
-          type: "binary",
-          op: "*",
-          left: { type: "number", value: exponent.value },
-          right: {
-            type: "binary",
-            op: "^",
-            left: base,
-            right: { type: "number", value: exponent.value - 1 },
-          },
-        },
-        right: differentiate(base),
-      };
-    }
-
-    if (base.type === "constant" || base.type === "number") {
-      return {
-        type: "binary",
-        op: "*",
-        left: { type: "binary", op: "^", left: base, right: exponent },
-        right: {
-          type: "binary",
-          op: "*",
-          left: { type: "func", name: "ln", arg: base },
-          right: differentiate(exponent),
-        },
-      };
-    }
-
-    throw new Error("Unsupported exponent form for differentiation.");
-  }
-
-  function differentiateFunction(node) {
-    const arg = node.arg;
-    const dArg = differentiate(arg);
-
-    switch (node.name) {
-      case "sin":
-        return {
-          type: "binary",
-          op: "*",
-          left: { type: "func", name: "cos", arg },
-          right: dArg,
-        };
-      case "cos":
-        return {
-          type: "binary",
-          op: "*",
-          left: {
-            type: "unary",
-            op: "-",
-            value: { type: "func", name: "sin", arg },
-          },
-          right: dArg,
-        };
-      case "tan":
-        return {
-          type: "binary",
-          op: "*",
-          left: {
-            type: "binary",
-            op: "/",
-            left: { type: "number", value: 1 },
-            right: {
-              type: "binary",
-              op: "^",
-              left: { type: "func", name: "cos", arg },
-              right: { type: "number", value: 2 },
-            },
-          },
-          right: dArg,
-        };
-      case "ln":
-        return {
-          type: "binary",
-          op: "*",
-          left: {
-            type: "binary",
-            op: "/",
-            left: { type: "number", value: 1 },
-            right: arg,
-          },
-          right: dArg,
-        };
-      case "log":
-        return {
-          type: "binary",
-          op: "*",
-          left: {
-            type: "binary",
-            op: "/",
-            left: { type: "number", value: 1 },
-            right: {
-              type: "binary",
-              op: "*",
-              left: arg,
-              right: {
-                type: "func",
-                name: "ln",
-                arg: { type: "number", value: 10 },
-              },
-            },
-          },
-          right: dArg,
-        };
-      case "exp":
-        return {
-          type: "binary",
-          op: "*",
-          left: { type: "func", name: "exp", arg },
-          right: dArg,
-        };
-      default:
-        throw new Error(`Unsupported function: ${node.name}`);
-    }
-  }
+  // Symbolic differentiation removed from this section.
 
   function simplify(node) {
     if (!node) return node;
@@ -9236,7 +8820,8 @@ function analyzePoint() {
 
   const expression = graphFunctions[0].expression;
   const y = evaluateFunction(expression, x);
-  const derivative = approximateDerivative(expression, x);
+  // derivative feature removed; analysis will use slope approximation when needed
+  const derivative = NaN;
 
   if (y === null) {
     alert('Function is undefined at that x value.');
@@ -9246,39 +8831,36 @@ function analyzePoint() {
   const result = document.getElementById('analysis-result');
   const pointCoords = document.getElementById('point-coords');
   const pointValue = document.getElementById('point-value');
-  const pointDerivative = document.getElementById('point-derivative');
+  // derivative element removed
   const pointAnalysis = document.getElementById('point-analysis');
 
   if (!result || !pointCoords || !pointValue || !pointDerivative || !pointAnalysis) return;
 
   pointCoords.textContent = `(${x.toFixed(4)}, ${y.toFixed(4)})`;
   pointValue.textContent = y.toFixed(6);
-  pointDerivative.textContent = Number.isFinite(derivative) ? derivative.toFixed(6) : 'undefined';
 
-  if (!Number.isFinite(derivative)) {
-    pointAnalysis.textContent = 'No derivative at this point';
-  } else if (Math.abs(derivative) < 1e-4) {
-    pointAnalysis.textContent = 'Likely stationary point';
-  } else if (derivative > 0) {
-    pointAnalysis.textContent = 'Increasing at this point';
+  // Simple analysis using forward difference approximation if possible
+  const yAhead = evaluateFunction(expression, x + 1e-3);
+  const yBehind = evaluateFunction(expression, x - 1e-3);
+  if (yAhead === null || yBehind === null) {
+    pointAnalysis.textContent = 'No derivative information available';
   } else {
-    pointAnalysis.textContent = 'Decreasing at this point';
+    const approx = (yAhead - yBehind) / (2 * 1e-3);
+    if (!Number.isFinite(approx)) {
+      pointAnalysis.textContent = 'No derivative information available';
+    } else if (Math.abs(approx) < 1e-4) {
+      pointAnalysis.textContent = 'Likely stationary point';
+    } else if (approx > 0) {
+      pointAnalysis.textContent = 'Increasing at this point';
+    } else {
+      pointAnalysis.textContent = 'Decreasing at this point';
+    }
   }
 
   result.style.display = 'block';
 }
 
-function approximateDerivative(expression, x) {
-  const h = 1e-5;
-  const y1 = evaluateFunction(expression, x + h);
-  const y2 = evaluateFunction(expression, x - h);
-  if (y1 === null || y2 === null) return NaN;
-  return (y1 - y2) / (2 * h);
-}
-
-function findDerivative() {
-  analyzePoint();
-}
+// approximateDerivative and findDerivative removed
 
 function findIntegral() {
   if (graphFunctions.length === 0) {
@@ -9398,8 +8980,12 @@ function findExtrema() {
 
   for (let i = 1; i < steps; i++) {
     const x = graphBounds.xMin + i * xStep;
-    const d1 = approximateDerivative(expression, x - xStep);
-    const d2 = approximateDerivative(expression, x + xStep);
+    const h = xStep;
+    const f1 = evaluateFunction(expression, x - h);
+    const f2 = evaluateFunction(expression, x + h);
+    if (f1 === null || f2 === null) continue;
+    const d1 = (evaluateFunction(expression, x - 2 * h) - f1) / (2 * h);
+    const d2 = (f2 - evaluateFunction(expression, x + 2 * h)) / (2 * h);
     if (!Number.isFinite(d1) || !Number.isFinite(d2)) continue;
 
     if (d1 * d2 < 0) {
@@ -9529,3 +9115,404 @@ function generateTable() {
     </div>
   `;
 }
+
+let cameraSolverStream = null;
+let cameraSolverCaptured = false;
+
+function getCameraSolverElements() {
+  return {
+    modal: document.getElementById("cameraSolverModal"),
+    video: document.getElementById("cameraSolverVideo"),
+    canvas: document.getElementById("cameraSolverCanvas"),
+    upload: document.getElementById("cameraSolverUpload"),
+    status: document.getElementById("cameraSolverStatus"),
+    result: document.getElementById("cameraSolverResult"),
+    expression: document.getElementById("cameraSolverExpression"),
+  };
+}
+
+function setCameraSolverStatus(message) {
+  const { status } = getCameraSolverElements();
+  if (status) status.textContent = message;
+}
+
+function setCameraSolverExpression(expression) {
+  const { result, expression: expressionNode } = getCameraSolverElements();
+  if (!result || !expressionNode) return;
+
+  if (expression) {
+    expressionNode.value = expression;
+    result.classList.remove("d-none");
+  } else {
+    expressionNode.value = "";
+    result.classList.add("d-none");
+  }
+}
+
+function openCameraSolver() {
+  const { modal } = getCameraSolverElements();
+  if (!modal) return;
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  cameraSolverCaptured = false;
+  setCameraSolverExpression("");
+  setCameraSolverStatus("Opening camera...");
+  startCameraSolver();
+}
+
+function closeCameraSolver() {
+  const { modal, video, upload } = getCameraSolverElements();
+  if (!modal) return;
+
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+
+  if (video) {
+    video.pause();
+    video.srcObject = null;
+  }
+
+  if (upload) upload.value = "";
+
+  if (cameraSolverStream) {
+    cameraSolverStream.getTracks().forEach((track) => track.stop());
+    cameraSolverStream = null;
+  }
+
+  cameraSolverCaptured = false;
+  setCameraSolverStatus("Camera is idle.");
+}
+
+async function startCameraSolver() {
+  const { video } = getCameraSolverElements();
+  if (!video) return;
+
+  try {
+    if (cameraSolverStream) {
+      cameraSolverStream.getTracks().forEach((track) => track.stop());
+    }
+
+    cameraSolverStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+      audio: false,
+    });
+
+    video.srcObject = cameraSolverStream;
+    await video.play();
+    cameraSolverCaptured = false;
+    setCameraSolverStatus("Camera is live. Frame the expression, then capture it.");
+  } catch (error) {
+    console.error("Camera solver failed to start:", error);
+    setCameraSolverStatus(
+      "Camera access failed. You can still upload an image instead.",
+    );
+  }
+}
+
+function captureCameraSolverFrame() {
+  const { video, canvas } = getCameraSolverElements();
+  if (!video || !canvas) return;
+
+  const width = video.videoWidth || 1280;
+  const height = video.videoHeight || 720;
+  const context = canvas.getContext("2d");
+  if (!context) return;
+
+  canvas.width = width;
+  canvas.height = height;
+  context.drawImage(video, 0, 0, width, height);
+  cameraSolverCaptured = true;
+  setCameraSolverStatus("Frame captured. Run OCR when ready.");
+}
+
+function loadCameraSolverImage(event) {
+  const file = event.target.files && event.target.files[0];
+  const { canvas } = getCameraSolverElements();
+  if (!file || !canvas) return;
+
+  const image = new Image();
+  const objectUrl = URL.createObjectURL(file);
+  image.onload = () => {
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    canvas.width = image.width;
+    canvas.height = image.height;
+    context.drawImage(image, 0, 0);
+    cameraSolverCaptured = true;
+    setCameraSolverExpression("");
+    setCameraSolverStatus("Image loaded. Run OCR when ready.");
+    URL.revokeObjectURL(objectUrl);
+  };
+  image.onerror = () => {
+    setCameraSolverStatus("The selected image could not be read.");
+    URL.revokeObjectURL(objectUrl);
+  };
+  image.src = objectUrl;
+}
+
+function preprocessCameraSolverCanvas(sourceCanvas) {
+  const processedCanvas = document.createElement("canvas");
+  processedCanvas.width = sourceCanvas.width;
+  processedCanvas.height = sourceCanvas.height;
+
+  const ctx = processedCanvas.getContext("2d");
+  if (!ctx) return sourceCanvas;
+
+  ctx.drawImage(sourceCanvas, 0, 0);
+  const imageData = ctx.getImageData(
+    0,
+    0,
+    processedCanvas.width,
+    processedCanvas.height,
+  );
+  const data = imageData.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const grayscale =
+      data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+    const normalized = grayscale > 150 ? 255 : 0;
+    data[i] = normalized;
+    data[i + 1] = normalized;
+    data[i + 2] = normalized;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+  return processedCanvas;
+}
+
+function normalizeCameraMathLine(line) {
+  if (!line) return "";
+
+  let cleaned = line
+    .toLowerCase()
+    .replace(/[÷]/g, "/")
+    .replace(/[×]/g, "*")
+    .replace(/[−–—]/g, "-")
+    .replace(/[|]/g, "1")
+    .replace(/,/g, ".")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  cleaned = cleaned
+    .replace(/(\d)\s*[xX]\s*(\d)/g, "$1*$2")
+    .replace(/(\d)\s*[xX]\s*\(/g, "$1*(")
+    .replace(/\)\s*[xX]\s*(\d)/g, ")*$1")
+    .replace(/([0-9)])\s*\(/g, "$1*(")
+    .replace(/\)\s*([a-z0-9])/g, ")*$1");
+
+  cleaned = cleaned.replace(/[^0-9xyzeπ+\-*/^=().\s]/g, "");
+  cleaned = cleaned.replace(/\s+/g, "");
+  cleaned = cleaned.replace(/^[+\-*/^.=]+/, "").replace(/[+\-*/^.=]+$/, "");
+
+  return cleaned;
+}
+
+function scoreCameraMathLine(line) {
+  if (!line) return 0;
+
+  let score = 0;
+  if (line.includes("=")) score += 6;
+  if (/[xy]/i.test(line)) score += 4;
+  if (/\d/.test(line)) score += 3;
+  if (/[+\-*/^]/.test(line)) score += 3;
+  if (line.length < 2) score -= 4;
+  if (/^[xy]+$/i.test(line)) score -= 3;
+
+  return score;
+}
+
+function extractCameraMathExpression(rawText) {
+  if (!rawText) return "";
+
+  const lines = rawText
+    .split(/\r?\n/)
+    .map((line) => normalizeCameraMathLine(line))
+    .filter(Boolean);
+
+  const candidates = lines.filter((line) => scoreCameraMathLine(line) >= 6);
+
+  if (candidates.length) {
+    return candidates.join("\n");
+  }
+
+  const fallback = normalizeCameraMathLine(rawText.replace(/\r?\n/g, " "));
+  return scoreCameraMathLine(fallback) >= 4 ? fallback : "";
+}
+
+function parseLinearEquationSide(side) {
+  const normalized = side.replace(/-/g, "+-");
+  const parts = normalized.split("+").filter(Boolean);
+  const totals = { x: 0, y: 0, constant: 0 };
+
+  for (const part of parts) {
+    if (part.includes("x")) {
+      const coeffText = part.replace("x", "");
+      const coeff =
+        coeffText === "" || coeffText === "+"
+          ? 1
+          : coeffText === "-"
+            ? -1
+            : parseFloat(coeffText);
+      if (!Number.isFinite(coeff)) return null;
+      totals.x += coeff;
+      continue;
+    }
+
+    if (part.includes("y")) {
+      const coeffText = part.replace("y", "");
+      const coeff =
+        coeffText === "" || coeffText === "+"
+          ? 1
+          : coeffText === "-"
+            ? -1
+            : parseFloat(coeffText);
+      if (!Number.isFinite(coeff)) return null;
+      totals.y += coeff;
+      continue;
+    }
+
+    const value = parseFloat(part);
+    if (!Number.isFinite(value)) return null;
+    totals.constant += value;
+  }
+
+  return totals;
+}
+
+function parseLinearEquation(line) {
+  const normalized = normalizeCameraMathLine(line);
+  if (!normalized.includes("=")) return null;
+
+  const [left, right] = normalized.split("=");
+  if (!left || !right) return null;
+
+  const leftSide = parseLinearEquationSide(left);
+  const rightSide = parseLinearEquationSide(right);
+  if (!leftSide || !rightSide) return null;
+
+  return {
+    a: leftSide.x - rightSide.x,
+    b: leftSide.y - rightSide.y,
+    c: rightSide.constant - leftSide.constant,
+  };
+}
+
+function solveCameraLinearSystem(expressionText) {
+  const lines = expressionText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length !== 2) return null;
+
+  const eq1 = parseLinearEquation(lines[0]);
+  const eq2 = parseLinearEquation(lines[1]);
+  if (!eq1 || !eq2) return null;
+
+  const determinant = eq1.a * eq2.b - eq2.a * eq1.b;
+  if (Math.abs(determinant) < 1e-10) return null;
+
+  const x = (eq1.c * eq2.b - eq2.c * eq1.b) / determinant;
+  const y = (eq1.a * eq2.c - eq2.a * eq1.c) / determinant;
+
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+
+  return { x, y };
+}
+
+function applyCameraSolverExpression() {
+  const { expression } = getCameraSolverElements();
+  if (!expression) return;
+
+  const editedExpression = extractCameraMathExpression(expression.value);
+  if (!editedExpression) {
+    setCameraSolverStatus("Enter or correct the expression before solving.");
+    return;
+  }
+
+  expression.value = editedExpression;
+  const simultaneousResult = solveCameraLinearSystem(editedExpression);
+
+  if (simultaneousResult) {
+    currentExpression = `x=${simultaneousResult.x.toFixed(4)}, y=${simultaneousResult.y.toFixed(4)}`;
+    document.getElementById("result").value = currentExpression;
+    document.getElementById("word-result").innerHTML =
+      `x = <strong>${simultaneousResult.x.toFixed(4)}</strong>, y = <strong>${simultaneousResult.y.toFixed(4)}</strong>`;
+    document.getElementById("word-area").style.display = "flex";
+    setCameraSolverStatus("Simultaneous equations solved.");
+    return;
+  }
+
+  if (editedExpression.includes("\n")) {
+    setCameraSolverStatus(
+      "Multiple equations detected. Edit them further or use a dedicated solver format.",
+    );
+    return;
+  }
+
+  currentExpression = editedExpression;
+  updateResult();
+  setCameraSolverStatus("Solving edited expression...");
+  calculateResult();
+  setCameraSolverStatus("Solved. The calculator display has been updated.");
+}
+
+async function solveCapturedCameraMath() {
+  const { canvas } = getCameraSolverElements();
+  if (!canvas) return;
+
+  if (!cameraSolverCaptured || !canvas.width || !canvas.height) {
+    setCameraSolverStatus("Capture or upload an image first.");
+    return;
+  }
+
+  if (!window.Tesseract) {
+    setCameraSolverStatus(
+      "OCR engine is unavailable. Check your internet connection and reload the page.",
+    );
+    return;
+  }
+
+  setCameraSolverStatus("Reading expression from image...");
+
+  try {
+    const processedCanvas = preprocessCameraSolverCanvas(canvas);
+    const result = await window.Tesseract.recognize(processedCanvas, "eng", {
+      tessedit_pageseg_mode: "6",
+      tessedit_char_whitelist:
+        "0123456789xyzXYZ+-=*/().,^ \n",
+      preserve_interword_spaces: "1",
+      logger: (message) => {
+        if (message.status === "recognizing text") {
+          const progress = Math.round((message.progress || 0) * 100);
+          setCameraSolverStatus(`Reading expression from image... ${progress}%`);
+        }
+      },
+    });
+
+    const rawText = result && result.data ? result.data.text : "";
+    const expression = extractCameraMathExpression(rawText);
+
+    if (!expression) {
+      setCameraSolverExpression("");
+      setCameraSolverStatus("No valid math expression was detected.");
+      return;
+    }
+
+    setCameraSolverExpression(expression);
+    setCameraSolverStatus(
+      "Expression detected. Review or edit it, then press Solve Edited.",
+    );
+  } catch (error) {
+    console.error("Camera OCR failed:", error);
+    setCameraSolverStatus("OCR failed while reading the image.");
+  }
+}
+
+window.addEventListener("beforeunload", () => {
+  if (cameraSolverStream) {
+    cameraSolverStream.getTracks().forEach((track) => track.stop());
+  }
+});
