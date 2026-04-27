@@ -10518,3 +10518,31 @@ window.addEventListener("beforeunload", () => {
     cameraSolverStream.getTracks().forEach((track) => track.stop());
   }
 });
+function translateToYoruba() {
+  const wordResult = document.getElementById("word-result");
+
+  if (!wordResult.innerText) return;
+
+  let text = wordResult.innerText.toLowerCase();
+
+  // Simple Yoruba translations (you can expand this later)
+  const translations = {
+    "zero": "odo",
+    "one": "okan",
+    "two": "meji",
+    "three": "meta",
+    "four": "merin",
+    "five": "marun",
+    "six": "mefa",
+    "seven": "meje",
+    "eight": "mejo",
+    "nine": "mesan",
+    "ten": "mewa",
+    "hundred": "ogorun",
+    "thousand": "egberun"
+  };
+
+  let translated = text.split(" ").map(word => translations[word] || word).join(" ");
+
+  wordResult.innerHTML = `<span class="small-label">Yoruba</span><strong>${translated}</strong>`;
+}
