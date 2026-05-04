@@ -381,7 +381,7 @@
       box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
     }
 
-     #yoruba-btn:hover:not(:disabled) {
+    #yoruba-btn:hover:not(:disabled) {
       background: #157347;
       transform: scale(1.05);
     }
@@ -601,20 +601,26 @@
       color: #adb5bd;
       box-shadow: none;
     }
-     .wrapper { width: 100%; max-width: 680px; }
- 
+
+    .wrapper {
+      width: 100%;
+      max-width: 680px;
+    }
+
     /* ── Age / Date accordion card ── */
     .adc-card {
       background: var(--card-bg);
       border-radius: 18px;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.10);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.10);
       overflow: hidden;
     }
+
     .adc-tabs {
       display: flex;
       background: #f1f3f5;
       border-bottom: 2px solid #dee2e6;
     }
+
     .adc-tab {
       flex: 1;
       padding: 10px 6px;
@@ -629,16 +635,27 @@
       transition: background .18s, color .18s;
       border-bottom: 3px solid transparent;
     }
+
     .adc-tab.active {
       background: white;
       color: var(--primary-color);
       border-bottom: 3px solid var(--primary-color);
     }
-    .adc-tab:hover:not(.active) { background: #e9ecef; color: #495057; }
- 
-    .adc-pane { display: none; padding: 20px; }
-    .adc-pane.active { display: block; }
- 
+
+    .adc-tab:hover:not(.active) {
+      background: #e9ecef;
+      color: #495057;
+    }
+
+    .adc-pane {
+      display: none;
+      padding: 20px;
+    }
+
+    .adc-pane.active {
+      display: block;
+    }
+
     /* Result chip strip */
     .chip-row {
       display: flex;
@@ -646,6 +663,7 @@
       gap: 10px;
       margin-top: 14px;
     }
+
     .camera-solver-modal {
       display: none;
       position: fixed;
@@ -689,6 +707,7 @@
       gap: 10px;
       margin-top: 14px;
     }
+
     .camera-solver-status {
       margin-top: 14px;
       font-size: 14px;
@@ -715,7 +734,7 @@
       color: #0d6efd;
       background: #ffffff;
     }
-    
+
     .chip {
       background: #e7f1ff;
       border-radius: 12px;
@@ -723,6 +742,7 @@
       text-align: center;
       flex: 1 1 130px;
     }
+
     .chip .chip-val {
       display: block;
       font-size: 1.25rem;
@@ -730,6 +750,7 @@
       color: var(--primary-color);
       line-height: 1.1;
     }
+
     .chip .chip-lbl {
       display: block;
       font-size: .72rem;
@@ -738,7 +759,7 @@
       letter-spacing: .5px;
       margin-top: 2px;
     }
- 
+
     /* Zodiac badge */
     .zodiac-badge {
       display: inline-flex;
@@ -752,8 +773,11 @@
       font-size: .9rem;
       margin-top: 12px;
     }
-    .zodiac-badge .z-emoji { font-size: 1.4rem; }
- 
+
+    .zodiac-badge .z-emoji {
+      font-size: 1.4rem;
+    }
+
     /* Highlight result box */
     .highlight-box {
       background: #f8f9fa;
@@ -763,10 +787,16 @@
       margin-top: 14px;
       font-size: .9rem;
     }
-    .highlight-box strong { color: var(--primary-color); }
- 
+
+    .highlight-box strong {
+      color: var(--primary-color);
+    }
+
     /* Progress bar for day-of-year */
-    .year-bar-wrap { margin-top: 14px; }
+    .year-bar-wrap {
+      margin-top: 14px;
+    }
+
     .year-bar-label {
       display: flex;
       justify-content: space-between;
@@ -774,18 +804,36 @@
       color: #6c757d;
       margin-bottom: 4px;
     }
-    .year-bar .progress-bar { transition: width .5s ease; }
- 
+
+    .year-bar .progress-bar {
+      transition: width .5s ease;
+    }
+
     /* Countdown ring */
     .countdown-ring-wrap {
       display: flex;
       justify-content: center;
       margin: 14px 0 8px;
     }
-    .ring-svg { transform: rotate(-90deg); }
-    .ring-bg { fill: none; stroke: #e9ecef; stroke-width: 10; }
-    .ring-fg { fill: none; stroke: var(--primary-color); stroke-width: 10;
-               stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+
+    .ring-svg {
+      transform: rotate(-90deg);
+    }
+
+    .ring-bg {
+      fill: none;
+      stroke: #e9ecef;
+      stroke-width: 10;
+    }
+
+    .ring-fg {
+      fill: none;
+      stroke: var(--primary-color);
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset .6s ease;
+    }
+
     .ring-text {
       font-size: .82rem;
       font-weight: 700;
@@ -793,13 +841,14 @@
       dominant-baseline: middle;
       text-anchor: middle;
     }
+
     .ring-sub {
       font-size: .55rem;
       fill: #6c757d;
       dominant-baseline: middle;
       text-anchor: middle;
     }
- 
+
     .section-title {
       font-size: .7rem;
       font-weight: 700;
@@ -808,9 +857,14 @@
       color: #adb5bd;
       margin-bottom: 8px;
     }
- 
+
     /* error state */
-    .adc-error { color: #dc3545; font-size: .85rem; margin-top: 6px; display: none; }
+    .adc-error {
+      color: #dc3545;
+      font-size: .85rem;
+      margin-top: 6px;
+      display: none;
+    }
   </style>
 </head>
 
@@ -840,7 +894,7 @@
                       onclick="copyResult()">📋</span>
                   </div>
                   <div id="memoryIndicator" style="font-weight:bold; visibility:hidden; margin:5px 10px;">
-                    
+
                   </div>
                   <div class="word-display-area" id="word-area">
                     <div id="word-result"></div>
@@ -849,6 +903,8 @@
                     <button id="yoruba-btn" onclick="translateToYoruba()">YO</button>
                     <button id="portuguese-btn" onclick="translateToPortuguese()">PT</button>
                     <button id="igbo-btn" onclick="translateToIgbo()">IG</button>
+                    <button id="dutch-btn" onclick="translateToDutch()"
+                      style="background:#0d6efd;border:none;color:white;width:40px;height:40px;border-radius:12px;font-size:12px;font-weight:bold;display:flex;align-items:center;justify-content:center;">NL</button>
                     <button id="speak-btn" onclick="speakResult()" disabled title="Speak Result">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
                         viewBox="0 0 16 16">
@@ -896,7 +952,8 @@
                       <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
                         <div>
                           <h5 class="mb-1">Camera Math Solver</h5>
-                          <p class="text-muted mb-0 small">Capture a printed expression, run OCR, then send it into the calculator.</p>
+                          <p class="text-muted mb-0 small">Capture a printed expression, run OCR, then send it into the
+                            calculator.</p>
                         </div>
                         <button class="btn btn-outline-secondary btn-sm" onclick="closeCameraSolver()">Close</button>
                       </div>
@@ -906,18 +963,23 @@
 
                       <div class="camera-solver-toolbar">
                         <button class="btn btn-primary btn-sm" onclick="startCameraSolver()">Start Camera</button>
-                        <button class="btn btn-outline-primary btn-sm" onclick="captureCameraSolverFrame()">Capture</button>
+                        <button class="btn btn-outline-primary btn-sm"
+                          onclick="captureCameraSolverFrame()">Capture</button>
                         <button class="btn btn-success btn-sm" onclick="solveCapturedCameraMath()">Read Image</button>
-                        <button class="btn btn-warning btn-sm" onclick="applyCameraSolverExpression()">Solve Edited</button>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('cameraSolverUpload').click()">Upload Image</button>
+                        <button class="btn btn-warning btn-sm" onclick="applyCameraSolverExpression()">Solve
+                          Edited</button>
+                        <button class="btn btn-outline-secondary btn-sm"
+                          onclick="document.getElementById('cameraSolverUpload').click()">Upload Image</button>
                       </div>
 
-                      <input id="cameraSolverUpload" type="file" accept="image/*" class="d-none" onchange="loadCameraSolverImage(event)">
+                      <input id="cameraSolverUpload" type="file" accept="image/*" class="d-none"
+                        onchange="loadCameraSolverImage(event)">
 
                       <div id="cameraSolverStatus" class="camera-solver-status">Camera is idle.</div>
                       <div id="cameraSolverResult" class="camera-solver-result d-none">
                         <div class="small text-muted mb-1">Recognized expression</div>
-                        <textarea id="cameraSolverExpression" class="camera-solver-input" rows="3" placeholder="OCR result will appear here for editing"></textarea>
+                        <textarea id="cameraSolverExpression" class="camera-solver-input" rows="3"
+                          placeholder="OCR result will appear here for editing"></textarea>
                       </div>
                     </div>
                   </div>
@@ -1006,7 +1068,8 @@
                     <button class="btn btn-special" onclick="tenPower()">10<sup>x</sup></button>
                     <button id="voice-input-btn" class="btn btn-special" aria-label="Speak calculation input"
                       onclick="startVoiceInput()">🎙️</button>
-                    <button class="btn btn-special" onclick="openCameraSolver()" title="Scan an expression with the camera">CAM</button>
+                    <button class="btn btn-special" onclick="openCameraSolver()"
+                      title="Scan an expression with the camera">CAM</button>
                     <button class="btn btn-operator" onclick="convertToHex()">HEX</button>
                     <button class="btn btn-operator" onclick="openGeometry()">📐 Geo</button>
                     <!-- Row 9 -->
@@ -1360,44 +1423,44 @@
                                 </div>
                               </div>
                             </div>
-                                                          <div class="accordion-item">
-                          <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button"
-                              data-bs-toggle="collapse" data-bs-target="#collapseMatrix">
-                              🧮 Matrix Calculator
-                            </button>
-                          </h2>
+                            <div class="accordion-item">
+                              <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                  data-bs-target="#collapseMatrix">
+                                  🧮 Matrix Calculator
+                                </button>
+                              </h2>
 
-                          <div id="collapseMatrix" class="accordion-collapse collapse">
-                            <div class="accordion-body">
+                              <div id="collapseMatrix" class="accordion-collapse collapse">
+                                <div class="accordion-body">
 
-                              <label class="small fw-bold">Matrix A</label>
-                              <textarea id="matrixA" class="form-control mb-2" rows="3"
-                                placeholder="Example:
+                                  <label class="small fw-bold">Matrix A</label>
+                                  <textarea id="matrixA" class="form-control mb-2" rows="3" placeholder="Example:
                         1 2
                         3 4"></textarea>
 
-                              <label class="small fw-bold">Matrix B</label>
-                              <textarea id="matrixB" class="form-control mb-2" rows="3"
-                                placeholder="Optional for add/multiply"></textarea>
+                                  <label class="small fw-bold">Matrix B</label>
+                                  <textarea id="matrixB" class="form-control mb-2" rows="3"
+                                    placeholder="Optional for add/multiply"></textarea>
 
-                              <div class="d-grid gap-2">
+                                  <div class="d-grid gap-2">
 
-                                <button class="btn btn-sm btn-primary" onclick="matrixAdd()">A + B</button>
-                                <button class="btn btn-sm btn-primary" onclick="matrixMultiply()">A × B</button>
-                                <button class="btn btn-sm btn-secondary" onclick="matrixDeterminant()">det(A)</button>
-                                <button class="btn btn-sm btn-secondary" onclick="matrixInverse()">A⁻¹</button>
+                                    <button class="btn btn-sm btn-primary" onclick="matrixAdd()">A + B</button>
+                                    <button class="btn btn-sm btn-primary" onclick="matrixMultiply()">A × B</button>
+                                    <button class="btn btn-sm btn-secondary"
+                                      onclick="matrixDeterminant()">det(A)</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="matrixInverse()">A⁻¹</button>
 
+                                  </div>
+
+                                  <div class="mt-3">
+                                    <label class="small fw-bold">Result</label>
+                                    <pre id="matrixResult" class="p-2 bg-light rounded small"></pre>
+                                  </div>
+
+                                </div>
                               </div>
-
-                              <div class="mt-3">
-                                <label class="small fw-bold">Result</label>
-                                <pre id="matrixResult" class="p-2 bg-light rounded small"></pre>
-                              </div>
-
                             </div>
-                          </div>
-                        </div>
 
                             <!-- Quadratic Equation Solver -->
                             <div class="accordion-item">
@@ -1629,7 +1692,7 @@
                             </div>
 
                             <!-- Matrix Calculator -->
-                           <!--  <div class="accordion-item">
+                            <!--  <div class="accordion-item">
                               <h2 class="accordion-header">
                                 <button
                                   class="accordion-button collapsed d-flex justify-content-between align-items-center"
@@ -2376,19 +2439,23 @@
                                   <span>📊Graphing Calculator</span>
                                 </button>
                               </h2>
-                              <div id="collapseGraphing" class="accordion-collapse collapse" aria-labelledby="headingGraphing"
-                                data-bs-parent="#converterAccordion">
+                              <div id="collapseGraphing" class="accordion-collapse collapse"
+                                aria-labelledby="headingGraphing" data-bs-parent="#converterAccordion">
                                 <div class="accordion-body">
-                                  <p class="text-muted small mb-3">Plot functions, analyze graphs, and explore mathematical relationships with interactive visualization.</p>
+                                  <p class="text-muted small mb-3">Plot functions, analyze graphs, and explore
+                                    mathematical relationships with interactive visualization.</p>
 
                                   <!-- Graph Controls -->
                                   <div class="row mb-3">
                                     <div class="col-md-8">
                                       <label class="form-label small mb-1" style="font-weight:600;">Function</label>
                                       <div class="input-group input-group-sm">
-                                        <input type="text" class="form-control" id="graph-function" placeholder="e.g., sin(x), x^2, sqrt(x)" value="sin(x)">
-                                        <button class="btn btn-success btn-sm" onclick="addFunction()" title="Add Function">➕</button>
-                                        <button class="btn btn-danger btn-sm" onclick="clearAllFunctions()" title="Clear All">🗑️</button>
+                                        <input type="text" class="form-control" id="graph-function"
+                                          placeholder="e.g., sin(x), x^2, sqrt(x)" value="sin(x)">
+                                        <button class="btn btn-success btn-sm" onclick="addFunction()"
+                                          title="Add Function">➕</button>
+                                        <button class="btn btn-danger btn-sm" onclick="clearAllFunctions()"
+                                          title="Clear All">🗑️</button>
                                       </div>
                                     </div>
                                     <div class="col-md-4">
@@ -2414,28 +2481,37 @@
 
                                   <!-- Graph Canvas -->
                                   <div class="graph-container mb-3" style="position:relative;">
-                                    <canvas id="graph-canvas" width="800" height="500" style="border:1px solid #dee2e6; border-radius:8px; background:white; width:100%; max-width:800px; height:auto;"></canvas>
+                                    <canvas id="graph-canvas" width="800" height="500"
+                                      style="border:1px solid #dee2e6; border-radius:8px; background:white; width:100%; max-width:800px; height:auto;"></canvas>
 
                                     <!-- Graph Controls Overlay -->
                                     <div class="graph-controls position-absolute top-0 end-0 p-2" style="z-index:10;">
                                       <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="zoomIn()" title="Zoom In">🔍+</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="zoomOut()" title="Zoom Out">🔍-</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="resetView()" title="Reset View">🏠</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleGrid()" id="grid-toggle" title="Toggle Grid">⊞</button>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="zoomIn()"
+                                          title="Zoom In">🔍+</button>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="zoomOut()"
+                                          title="Zoom Out">🔍-</button>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="resetView()"
+                                          title="Reset View">🏠</button>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleGrid()"
+                                          id="grid-toggle" title="Toggle Grid">⊞</button>
                                       </div>
                                     </div>
 
                                     <!-- Coordinates Display -->
-                                    <div id="coordinates-display" class="position-absolute bottom-0 start-0 p-2 bg-light border rounded" style="font-size:12px; display:none;"></div>
+                                    <div id="coordinates-display"
+                                      class="position-absolute bottom-0 start-0 p-2 bg-light border rounded"
+                                      style="font-size:12px; display:none;"></div>
                                   </div>
 
                                   <!-- Analysis Tools -->
                                   <div class="row mb-3">
                                     <div class="col-md-6">
-                                      <label class="form-label small mb-1" style="font-weight:600;">Analysis Point (x)</label>
+                                      <label class="form-label small mb-1" style="font-weight:600;">Analysis Point
+                                        (x)</label>
                                       <div class="input-group input-group-sm">
-                                        <input type="number" class="form-control" id="analysis-x" placeholder="0" step="0.1">
+                                        <input type="number" class="form-control" id="analysis-x" placeholder="0"
+                                          step="0.1">
                                         <button class="btn btn-info btn-sm" onclick="analyzePoint()">📊 Analyze</button>
                                       </div>
                                     </div>
@@ -2451,7 +2527,8 @@
                                   </div>
 
                                   <!-- Analysis Results -->
-                                  <div id="analysis-result" class="alert alert-info py-2 px-3 mb-3" style="display:none; font-size:0.9rem;">
+                                  <div id="analysis-result" class="alert alert-info py-2 px-3 mb-3"
+                                    style="display:none; font-size:0.9rem;">
                                     <div class="row">
                                       <div class="col-md-6">
                                         <div><strong>Point:</strong> <span id="point-coords"></span></div>
@@ -2468,42 +2545,58 @@
                                   <div class="row mb-3">
                                     <div class="col-md-3">
                                       <label class="form-label small mb-1" style="font-weight:600;">X Min</label>
-                                      <input type="number" class="form-control form-control-sm" id="x-min" value="-10" step="1" onchange="updateGraph()">
+                                      <input type="number" class="form-control form-control-sm" id="x-min" value="-10"
+                                        step="1" onchange="updateGraph()">
                                     </div>
                                     <div class="col-md-3">
                                       <label class="form-label small mb-1" style="font-weight:600;">X Max</label>
-                                      <input type="number" class="form-control form-control-sm" id="x-max" value="10" step="1" onchange="updateGraph()">
+                                      <input type="number" class="form-control form-control-sm" id="x-max" value="10"
+                                        step="1" onchange="updateGraph()">
                                     </div>
                                     <div class="col-md-3">
                                       <label class="form-label small mb-1" style="font-weight:600;">Y Min</label>
-                                      <input type="number" class="form-control form-control-sm" id="y-min" value="-10" step="1" onchange="updateGraph()">
+                                      <input type="number" class="form-control form-control-sm" id="y-min" value="-10"
+                                        step="1" onchange="updateGraph()">
                                     </div>
                                     <div class="col-md-3">
                                       <label class="form-label small mb-1" style="font-weight:600;">Y Max</label>
-                                      <input type="number" class="form-control form-control-sm" id="y-max" value="10" step="1" onchange="updateGraph()">
+                                      <input type="number" class="form-control form-control-sm" id="y-max" value="10"
+                                        step="1" onchange="updateGraph()">
                                     </div>
                                   </div>
 
                                   <!-- Preset Functions -->
                                   <div class="mb-3">
-                                    <label class="form-label small mb-1" style="font-weight:600;">Quick Functions</label>
+                                    <label class="form-label small mb-1" style="font-weight:600;">Quick
+                                      Functions</label>
                                     <div class="d-flex flex-wrap gap-1">
-                                      <button class="btn btn-outline-secondary btn-sm" onclick="loadPreset('sin(x)')">sin(x)</button>
-                                      <button class="btn btn-outline-secondary btn-sm" onclick="loadPreset('cos(x)')">cos(x)</button>
-                                      <button class="btn btn-outline-secondary btn-sm" onclick="loadPreset('x^2')">x²</button>
-                                      <button class="btn btn-outline-secondary btn-sm" onclick="loadPreset('sqrt(x)')">√x</button>
-                                      <button class="btn btn-outline-secondary btn-sm" onclick="loadPreset('e^x')">eˣ</button>
-                                      <button class="btn btn-outline-secondary btn-sm" onclick="loadPreset('ln(x)')">ln(x)</button>
-                                      <button class="btn btn-outline-secondary btn-sm" onclick="loadPreset('1/x')">1/x</button>
-                                      <button class="btn btn-outline-secondary btn-sm" onclick="loadPreset('x^3')">x³</button>
+                                      <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="loadPreset('sin(x)')">sin(x)</button>
+                                      <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="loadPreset('cos(x)')">cos(x)</button>
+                                      <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="loadPreset('x^2')">x²</button>
+                                      <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="loadPreset('sqrt(x)')">√x</button>
+                                      <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="loadPreset('e^x')">eˣ</button>
+                                      <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="loadPreset('ln(x)')">ln(x)</button>
+                                      <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="loadPreset('1/x')">1/x</button>
+                                      <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="loadPreset('x^3')">x³</button>
                                     </div>
                                   </div>
 
                                   <!-- Export Options -->
                                   <div class="d-flex gap-2 mb-3">
-                                    <button class="btn btn-outline-primary btn-sm" onclick="exportGraph('png')">📷 Export PNG</button>
-                                    <button class="btn btn-outline-primary btn-sm" onclick="exportGraph('svg')">📄 Export SVG</button>
-                                    <button class="btn btn-outline-primary btn-sm" onclick="showTable()">📋 Table of Values</button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="exportGraph('png')">📷
+                                      Export PNG</button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="exportGraph('svg')">📄
+                                      Export SVG</button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="showTable()">📋 Table of
+                                      Values</button>
                                   </div>
 
                                   <!-- Table of Values Modal -->
@@ -2518,18 +2611,22 @@
                                           <div class="row mb-3">
                                             <div class="col-md-4">
                                               <label class="form-label small">Start X</label>
-                                              <input type="number" class="form-control" id="table-start" value="-5" step="0.5">
+                                              <input type="number" class="form-control" id="table-start" value="-5"
+                                                step="0.5">
                                             </div>
                                             <div class="col-md-4">
                                               <label class="form-label small">End X</label>
-                                              <input type="number" class="form-control" id="table-end" value="5" step="0.5">
+                                              <input type="number" class="form-control" id="table-end" value="5"
+                                                step="0.5">
                                             </div>
                                             <div class="col-md-4">
                                               <label class="form-label small">Step</label>
-                                              <input type="number" class="form-control" id="table-step" value="0.5" step="0.1" min="0.1">
+                                              <input type="number" class="form-control" id="table-step" value="0.5"
+                                                step="0.1" min="0.1">
                                             </div>
                                           </div>
-                                          <button class="btn btn-primary mb-3" onclick="generateTable()">Generate Table</button>
+                                          <button class="btn btn-primary mb-3" onclick="generateTable()">Generate
+                                            Table</button>
                                           <div id="table-content"></div>
                                         </div>
                                       </div>
@@ -2538,13 +2635,15 @@
 
                                   <!-- Help Text -->
                                   <div class="alert alert-light py-2 px-3 mb-0 border" style="font-size: 0.85rem;">
-                                    <strong> Supported Functions:</strong> sin, cos, tan, asin, acos, atan, ln, log, exp, sqrt, abs, floor, ceil, round<br>
+                                    <strong> Supported Functions:</strong> sin, cos, tan, asin, acos, atan, ln, log,
+                                    exp, sqrt, abs, floor, ceil, round<br>
                                     <strong> Operators:</strong> +, -, *, /, ^ (power), % (modulo)<br>
-                                    <strong> Tip:</strong> Use 'pi' for π and 'e' for Euler's number. Click and drag to pan, scroll to zoom.
+                                    <strong> Tip:</strong> Use 'pi' for π and 'e' for Euler's number. Click and drag to
+                                    pan, scroll to zoom.
                                   </div>
                                 </div>
                               </div>
-                            </div>                            
+                            </div>
 
                             <!-- ===== LOAN & MORTGAGE CALCULATOR ===== -->
                             <div class="accordion-item">
@@ -2865,60 +2964,64 @@
                               </div>
                             </div>
                             <!-- END Loan & Mortgage Calculator -->
-                                                  <!-- ===== AGE CALCULATOR ===== -->
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingAgeCalc">
-            <button
-              class="accordion-button collapsed d-flex justify-content-between align-items-center"
-              type="button" data-bs-toggle="collapse" data-bs-target="#collapseAgeCalc"
-              aria-expanded="false" aria-controls="collapseAgeCalc">
-              <span>🎂 Age Calculator</span>
-            </button>
-          </h2>
-          <div id="collapseAgeCalc" class="accordion-collapse collapse" aria-labelledby="headingAgeCalc"
-            data-bs-parent="#converterAccordion">
-            <div class="accordion-body">
-              <form id="age-calc-form" class="mb-3">
-                <div class="row g-2 align-items-end">
-                  <div class="col-md-6">
-                    <label for="birth-date" class="form-label small" style="font-weight:600;">Birth Date</label>
-                    <input type="date" class="form-control" id="birth-date" required>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="target-date" class="form-label small" style="font-weight:600;">Target Date</label>
-                    <input type="date" class="form-control" id="target-date" disabled>
-                    <div class="form-check mt-1">
-                      <input class="form-check-input" type="checkbox" id="custom-date-toggle">
-                      <label class="form-check-label small" for="custom-date-toggle">Custom target date</label>
-                    </div>
-                  </div>
-                </div>
-                <div class="d-grid mt-3">
-                  <button type="submit" class="btn btn-primary">Calculate Age</button>
-                </div>
-              </form>
-              <div id="age-calc-result" style="display:none;">
-                <h5>Exact Age</h5>
-                <div id="exact-age"></div>
-                <h6 class="mt-3">Totals</h6>
-                <ul class="list-group list-group-flush mb-2">
-                  <li class="list-group-item"><span id="total-months"></span></li>
-                  <li class="list-group-item"><span id="total-weeks"></span></li>
-                  <li class="list-group-item"><span id="total-days"></span></li>
-                  <li class="list-group-item"><span id="total-hours"></span></li>
-                </ul>
-                <div id="next-birthday"></div>
-                <div id="zodiac-signs" class="mt-2"></div>
-                <div class="mt-3">
-                  <label class="form-label small">Year Progress</label>
-                  <div class="progress">
-                    <div id="year-progress-bar" class="progress-bar" role="progressbar" style="width:0%"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                            <!-- ===== AGE CALCULATOR ===== -->
+                            <div class="accordion-item">
+                              <h2 class="accordion-header" id="headingAgeCalc">
+                                <button
+                                  class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                                  type="button" data-bs-toggle="collapse" data-bs-target="#collapseAgeCalc"
+                                  aria-expanded="false" aria-controls="collapseAgeCalc">
+                                  <span>🎂 Age Calculator</span>
+                                </button>
+                              </h2>
+                              <div id="collapseAgeCalc" class="accordion-collapse collapse"
+                                aria-labelledby="headingAgeCalc" data-bs-parent="#converterAccordion">
+                                <div class="accordion-body">
+                                  <form id="age-calc-form" class="mb-3">
+                                    <div class="row g-2 align-items-end">
+                                      <div class="col-md-6">
+                                        <label for="birth-date" class="form-label small" style="font-weight:600;">Birth
+                                          Date</label>
+                                        <input type="date" class="form-control" id="birth-date" required>
+                                      </div>
+                                      <div class="col-md-6">
+                                        <label for="target-date" class="form-label small"
+                                          style="font-weight:600;">Target Date</label>
+                                        <input type="date" class="form-control" id="target-date" disabled>
+                                        <div class="form-check mt-1">
+                                          <input class="form-check-input" type="checkbox" id="custom-date-toggle">
+                                          <label class="form-check-label small" for="custom-date-toggle">Custom target
+                                            date</label>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="d-grid mt-3">
+                                      <button type="submit" class="btn btn-primary">Calculate Age</button>
+                                    </div>
+                                  </form>
+                                  <div id="age-calc-result" style="display:none;">
+                                    <h5>Exact Age</h5>
+                                    <div id="exact-age"></div>
+                                    <h6 class="mt-3">Totals</h6>
+                                    <ul class="list-group list-group-flush mb-2">
+                                      <li class="list-group-item"><span id="total-months"></span></li>
+                                      <li class="list-group-item"><span id="total-weeks"></span></li>
+                                      <li class="list-group-item"><span id="total-days"></span></li>
+                                      <li class="list-group-item"><span id="total-hours"></span></li>
+                                    </ul>
+                                    <div id="next-birthday"></div>
+                                    <div id="zodiac-signs" class="mt-2"></div>
+                                    <div class="mt-3">
+                                      <label class="form-label small">Year Progress</label>
+                                      <div class="progress">
+                                        <div id="year-progress-bar" class="progress-bar" role="progressbar"
+                                          style="width:0%"></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -2974,281 +3077,271 @@
                 <div class="history-item-time"></div>
               </div>
             </template>
-             <!-- ⏱️ AGE & DATE MATH CALCULATOR -->
-  <div class="wrapper">
-    <div class="accordion-item adc-card">
-    <h2 class="accordion-header" id="headingAgeDateMath">
-      <button
-        class="accordion-button collapsed d-flex justify-content-between align-items-center"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#collapseAgeDateMath"
-        aria-expanded="false"
-        aria-controls="collapseAgeDateMath">
-        <span>⏱️ Age &amp; Date Math Calculator</span>
-      </button>
-    </h2>
- 
-    <div id="collapseAgeDateMath" class="accordion-collapse collapse"
-         aria-labelledby="headingAgeDateMath">
-      <div class="accordion-body p-0">
- 
-        <!-- Tab strip -->
-        <div class="adc-tabs" id="adcTabStrip">
-          <button class="adc-tab active" onclick="adcSwitchTab('age',this)">🎂 Age</button>
-          <button class="adc-tab" onclick="adcSwitchTab('countdown',this)">⏳ Countdown</button>
-          <button class="adc-tab" onclick="adcSwitchTab('dayofweek',this)">📅 Day Finder</button>
-          <button class="adc-tab" onclick="adcSwitchTab('diff',this)">📐 Date Diff</button>
-        </div>
- 
-        <!-- ══════════ TAB 1: AGE ══════════ -->
-        <div class="adc-pane active" id="adc-pane-age">
-          <p class="text-muted small mb-3">Enter your date of birth to get a full breakdown.</p>
- 
-          <label class="form-label small fw-bold">Date of Birth</label>
-          <input type="date" class="form-control mb-1" id="adc-dob"
-                 max="" oninput="adcCalcAge()" />
-          <div class="adc-error" id="adc-age-err">Please enter a valid past date.</div>
- 
-          <!-- Results -->
-          <div id="adc-age-results" style="display:none;">
- 
-            <div class="chip-row">
-              <div class="chip">
-                <span class="chip-val" id="adc-years">—</span>
-                <span class="chip-lbl">Years</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-months">—</span>
-                <span class="chip-lbl">Months</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-days-age">—</span>
-                <span class="chip-lbl">Days</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-hours">—</span>
-                <span class="chip-lbl">Hours lived</span>
-              </div>
-            </div>
- 
-            <div class="chip-row">
-              <div class="chip">
-                <span class="chip-val" id="adc-weeks">—</span>
-                <span class="chip-lbl">Weeks lived</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-total-days">—</span>
-                <span class="chip-lbl">Total days</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-heartbeats">—</span>
-                <span class="chip-lbl">~Heartbeats (×M)</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-next-bday">—</span>
-                <span class="chip-lbl">Days to birthday</span>
-              </div>
-            </div>
- 
-            <!-- Zodiac -->
-            <div class="section-title mt-3">Zodiac &amp; Life Stage</div>
-            <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
-              <div class="zodiac-badge">
-                <span class="z-emoji" id="adc-zodiac-emoji">♈</span>
-                <span id="adc-zodiac-name">Aries</span>
-              </div>
-              <div class="highlight-box flex-grow-1 m-0">
-                <strong id="adc-life-stage">Young Adult</strong>
-                <span id="adc-life-desc" class="text-muted"> · —</span>
-              </div>
-            </div>
- 
-            <!-- Year progress bar -->
-            <div class="year-bar-wrap">
-              <div class="year-bar-label">
-                <span>Day of year: <strong id="adc-doy">—</strong></span>
-                <span id="adc-doy-pct">—%</span>
-              </div>
-              <div class="progress year-bar" style="height:10px; border-radius:6px;">
-                <div class="progress-bar bg-primary" id="adc-doy-bar"
-                     role="progressbar" style="width:0%"></div>
-              </div>
-            </div>
- 
-            <!-- Day of birth weekday -->
-            <div class="highlight-box mt-2">
-              You were born on a <strong id="adc-birth-weekday">—</strong>. 
-              Your next birthday falls on a <strong id="adc-next-bday-day">—</strong>.
-            </div>
- 
-          </div><!-- /age-results -->
-        </div><!-- /pane-age -->
- 
-        <!-- ══════════ TAB 2: COUNTDOWN ══════════ -->
-        <div class="adc-pane" id="adc-pane-countdown">
-          <p class="text-muted small mb-3">How far away is your event?</p>
- 
-          <label class="form-label small fw-bold">Event Name (optional)</label>
-          <input type="text" class="form-control mb-2" id="adc-event-name"
-                 placeholder="e.g. Graduation, Wedding…" oninput="adcCalcCountdown()" />
- 
-          <label class="form-label small fw-bold">Event Date</label>
-          <input type="date" class="form-control mb-1" id="adc-event-date"
-                 oninput="adcCalcCountdown()" />
-          <div class="adc-error" id="adc-cd-err">Please choose a future date.</div>
- 
-          <div id="adc-cd-results" style="display:none;">
-            <!-- SVG ring -->
-            <div class="countdown-ring-wrap">
-              <svg class="ring-svg" width="130" height="130" viewBox="0 0 130 130">
-                <circle class="ring-bg" cx="65" cy="65" r="55"/>
-                <circle class="ring-fg" id="adc-ring-fg" cx="65" cy="65" r="55"
-                        stroke-dasharray="345.4" stroke-dashoffset="345.4"/>
-                <!-- text is not rotated, use transform on group -->
-                <g transform="rotate(90,65,65)">
-                  <text class="ring-text" x="65" y="60" id="adc-ring-days">—</text>
-                  <text class="ring-sub"  x="65" y="75">days left</text>
-                </g>
-              </svg>
-            </div>
- 
-            <div class="chip-row">
-              <div class="chip">
-                <span class="chip-val" id="adc-cd-weeks">—</span>
-                <span class="chip-lbl">Weeks</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-cd-months">—</span>
-                <span class="chip-lbl">Months</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-cd-hours">—</span>
-                <span class="chip-lbl">Hours</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-cd-mins">—</span>
-                <span class="chip-lbl">Minutes</span>
-              </div>
-            </div>
- 
-            <div class="highlight-box">
-              <strong id="adc-cd-event-label">Your event</strong> is on a
-              <strong id="adc-cd-weekday">—</strong>
-              — that's <strong id="adc-cd-daysstr">—</strong> away.
-            </div>
-          </div>
-        </div><!-- /pane-countdown -->
- 
-        <!-- ══════════ TAB 3: DAY FINDER ══════════ -->
-        <div class="adc-pane" id="adc-pane-dayofweek">
-          <p class="text-muted small mb-3">Find the day of the week for any date in history or future.</p>
- 
-          <label class="form-label small fw-bold">Enter Any Date</label>
-          <input type="date" class="form-control mb-2" id="adc-dow-date"
-                 oninput="adcCalcDOW()" />
- 
-          <div id="adc-dow-results" style="display:none;">
- 
-            <div class="chip-row">
-              <div class="chip" style="flex:2 1 180px; background:#e7f1ff;">
-                <span class="chip-val" style="font-size:1.7rem;" id="adc-dow-day">—</span>
-                <span class="chip-lbl">Day of week</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-dow-doy">—</span>
-                <span class="chip-lbl">Day of year</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-dow-week">—</span>
-                <span class="chip-lbl">Week №</span>
-              </div>
-            </div>
- 
-            <div class="chip-row">
-              <div class="chip">
-                <span class="chip-val" id="adc-dow-quarter">—</span>
-                <span class="chip-lbl">Quarter</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-dow-leapyear">—</span>
-                <span class="chip-lbl">Leap Year?</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-dow-days-in-month">—</span>
-                <span class="chip-lbl">Days in month</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-dow-days-left-year">—</span>
-                <span class="chip-lbl">Days left in year</span>
-              </div>
-            </div>
- 
-            <div class="highlight-box">
-              <span id="adc-dow-fun-fact"></span>
-            </div>
-          </div>
-        </div><!-- /pane-dayofweek -->
- 
-        <!-- ══════════ TAB 4: DATE DIFF ══════════ -->
-        <div class="adc-pane" id="adc-pane-diff">
-          <p class="text-muted small mb-3">Calculate the exact difference between two dates.</p>
- 
-          <div class="row g-2 mb-2">
-            <div class="col-6">
-              <label class="form-label small fw-bold">Start Date</label>
-              <input type="date" class="form-control" id="adc-diff-start"
-                     oninput="adcCalcDiff()" />
-            </div>
-            <div class="col-6">
-              <label class="form-label small fw-bold">End Date</label>
-              <input type="date" class="form-control" id="adc-diff-end"
-                     oninput="adcCalcDiff()" />
-            </div>
-          </div>
-          <div class="adc-error" id="adc-diff-err">End date must be after start date.</div>
- 
-          <div id="adc-diff-results" style="display:none;">
-            <div class="chip-row">
-              <div class="chip">
-                <span class="chip-val" id="adc-diff-years">—</span>
-                <span class="chip-lbl">Years</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-diff-months">—</span>
-                <span class="chip-lbl">Months</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-diff-days">—</span>
-                <span class="chip-lbl">Days</span>
-              </div>
-            </div>
-            <div class="chip-row">
-              <div class="chip">
-                <span class="chip-val" id="adc-diff-total-days">—</span>
-                <span class="chip-lbl">Total days</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-diff-total-weeks">—</span>
-                <span class="chip-lbl">Total weeks</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-diff-total-hours">—</span>
-                <span class="chip-lbl">Total hours</span>
-              </div>
-              <div class="chip">
-                <span class="chip-val" id="adc-diff-total-mins">—</span>
-                <span class="chip-lbl">Total minutes</span>
+            <!-- ⏱️ AGE & DATE MATH CALCULATOR -->
+            <div class="wrapper">
+              <div class="accordion-item adc-card">
+                <h2 class="accordion-header" id="headingAgeDateMath">
+                  <button class="accordion-button collapsed d-flex justify-content-between align-items-center"
+                    type="button" data-bs-toggle="collapse" data-bs-target="#collapseAgeDateMath" aria-expanded="false"
+                    aria-controls="collapseAgeDateMath">
+                    <span>⏱️ Age &amp; Date Math Calculator</span>
+                  </button>
+                </h2>
+
+                <div id="collapseAgeDateMath" class="accordion-collapse collapse" aria-labelledby="headingAgeDateMath">
+                  <div class="accordion-body p-0">
+
+                    <!-- Tab strip -->
+                    <div class="adc-tabs" id="adcTabStrip">
+                      <button class="adc-tab active" onclick="adcSwitchTab('age',this)">🎂 Age</button>
+                      <button class="adc-tab" onclick="adcSwitchTab('countdown',this)">⏳ Countdown</button>
+                      <button class="adc-tab" onclick="adcSwitchTab('dayofweek',this)">📅 Day Finder</button>
+                      <button class="adc-tab" onclick="adcSwitchTab('diff',this)">📐 Date Diff</button>
+                    </div>
+
+                    <!-- ══════════ TAB 1: AGE ══════════ -->
+                    <div class="adc-pane active" id="adc-pane-age">
+                      <p class="text-muted small mb-3">Enter your date of birth to get a full breakdown.</p>
+
+                      <label class="form-label small fw-bold">Date of Birth</label>
+                      <input type="date" class="form-control mb-1" id="adc-dob" max="" oninput="adcCalcAge()" />
+                      <div class="adc-error" id="adc-age-err">Please enter a valid past date.</div>
+
+                      <!-- Results -->
+                      <div id="adc-age-results" style="display:none;">
+
+                        <div class="chip-row">
+                          <div class="chip">
+                            <span class="chip-val" id="adc-years">—</span>
+                            <span class="chip-lbl">Years</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-months">—</span>
+                            <span class="chip-lbl">Months</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-days-age">—</span>
+                            <span class="chip-lbl">Days</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-hours">—</span>
+                            <span class="chip-lbl">Hours lived</span>
+                          </div>
+                        </div>
+
+                        <div class="chip-row">
+                          <div class="chip">
+                            <span class="chip-val" id="adc-weeks">—</span>
+                            <span class="chip-lbl">Weeks lived</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-total-days">—</span>
+                            <span class="chip-lbl">Total days</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-heartbeats">—</span>
+                            <span class="chip-lbl">~Heartbeats (×M)</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-next-bday">—</span>
+                            <span class="chip-lbl">Days to birthday</span>
+                          </div>
+                        </div>
+
+                        <!-- Zodiac -->
+                        <div class="section-title mt-3">Zodiac &amp; Life Stage</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+                          <div class="zodiac-badge">
+                            <span class="z-emoji" id="adc-zodiac-emoji">♈</span>
+                            <span id="adc-zodiac-name">Aries</span>
+                          </div>
+                          <div class="highlight-box flex-grow-1 m-0">
+                            <strong id="adc-life-stage">Young Adult</strong>
+                            <span id="adc-life-desc" class="text-muted"> · —</span>
+                          </div>
+                        </div>
+
+                        <!-- Year progress bar -->
+                        <div class="year-bar-wrap">
+                          <div class="year-bar-label">
+                            <span>Day of year: <strong id="adc-doy">—</strong></span>
+                            <span id="adc-doy-pct">—%</span>
+                          </div>
+                          <div class="progress year-bar" style="height:10px; border-radius:6px;">
+                            <div class="progress-bar bg-primary" id="adc-doy-bar" role="progressbar" style="width:0%">
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Day of birth weekday -->
+                        <div class="highlight-box mt-2">
+                          You were born on a <strong id="adc-birth-weekday">—</strong>.
+                          Your next birthday falls on a <strong id="adc-next-bday-day">—</strong>.
+                        </div>
+
+                      </div><!-- /age-results -->
+                    </div><!-- /pane-age -->
+
+                    <!-- ══════════ TAB 2: COUNTDOWN ══════════ -->
+                    <div class="adc-pane" id="adc-pane-countdown">
+                      <p class="text-muted small mb-3">How far away is your event?</p>
+
+                      <label class="form-label small fw-bold">Event Name (optional)</label>
+                      <input type="text" class="form-control mb-2" id="adc-event-name"
+                        placeholder="e.g. Graduation, Wedding…" oninput="adcCalcCountdown()" />
+
+                      <label class="form-label small fw-bold">Event Date</label>
+                      <input type="date" class="form-control mb-1" id="adc-event-date" oninput="adcCalcCountdown()" />
+                      <div class="adc-error" id="adc-cd-err">Please choose a future date.</div>
+
+                      <div id="adc-cd-results" style="display:none;">
+                        <!-- SVG ring -->
+                        <div class="countdown-ring-wrap">
+                          <svg class="ring-svg" width="130" height="130" viewBox="0 0 130 130">
+                            <circle class="ring-bg" cx="65" cy="65" r="55" />
+                            <circle class="ring-fg" id="adc-ring-fg" cx="65" cy="65" r="55" stroke-dasharray="345.4"
+                              stroke-dashoffset="345.4" />
+                            <!-- text is not rotated, use transform on group -->
+                            <g transform="rotate(90,65,65)">
+                              <text class="ring-text" x="65" y="60" id="adc-ring-days">—</text>
+                              <text class="ring-sub" x="65" y="75">days left</text>
+                            </g>
+                          </svg>
+                        </div>
+
+                        <div class="chip-row">
+                          <div class="chip">
+                            <span class="chip-val" id="adc-cd-weeks">—</span>
+                            <span class="chip-lbl">Weeks</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-cd-months">—</span>
+                            <span class="chip-lbl">Months</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-cd-hours">—</span>
+                            <span class="chip-lbl">Hours</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-cd-mins">—</span>
+                            <span class="chip-lbl">Minutes</span>
+                          </div>
+                        </div>
+
+                        <div class="highlight-box">
+                          <strong id="adc-cd-event-label">Your event</strong> is on a
+                          <strong id="adc-cd-weekday">—</strong>
+                          — that's <strong id="adc-cd-daysstr">—</strong> away.
+                        </div>
+                      </div>
+                    </div><!-- /pane-countdown -->
+
+                    <!-- ══════════ TAB 3: DAY FINDER ══════════ -->
+                    <div class="adc-pane" id="adc-pane-dayofweek">
+                      <p class="text-muted small mb-3">Find the day of the week for any date in history or future.</p>
+
+                      <label class="form-label small fw-bold">Enter Any Date</label>
+                      <input type="date" class="form-control mb-2" id="adc-dow-date" oninput="adcCalcDOW()" />
+
+                      <div id="adc-dow-results" style="display:none;">
+
+                        <div class="chip-row">
+                          <div class="chip" style="flex:2 1 180px; background:#e7f1ff;">
+                            <span class="chip-val" style="font-size:1.7rem;" id="adc-dow-day">—</span>
+                            <span class="chip-lbl">Day of week</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-dow-doy">—</span>
+                            <span class="chip-lbl">Day of year</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-dow-week">—</span>
+                            <span class="chip-lbl">Week №</span>
+                          </div>
+                        </div>
+
+                        <div class="chip-row">
+                          <div class="chip">
+                            <span class="chip-val" id="adc-dow-quarter">—</span>
+                            <span class="chip-lbl">Quarter</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-dow-leapyear">—</span>
+                            <span class="chip-lbl">Leap Year?</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-dow-days-in-month">—</span>
+                            <span class="chip-lbl">Days in month</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-dow-days-left-year">—</span>
+                            <span class="chip-lbl">Days left in year</span>
+                          </div>
+                        </div>
+
+                        <div class="highlight-box">
+                          <span id="adc-dow-fun-fact"></span>
+                        </div>
+                      </div>
+                    </div><!-- /pane-dayofweek -->
+
+                    <!-- ══════════ TAB 4: DATE DIFF ══════════ -->
+                    <div class="adc-pane" id="adc-pane-diff">
+                      <p class="text-muted small mb-3">Calculate the exact difference between two dates.</p>
+
+                      <div class="row g-2 mb-2">
+                        <div class="col-6">
+                          <label class="form-label small fw-bold">Start Date</label>
+                          <input type="date" class="form-control" id="adc-diff-start" oninput="adcCalcDiff()" />
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label small fw-bold">End Date</label>
+                          <input type="date" class="form-control" id="adc-diff-end" oninput="adcCalcDiff()" />
+                        </div>
+                      </div>
+                      <div class="adc-error" id="adc-diff-err">End date must be after start date.</div>
+
+                      <div id="adc-diff-results" style="display:none;">
+                        <div class="chip-row">
+                          <div class="chip">
+                            <span class="chip-val" id="adc-diff-years">—</span>
+                            <span class="chip-lbl">Years</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-diff-months">—</span>
+                            <span class="chip-lbl">Months</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-diff-days">—</span>
+                            <span class="chip-lbl">Days</span>
+                          </div>
+                        </div>
+                        <div class="chip-row">
+                          <div class="chip">
+                            <span class="chip-val" id="adc-diff-total-days">—</span>
+                            <span class="chip-lbl">Total days</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-diff-total-weeks">—</span>
+                            <span class="chip-lbl">Total weeks</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-diff-total-hours">—</span>
+                            <span class="chip-lbl">Total hours</span>
+                          </div>
+                          <div class="chip">
+                            <span class="chip-val" id="adc-diff-total-mins">—</span>
+                            <span class="chip-lbl">Total minutes</span>
+                          </div>
+                        </div>
+                        <div class="highlight-box" id="adc-diff-summary"></div>
+                      </div>
+                    </div><!-- /pane-diff -->
+
+                  </div><!-- /accordion-body -->
+                </div><!-- /collapse -->
               </div>
             </div>
-            <div class="highlight-box" id="adc-diff-summary"></div>
-          </div>
-        </div><!-- /pane-diff -->
- 
-      </div><!-- /accordion-body -->
-    </div><!-- /collapse -->
-  </div>
-  </div>
           </div>
 
           <script src="assets/js/bootstrap.min.js"></script>
@@ -3261,4 +3354,3 @@
 
 
 </html>
-

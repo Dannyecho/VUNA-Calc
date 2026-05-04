@@ -10647,3 +10647,135 @@ function translateToYoruba() {
     yoruba +
     "</strong>";
 }
+
+// ===============================
+// DUTCH TRANSLATION
+// ===============================
+function numberToDutch(num) {
+  if (num === "Error") return "Fout";
+  if (num === "" || num === null || num === undefined) return "";
+
+  const ones = [
+    "nul",
+    "een",
+    "twee",
+    "drie",
+    "vier",
+    "vijf",
+    "zes",
+    "zeven",
+    "acht",
+    "negen",
+  ];
+  const teens = [
+    "tien",
+    "elf",
+    "twaalf",
+    "dertien",
+    "veertien",
+    "vijftien",
+    "zestien",
+    "zeventien",
+    "achttien",
+    "negentien",
+  ];
+  const tens = [
+    "",
+    "",
+    "twintig",
+    "dertig",
+    "veertig",
+    "vijftig",
+    "zestig",
+    "zeventig",
+    "tachtig",
+    "negentig",
+  ];
+  const scales = ["", "duizend", "miljoen", "miljard", "biljoen"];
+
+  function convertHundreds(n) {
+    let out = [];
+    n = parseInt(n, 10);
+    if (n >= 100) {
+      const h = Math.floor(n / 100);
+      if (h === 1) out.push("honderd");
+      else out.push(ones[h] + " honderd");
+      n = n % 100;
+    }
+    if (n >= 20) {
+      const t = Math.floor(n / 10);
+      const o = n % 10;
+      if (o === 0) out.push(tens[t]);
+      else {
+        // Dutch typically writes e.g. "eenentwintig" but we'll separate for clarity: "een en twintig"
+        // Use compact form where common: "eenentwintig"
+        // build compact for 21..99 with ones then "en" + tens
+        if (t === 2 && o === 1) out.push("eenentwintig");
+        else {
+          out.push(ones[o] + " en " + tens[t]);
+        }
+      }
+    } else if (n >= 10) {
+      out.push(teens[n - 10]);
+    } else if (n > 0) {
+      out.push(ones[n]);
+    }
+    return out.join(" ");
+  }
+
+  let n = parseFloat(num);
+  if (isNaN(n)) return "";
+
+  let sign = n < 0 ? "negatief " : "";
+  n = Math.abs(n);
+
+  const parts = n.toString().split(".");
+  let integerPart = parseInt(parts[0], 10);
+  const decimalPart = parts[1];
+
+  if (integerPart === 0) {
+    var words = "nul";
+  } else {
+    let groups = [];
+    let scale = 0;
+    while (integerPart > 0) {
+      const group = integerPart % 1000;
+      if (group > 0) {
+        let grpWords = convertHundreds(group);
+        if (scale > 0) {
+          if (group === 1 && scale === 1) {
+            // "duizend" not "een duizend"
+            groups.unshift(scales[scale]);
+          } else {
+            groups.unshift(grpWords + " " + scales[scale]);
+          }
+        } else {
+          groups.unshift(grpWords);
+        }
+      }
+      integerPart = Math.floor(integerPart / 1000);
+      scale++;
+    }
+    var words = groups.join(", ");
+  }
+
+  if (decimalPart) {
+    const decimals = decimalPart.split("").map((d) => ones[parseInt(d, 10)]);
+    words += " komma " + decimals.join(" ");
+  }
+
+  return (sign + words).trim();
+}
+
+function translateToDutch() {
+  if (!currentExpression) return;
+  const dutch = numberToDutch(currentExpression);
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+
+  wordResult.innerHTML =
+    '<span class="small-label">Resultaat in het Nederlands</span><strong>' +
+    dutch +
+    "</strong>";
+  if (wordArea) wordArea.style.display = "flex";
+}
