@@ -365,6 +365,33 @@
       box-shadow: none;
     }
 
+    #yoruba-btn {
+      background: #198754;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
+    }
+
+     #yoruba-btn:hover:not(:disabled) {
+      background: #157347;
+      transform: scale(1.05);
+    }
+
+    #yoruba-btn:disabled {
+      background: #e9ecef;
+      color: #adb5bd;
+      box-shadow: none;
+    }
+
     #history-list {
       display: flex;
       flex-direction: column;
@@ -813,12 +840,13 @@
                       onclick="copyResult()">📋</span>
                   </div>
                   <div id="memoryIndicator" style="font-weight:bold; visibility:hidden; margin:5px 10px;">
-                    M
+                    
                   </div>
                   <div class="word-display-area" id="word-area">
                     <div id="word-result"></div>
                     <button id="hausa-btn" onclick="translateToHausa()">HA</button>
                     <button id="english-btn" onclick="backToEnglish()">EN</button>
+                    <button id="yoruba-btn" onclick="translateToYoruba()">YO</button>
                     <button id="portuguese-btn" onclick="translateToPortuguese()">PT</button>
                     <button id="igbo-btn" onclick="translateToIgbo()">IG</button>
                     <button id="speak-btn" onclick="speakResult()" disabled title="Speak Result">

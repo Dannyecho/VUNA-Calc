@@ -313,6 +313,15 @@ window.addEventListener("DOMContentLoaded", function () {
 
 function formatResult(value) {
   return value.toFixed(4);
+  const rounded = Math.round(value * 1000) / 1000;
+
+  // 👉 Update Yoruba display globally
+  const yorubaEl = document.getElementById("word-result");
+  if (yorubaEl) {
+    yorubaEl.textContent = numberToYoruba(Math.floor(rounded));
+  }
+
+  return rounded;
 }
 
 function updateExampleConversion(value) {
@@ -658,6 +667,9 @@ function calculateResult() {
     currentExpression = result.toString();
     updateResult();
     document.getElementById("word-result").innerHTML = numberToWords(result);
+
+    const yorubaText = numberToYoruba(Math.floor(result));
+    document.getElementById("word-result").textContent = yorubaText;
   } catch (e) {
     currentExpression = "Error";
     updateResult();
@@ -10518,3 +10530,120 @@ window.addEventListener("beforeunload", () => {
     cameraSolverStream.getTracks().forEach((track) => track.stop());
   }
 });
+
+function numberToYoruba(num) {
+  if (num === "Error") return "Aṣiṣe";
+
+  const ones = [
+    "",
+    "Ọkan",
+    "Meji",
+    "Mẹta",
+    "Mẹrin",
+    "Marun",
+    "Mefa",
+    "Meje",
+    "Mẹjọ",
+    "Mẹsan",
+  ];
+
+  const tens = [
+    "",
+    "",
+    "Ogún",
+    "Ọgbọn",
+    "Ogoji",
+    "Aadọta",
+    "Ọgọta",
+    "Aadọrin",
+    "Ọgọrin",
+    "Aadọrun",
+  ];
+
+  const teens = [
+    "Mẹwa",
+    "Mọkanlá",
+    "Mejila",
+    "Mẹtala",
+    "Mẹrinla",
+    "Mẹdogun",
+    "Mẹrindinlogun",
+    "Mẹtadinlogun",
+    "Mẹjọdinlogun",
+    "Mẹsandinlogun",
+  ];
+
+  const scales = ["", "Ẹgbẹrun", "Miliọnu", "Biliọnu", "Triliọnu"];
+
+  function convertGroup(val) {
+    let res = "";
+
+    if (val >= 100) {
+      res += ones[Math.floor(val / 100)] + " Ọgọ́rùn-ún ";
+      val %= 100;
+    }
+
+    if (val >= 10 && val <= 19) {
+      res += teens[val - 10] + " ";
+    } else if (val >= 20) {
+      res +=
+        tens[Math.floor(val / 10)] +
+        (val % 10 ? " ati " + ones[val % 10] : "") +
+        " ";
+    } else if (val > 0) {
+      res += ones[val] + " ";
+    }
+
+    return res.trim();
+  }
+
+  let n = parseFloat(num);
+  if (isNaN(n)) return "";
+
+  let sign = n < 0 ? "Nọ́mbà odi " : "";
+  let absN = Math.abs(n);
+  let parts = absN.toString().split(".");
+  let integerPart = parseInt(parts[0]);
+  let decimalPart = parts[1];
+
+  let wordArr = [];
+
+  if (integerPart === 0) {
+    wordArr.push("Odo");
+  } else {
+    let scaleIdx = 0;
+    while (integerPart > 0) {
+      let chunk = integerPart % 1000;
+      if (chunk > 0) {
+        let chunkWords = convertGroup(chunk);
+        wordArr.unshift(
+          chunkWords + (scales[scaleIdx] ? " " + scales[scaleIdx] : "")
+        );
+      }
+      integerPart = Math.floor(integerPart / 1000);
+      scaleIdx++;
+    }
+  }
+
+  let result = sign + wordArr.join(", ").trim();
+
+  if (decimalPart) {
+    result += " Koma";
+    for (let digit of decimalPart) {
+      result += " " + (digit === "0" ? "Odo" : ones[parseInt(digit)]);
+    }
+  }
+
+  return result.trim();
+}
+function translateToYoruba() {
+  if (!currentExpression) return;
+
+  const yoruba = numberToYoruba(currentExpression);
+  const wordResult = document.getElementById("word-result");
+
+  wordResult.innerHTML =
+    '<span class="small-label">Abajade ni Yoruba</span><strong>' +
+    yoruba +
+    "</strong>";
+}
