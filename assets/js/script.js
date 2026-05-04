@@ -1564,6 +1564,70 @@ function factors() {
   updateResult();
 }
 
+// PRIME FACTORIZATION
+
+
+function primeFactorization() {
+  const num = parseFloat(currentExpression);
+
+  if (
+    isNaN(num) ||
+    !Number.isInteger(num) ||
+    num < 2 ||
+    currentExpression.includes(" ") ||
+    currentExpression.includes("+") ||
+    currentExpression.includes("-") ||
+    currentExpression.includes("*") ||
+    currentExpression.includes("/") ||
+    currentExpression.includes("^") ||
+    currentExpression.includes("(") ||
+    currentExpression.includes(")")
+  ) {
+    alert("Please enter a single whole number ≥ 2 for prime factorization");
+    return;
+  }
+
+  const wordResult = document.getElementById("word-result");
+  const wordArea = document.getElementById("word-area");
+
+  let n = num;
+  const factorMap = {};
+  let d = 2;
+
+  while (d * d <= n) {
+    while (n % d === 0) {
+      factorMap[d] = (factorMap[d] || 0) + 1;
+      n /= d;
+    }
+    d++;
+  }
+  if (n > 1) {
+    factorMap[n] = (factorMap[n] || 0) + 1;
+  }
+
+  const formatted = Object.entries(factorMap)
+    .map(([base, exp]) => (exp > 1 ? `${base}^${exp}` : `${base}`))
+    .join(" × ");
+
+  wordResult.innerHTML =
+    '<span class="small-label">Prime Factorization</span><strong>' +
+    num + " = " + formatted +
+    "</strong>";
+
+  wordArea.style.display = "flex";
+  enableSpeakButton();
+
+  calculationHistory.push({
+    expression: `PF(${num}) = ${formatted}`,
+    words: `Prime factors of ${num}: ${formatted}`,
+    time: new Date().toLocaleTimeString(),
+  });
+
+  if (calculationHistory.length > 20) calculationHistory.shift();
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  renderHistory();
+  resetRedoIndex();
+}
 function updateStepsDisplay() {
   // Keeping for compatibility
 }
