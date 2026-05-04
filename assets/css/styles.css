@@ -53,6 +53,7 @@ body {
   justify-content: flex-end;
 }
 
+<<<<<<< HEAD
 .diff-panel {
   background: #f8f9fa;
   padding: 16px;
@@ -100,6 +101,24 @@ body {
 #memory-indicator {
   position: absolute;
   left: 16px;
+=======
+#result {
+  text-align: right;
+  font-size: 38px;
+  font-weight: 600;
+  height: auto;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #212529;
+  box-shadow: none;
+  width: 100%;
+}
+
+#memory-indicator {
+  position: absolute;
+  left: 16px;
+>>>>>>> e56c1d423a03533b60d24c631aa58ff630570ca7
   top: 12px;
   font-size: 12px;
   font-weight: 700;
@@ -275,6 +294,16 @@ body {
   margin-bottom: 20px;
   text-transform: uppercase;
   font-size: 1.2rem;
+}
+
+.btn-memory {
+  background: #f1f3f5;
+  color: #495057;
+  font-size: 14px;
+}
+
+.btn-memory:hover {
+  background: #e9ecef;
 }
 
 .btn-memory {

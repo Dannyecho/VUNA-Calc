@@ -574,146 +574,6 @@
       color: #adb5bd;
       box-shadow: none;
     }
-     .wrapper { width: 100%; max-width: 680px; }
- 
-    /* ── Age / Date accordion card ── */
-    .adc-card {
-      background: var(--card-bg);
-      border-radius: 18px;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.10);
-      overflow: hidden;
-    }
-    .adc-tabs {
-      display: flex;
-      background: #f1f3f5;
-      border-bottom: 2px solid #dee2e6;
-    }
-    .adc-tab {
-      flex: 1;
-      padding: 10px 6px;
-      text-align: center;
-      font-size: .78rem;
-      font-weight: 700;
-      letter-spacing: .3px;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      color: #6c757d;
-      transition: background .18s, color .18s;
-      border-bottom: 3px solid transparent;
-    }
-    .adc-tab.active {
-      background: white;
-      color: var(--primary-color);
-      border-bottom: 3px solid var(--primary-color);
-    }
-    .adc-tab:hover:not(.active) { background: #e9ecef; color: #495057; }
- 
-    .adc-pane { display: none; padding: 20px; }
-    .adc-pane.active { display: block; }
- 
-    /* Result chip strip */
-    .chip-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
-    }
-    .chip {
-      background: #e7f1ff;
-      border-radius: 12px;
-      padding: 8px 14px;
-      text-align: center;
-      flex: 1 1 130px;
-    }
-    .chip .chip-val {
-      display: block;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--primary-color);
-      line-height: 1.1;
-    }
-    .chip .chip-lbl {
-      display: block;
-      font-size: .72rem;
-      color: #6c757d;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      margin-top: 2px;
-    }
- 
-    /* Zodiac badge */
-    .zodiac-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: .9rem;
-      margin-top: 12px;
-    }
-    .zodiac-badge .z-emoji { font-size: 1.4rem; }
- 
-    /* Highlight result box */
-    .highlight-box {
-      background: #f8f9fa;
-      border-left: 4px solid var(--primary-color);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-top: 14px;
-      font-size: .9rem;
-    }
-    .highlight-box strong { color: var(--primary-color); }
- 
-    /* Progress bar for day-of-year */
-    .year-bar-wrap { margin-top: 14px; }
-    .year-bar-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: .75rem;
-      color: #6c757d;
-      margin-bottom: 4px;
-    }
-    .year-bar .progress-bar { transition: width .5s ease; }
- 
-    /* Countdown ring */
-    .countdown-ring-wrap {
-      display: flex;
-      justify-content: center;
-      margin: 14px 0 8px;
-    }
-    .ring-svg { transform: rotate(-90deg); }
-    .ring-bg { fill: none; stroke: #e9ecef; stroke-width: 10; }
-    .ring-fg { fill: none; stroke: var(--primary-color); stroke-width: 10;
-               stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
-    .ring-text {
-      font-size: .82rem;
-      font-weight: 700;
-      fill: #212529;
-      dominant-baseline: middle;
-      text-anchor: middle;
-    }
-    .ring-sub {
-      font-size: .55rem;
-      fill: #6c757d;
-      dominant-baseline: middle;
-      text-anchor: middle;
-    }
- 
-    .section-title {
-      font-size: .7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #adb5bd;
-      margin-bottom: 8px;
-    }
- 
-    /* error state */
-    .adc-error { color: #dc3545; font-size: .85rem; margin-top: 6px; display: none; }
   </style>
 </head>
 
@@ -768,25 +628,7 @@
                   <div class="preview-panel">
                     <div id="answer-preview"></div>
                   </div>
-                  <div class="diff-panel">
-                    <div class="display-container my-3">
-                      <div class="col-md-12">
-                        <h4 class="group-header mb-0">Differentiate</h4>
-                        <div class="diff-controls row align-items-end">
-                          <div class="col-9">
-                            <input type="text" class="form-control diff-input" id="diff-input"
-                              placeholder="e.g., x^3 + 4x or sin(x)" />
-                          </div>
-                          <div class="col">
-                            <a class="btn btn-block btn-operator diff-btn" onclick="differentiateExpression()">
-                              d/dx
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div id="diff-output" class="diff-outputx"></div>
-                  </div>
+                  <!-- Differentiate feature removed -->
 
                   <!-- Geometry Modal -->
                   <div id="geometryModal"
@@ -811,6 +653,37 @@
                     </div>
                   </div>
 
+                  <div id="cameraSolverModal" class="camera-solver-modal" aria-hidden="true">
+                    <div class="camera-solver-card">
+                      <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                          <h5 class="mb-1">Camera Math Solver</h5>
+                          <p class="text-muted mb-0 small">Capture a printed expression, run OCR, then send it into the calculator.</p>
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="closeCameraSolver()">Close</button>
+                      </div>
+
+                      <video id="cameraSolverVideo" class="camera-solver-preview" autoplay playsinline muted></video>
+                      <canvas id="cameraSolverCanvas" class="camera-solver-canvas"></canvas>
+
+                      <div class="camera-solver-toolbar">
+                        <button class="btn btn-primary btn-sm" onclick="startCameraSolver()">Start Camera</button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="captureCameraSolverFrame()">Capture</button>
+                        <button class="btn btn-success btn-sm" onclick="solveCapturedCameraMath()">Read Image</button>
+                        <button class="btn btn-warning btn-sm" onclick="applyCameraSolverExpression()">Solve Edited</button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('cameraSolverUpload').click()">Upload Image</button>
+                      </div>
+
+                      <input id="cameraSolverUpload" type="file" accept="image/*" class="d-none" onchange="loadCameraSolverImage(event)">
+
+                      <div id="cameraSolverStatus" class="camera-solver-status">Camera is idle.</div>
+                      <div id="cameraSolverResult" class="camera-solver-result d-none">
+                        <div class="small text-muted mb-1">Recognized expression</div>
+                        <textarea id="cameraSolverExpression" class="camera-solver-input" rows="3" placeholder="OCR result will appear here for editing"></textarea>
+                      </div>
+                    </div>
+                  </div>
+
                   <div class="btn-grid">
                     <!-- Row 1 -->
                     <button class="btn btn-info" onclick="redoCalculation()" id="redoBtn">↻ REDO</button>
@@ -823,6 +696,7 @@
                     <button id="sin-btn" class="btn btn-light" onclick="trigButtonPressed('sin')">sin</button>
                     <button id="cos-btn" class="btn btn-light" onclick="trigButtonPressed('cos')">cos</button>
                     <button id="tan-btn" class="btn btn-light" onclick="trigButtonPressed('tan')">tan</button>
+                    <button id="sinh-btn" class="btn btn-light" onclick="trigButtonPressed('sinh')">sinh</button>
 
                     <!-- Row 2 -->
                     <button id="" class="btn btn-operator" onclick="toggleInverseMode()">2nd</button>
@@ -894,6 +768,7 @@
                     <button class="btn btn-special" onclick="tenPower()">10<sup>x</sup></button>
                     <button id="voice-input-btn" class="btn btn-special" aria-label="Speak calculation input"
                       onclick="startVoiceInput()">🎙️</button>
+                    <button class="btn btn-special" onclick="openCameraSolver()" title="Scan an expression with the camera">CAM</button>
                     <button class="btn btn-operator" onclick="convertToHex()">HEX</button>
                     <button class="btn btn-operator" onclick="openGeometry()">📐 Geo</button>
                     <!-- Row 9 -->
@@ -2329,7 +2204,7 @@
                                     <div class="col-md-6">
                                       <label class="form-label small mb-1" style="font-weight:600;">Find</label>
                                       <div class="btn-group btn-group-sm w-100">
-                                        <button class="btn btn-outline-primary" onclick="findDerivative()">d/dx</button>
+                                        <!--<button class="btn btn-outline-primary" onclick="findDerivative()">d/dx</button>-->
                                         <button class="btn btn-outline-primary" onclick="findIntegral()">∫</button>
                                         <button class="btn btn-outline-primary" onclick="findRoots()">Roots</button>
                                         <button class="btn btn-outline-primary" onclick="findExtrema()">Min/Max</button>
@@ -2345,7 +2220,7 @@
                                         <div><strong>Value:</strong> <span id="point-value"></span></div>
                                       </div>
                                       <div class="col-md-6">
-                                        <div><strong>Derivative:</strong> <span id="point-derivative"></span></div>
+                                        <!--<div><strong>Derivative:</strong> <span id="point-derivative"></span></div>-->
                                         <div><strong>Analysis:</strong> <span id="point-analysis"></span></div>
                                       </div>
                                     </div>
@@ -2752,6 +2627,60 @@
                               </div>
                             </div>
                             <!-- END Loan & Mortgage Calculator -->
+                                                  <!-- ===== AGE CALCULATOR ===== -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingAgeCalc">
+            <button
+              class="accordion-button collapsed d-flex justify-content-between align-items-center"
+              type="button" data-bs-toggle="collapse" data-bs-target="#collapseAgeCalc"
+              aria-expanded="false" aria-controls="collapseAgeCalc">
+              <span>🎂 Age Calculator</span>
+            </button>
+          </h2>
+          <div id="collapseAgeCalc" class="accordion-collapse collapse" aria-labelledby="headingAgeCalc"
+            data-bs-parent="#converterAccordion">
+            <div class="accordion-body">
+              <form id="age-calc-form" class="mb-3">
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-6">
+                    <label for="birth-date" class="form-label small" style="font-weight:600;">Birth Date</label>
+                    <input type="date" class="form-control" id="birth-date" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="target-date" class="form-label small" style="font-weight:600;">Target Date</label>
+                    <input type="date" class="form-control" id="target-date" disabled>
+                    <div class="form-check mt-1">
+                      <input class="form-check-input" type="checkbox" id="custom-date-toggle">
+                      <label class="form-check-label small" for="custom-date-toggle">Custom target date</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-grid mt-3">
+                  <button type="submit" class="btn btn-primary">Calculate Age</button>
+                </div>
+              </form>
+              <div id="age-calc-result" style="display:none;">
+                <h5>Exact Age</h5>
+                <div id="exact-age"></div>
+                <h6 class="mt-3">Totals</h6>
+                <ul class="list-group list-group-flush mb-2">
+                  <li class="list-group-item"><span id="total-months"></span></li>
+                  <li class="list-group-item"><span id="total-weeks"></span></li>
+                  <li class="list-group-item"><span id="total-days"></span></li>
+                  <li class="list-group-item"><span id="total-hours"></span></li>
+                </ul>
+                <div id="next-birthday"></div>
+                <div id="zodiac-signs" class="mt-2"></div>
+                <div class="mt-3">
+                  <label class="form-label small">Year Progress</label>
+                  <div class="progress">
+                    <div id="year-progress-bar" class="progress-bar" role="progressbar" style="width:0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
                           </div>
                         </div>
                       </div>
@@ -3085,6 +3014,7 @@
           </div>
 
           <script src="assets/js/bootstrap.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
           <script src="assets/js/script.js"></script>
           <button id="scroll-to-calculator" title="Back to Calculator">↑</button>
         </div>
@@ -3093,3 +3023,4 @@
 
 
 </html>
+

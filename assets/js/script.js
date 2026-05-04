@@ -22,6 +22,121 @@ function toggleTheme() {
     localStorage.setItem("theme", "light");
   }
 }
+// ===============================
+// AGE CALCULATOR FUNCTIONALITY
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+  const ageForm = document.getElementById("age-calc-form");
+  if (ageForm) {
+    const birthInput = document.getElementById("birth-date");
+    const targetInput = document.getElementById("target-date");
+    const customToggle = document.getElementById("custom-date-toggle");
+    customToggle.addEventListener("change", function () {
+      targetInput.disabled = !this.checked;
+      if (!this.checked) targetInput.value = "";
+    });
+    ageForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const birthDate = new Date(birthInput.value);
+      let targetDate = new Date();
+      if (customToggle.checked && targetInput.value) {
+        targetDate = new Date(targetInput.value);
+      }
+      if (!birthInput.value) return;
+      const result = calculateAgeDetails(birthDate, targetDate);
+      displayAgeResult(result);
+      logAgeCalculation(birthDate, targetDate, result);
+    });
+  }
+});
+
+function calculateAgeDetails(birthDate, targetDate) {
+  // Years, months, days
+  let years = targetDate.getFullYear() - birthDate.getFullYear();
+  let months = targetDate.getMonth() - birthDate.getMonth();
+  let days = targetDate.getDate() - birthDate.getDate();
+  if (days < 0) {
+    months--;
+    const prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
+    days += prevMonth.getDate();
+  }
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+  // Total days, weeks, hours
+  const diffMs = targetDate - birthDate;
+  const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const totalWeeks = Math.floor(totalDays / 7);
+  const totalMonths = (targetDate.getFullYear() - birthDate.getFullYear()) * 12 + (targetDate.getMonth() - birthDate.getMonth());
+  const totalHours = totalDays * 24;
+  // Next birthday
+  let nextBirthday = new Date(targetDate.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+  if (nextBirthday < targetDate) nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+  const msToNextBday = nextBirthday - targetDate;
+  const daysToNextBday = Math.ceil(msToNextBday / (1000 * 60 * 60 * 24));
+  // Zodiac
+  const westernZodiac = getWesternZodiac(birthDate);
+  const chineseZodiac = getChineseZodiac(birthDate.getFullYear());
+  // Year progress
+  const startOfYear = new Date(targetDate.getFullYear(), 0, 1);
+  const endOfYear = new Date(targetDate.getFullYear() + 1, 0, 1);
+  const yearProgress = ((targetDate - startOfYear) / (endOfYear - startOfYear)) * 100;
+  return {
+    years, months, days, totalMonths, totalWeeks, totalDays, totalHours,
+    nextBirthday, daysToNextBday, westernZodiac, chineseZodiac, yearProgress
+  };
+}
+
+function displayAgeResult(result) {
+  document.getElementById("age-calc-result").style.display = "block";
+  document.getElementById("exact-age").textContent = `${result.years} years, ${result.months} months, ${result.days} days`;
+  document.getElementById("total-months").textContent = `Total Months: ${result.totalMonths}`;
+  document.getElementById("total-weeks").textContent = `Total Weeks: ${result.totalWeeks}`;
+  document.getElementById("total-days").textContent = `Total Days: ${result.totalDays}`;
+  document.getElementById("total-hours").textContent = `Total Hours: ${result.totalHours}`;
+  document.getElementById("next-birthday").innerHTML = `<b>Next Birthday:</b> in ${result.daysToNextBday} days (${result.nextBirthday.toLocaleDateString()})`;
+  document.getElementById("zodiac-signs").innerHTML = `<b>Western Zodiac:</b> ${result.westernZodiac} <br><b>Chinese Zodiac:</b> ${result.chineseZodiac}`;
+  document.getElementById("year-progress-bar").style.width = `${result.yearProgress.toFixed(1)}%`;
+  document.getElementById("year-progress-bar").textContent = `${result.yearProgress.toFixed(1)}%`;
+}
+
+function getWesternZodiac(date) {
+  const zodiacs = [
+    ["Capricorn", 1, 20], ["Aquarius", 2, 19], ["Pisces", 3, 21], ["Aries", 4, 20],
+    ["Taurus", 5, 21], ["Gemini", 6, 21], ["Cancer", 7, 23], ["Leo", 8, 23],
+    ["Virgo", 9, 23], ["Libra", 10, 23], ["Scorpio", 11, 22], ["Sagittarius", 12, 22], ["Capricorn", 12, 32]
+  ];
+  const m = date.getMonth() + 1, d = date.getDate();
+  for (let i = 0; i < zodiacs.length - 1; i++) {
+    const [sign, month, day] = zodiacs[i];
+    const [nextSign, nextMonth, nextDay] = zodiacs[i + 1];
+    if ((m === month && d >= day) || (m === nextMonth && d < nextDay)) return sign;
+  }
+  return "Capricorn";
+}
+
+function getChineseZodiac(year) {
+  const animals = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"];
+  return animals[(year - 4) % 12];
+}
+
+function logAgeCalculation(birthDate, targetDate, result) {
+  calculationHistory?.push({
+    expression: `Age from ${birthDate.toLocaleDateString()} to ${targetDate.toLocaleDateString()}`,
+    result: `${result.years}y ${result.months}m ${result.days}d (${result.totalDays} days)`,
+    time: new Date().toLocaleString(),
+    type: "age",
+    details: {
+      zodiac: `${result.westernZodiac}, ${result.chineseZodiac}`,
+      nextBirthday: result.nextBirthday.toLocaleDateString(),
+      daysToNextBday: result.daysToNextBday
+    }
+  });
+  if (calculationHistory.length > 20) calculationHistory.shift();
+  localStorage.setItem("calcHistory", JSON.stringify(calculationHistory));
+  if (typeof renderHistory === "function") renderHistory();
+}
 
 var inverseMode = false;
 var currentExpression = "";
@@ -667,6 +782,9 @@ function toggleInverseMode() {
   document.getElementById("tan-btn").textContent = inverseMode
     ? "tan⁻¹"
     : "tan";
+  document.getElementById("sinh-btn").textContent = inverseMode
+    ? "sinh⁻¹"
+    : "sinh";
 }
 
 function sinDeg(x) {
@@ -689,6 +807,14 @@ function atanDeg(x) {
   return (Math.atan(x) * 180) / Math.PI;
 }
 
+function sinh(x) {
+  return Math.sinh(x);
+}
+
+function asinh(x) {
+  return Math.asinh(x);
+}
+
 function appendTrig(func) {
   currentExpression += func + "(";
   updateResult();
@@ -696,8 +822,8 @@ function appendTrig(func) {
 
 function trigButtonPressed(func) {
   const map = inverseMode
-    ? { sin: "asin", cos: "acos", tan: "atan" }
-    : { sin: "sin", cos: "cos", tan: "tan" };
+    ? { sin: "asin", cos: "acos", tan: "atan", sinh: "asinh" }
+    : { sin: "sin", cos: "cos", tan: "tan", sinh: "sinh" };
 
   appendTrig(map[func]);
 }
@@ -710,16 +836,133 @@ function normalizeExpression(expr) {
     .replace(/sin\(/g, "sinDeg(")
     .replace(/cos\(/g, "cosDeg(")
     .replace(/tan\(/g, "tanDeg(")
+    .replace(/asinh\(/g, "asinh(")
+    .replace(/sinh\(/g, "sinh(")
     .replace(/\be\b/g, "Math.E")
     .replace(/\bpi\b/g, "Math.PI");
 }
 
-function isPrime(num) {
-  if (num <= 1) return false;
-  for (let i = 2; i <= Math.sqrt(num); i++) {
-    if (num % i === 0) return false;
+function differentiateExpression() {
+  const input = document.getElementById("diff-input");
+  const output = document.getElementById("diff-output");
+  if (!input || !output) return;
+
+  const raw = input.value.trim();
+  if (!raw) {
+    output.innerText = "Enter an expression to differentiate.";
+    return;
   }
-  return true;
+
+  try {
+    const normalized = normalizeInput(raw);
+    const expr = stripDerivativePrefix(normalized);
+    const tokens = tokenize(expr);
+    const parser = new Parser(tokens);
+    const ast = parser.parseExpression();
+    if (!parser.isAtEnd()) {
+      throw new Error("Unexpected token near the end of the expression.");
+    }
+    const derivative = simplify(differentiate(ast));
+    output.innerText = toString(derivative);
+    currentExpression = toString(derivative);
+    updateResult();
+  } catch (error) {
+    output.innerText = error.message || "Invalid expression.";
+  }
+}
+
+function normalizeInput(value) {
+  return value.replace(/−/g, "-").replace(/\s+/g, " ");
+}
+
+function stripDerivativePrefix(value) {
+  const trimmed = value.trim();
+  if (/^d\/dx/i.test(trimmed)) {
+    let rest = trimmed.replace(/^d\/dx/i, "").trim();
+    if (rest.startsWith("(") && rest.endsWith(")")) {
+      rest = rest.slice(1, -1).trim();
+    }
+    return rest;
+  }
+  return trimmed;
+}
+
+function tokenize(value) {
+  const tokens = [];
+  let i = 0;
+
+  while (i < value.length) {
+    const ch = value[i];
+
+    if (ch === " ") {
+      i += 1;
+      continue;
+    }
+
+    if ((ch >= "0" && ch <= "9") || ch === ".") {
+      let num = ch;
+      i += 1;
+      while (i < value.length && ((value[i] >= "0" && value[i] <= "9") || value[i] === ".")) {
+        num += value[i];
+        i += 1;
+      }
+      if (num === ".") throw new Error("Invalid number format.");
+      tokens.push({ type: "number", value: parseFloat(num) });
+      continue;
+    }
+
+    if ((ch >= "a" && ch <= "z") || (ch >= "A" && ch <= "Z")) {
+      let ident = ch;
+      i += 1;
+      while (i < value.length && /[a-zA-Z]/.test(value[i])) {
+        ident += value[i];
+        i += 1;
+      }
+      const lower = ident.toLowerCase();
+      if (lower === "x") {
+        tokens.push({ type: "variable", name: "x" });
+      } else if (["sin", "cos", "tan", "ln", "log", "exp"].includes(lower)) {
+        tokens.push({ type: "func", name: lower });
+      } else if (lower === "e") {
+        tokens.push({ type: "constant", name: "e", value: Math.E });
+      } else if (lower === "pi") {
+        tokens.push({ type: "constant", name: "pi", value: Math.PI });
+      } else {
+        throw new Error(`Unknown identifier: ${ident}`);
+      }
+      continue;
+    }
+
+    if ("+-*/^()".includes(ch)) {
+      if (ch === "(") tokens.push({ type: "lparen", value: ch });
+      else if (ch === ")") tokens.push({ type: "rparen", value: ch });
+      else tokens.push({ type: "operator", value: ch });
+      i += 1;
+      continue;
+    }
+
+    throw new Error(`Unsupported character: ${ch}`);
+  }
+
+  return insertImplicitMultiplication(tokens);
+}
+
+function insertImplicitMultiplication(tokens) {
+  const result = [];
+  const leftTypes = ["number", "variable", "constant", "rparen"];
+  const rightTypes = ["number", "variable", "constant", "func", "lparen"];
+
+  for (let i = 0; i < tokens.length; i += 1) {
+    const current = tokens[i];
+    const next = tokens[i + 1];
+    result.push(current);
+    if (!next) continue;
+    if (leftTypes.includes(current.type) && rightTypes.includes(next.type)) {
+      result.push({ type: "operator", value: "*" });
+    }
+  }
+
+  return result;
 }
 
 function Parser(tokens) {
@@ -890,53 +1133,13 @@ function differentiateBinary(node) {
           left: { type: "binary", op: "*", left: dLeft, right: right },
           right: { type: "binary", op: "*", left: left, right: dRight },
         },
-        right: {
-          type: "binary",
-          op: "^",
-          left: right,
-          right: { type: "number", value: 2 },
-        },
+        right: { type: "binary", op: "^", left: right, right: { type: "number", value: 2 } },
       };
     case "^":
       return differentiatePower(left, right);
     default:
       throw new Error("Unsupported operator.");
   }
-}
-
-function convertToFraction() {
-  const display = document.getElementById("result");
-  if (!display || !display.value) return;
-
-  const value = Number(display.value);
-  if (isNaN(value)) return;
-
-  if (Number.isInteger(value)) {
-    display.value = value + "/1";
-    currentExpression = display.value;
-    return;
-  }
-
-  let tolerance = 1.0e-6;
-  let h1 = 1,
-    h2 = 0,
-    k1 = 0,
-    k2 = 1;
-  let b = value;
-
-  do {
-    let a = Math.floor(b);
-    let aux = h1;
-    h1 = a * h1 + h2;
-    h2 = aux;
-    aux = k1;
-    k1 = a * k1 + k2;
-    k2 = aux;
-    b = 1 / (b - a);
-  } while (Math.abs(value - h1 / k1) > value * tolerance);
-
-  display.value = `${h1}/${k1}`;
-  currentExpression = display.value;
 }
 
 function differentiatePower(base, exponent) {
@@ -948,12 +1151,7 @@ function differentiatePower(base, exponent) {
         type: "binary",
         op: "*",
         left: { type: "number", value: exponent.value },
-        right: {
-          type: "binary",
-          op: "^",
-          left: base,
-          right: { type: "number", value: exponent.value - 1 },
-        },
+        right: { type: "binary", op: "^", left: base, right: { type: "number", value: exponent.value - 1 } },
       },
       right: differentiate(base),
     };
@@ -964,12 +1162,7 @@ function differentiatePower(base, exponent) {
       type: "binary",
       op: "*",
       left: { type: "binary", op: "^", left: base, right: exponent },
-      right: {
-        type: "binary",
-        op: "*",
-        left: { type: "func", name: "ln", arg: base },
-        right: differentiate(exponent),
-      },
+      right: { type: "binary", op: "*", left: { type: "func", name: "ln", arg: base }, right: differentiate(exponent) },
     };
   }
 
@@ -982,21 +1175,12 @@ function differentiateFunction(node) {
 
   switch (node.name) {
     case "sin":
-      return {
-        type: "binary",
-        op: "*",
-        left: { type: "func", name: "cos", arg },
-        right: dArg,
-      };
+      return { type: "binary", op: "*", left: { type: "func", name: "cos", arg }, right: dArg };
     case "cos":
       return {
         type: "binary",
         op: "*",
-        left: {
-          type: "unary",
-          op: "-",
-          value: { type: "func", name: "sin", arg },
-        },
+        left: { type: "unary", op: "-", value: { type: "func", name: "sin", arg } },
         right: dArg,
       };
     case "tan":
@@ -1017,17 +1201,7 @@ function differentiateFunction(node) {
         right: dArg,
       };
     case "ln":
-      return {
-        type: "binary",
-        op: "*",
-        left: {
-          type: "binary",
-          op: "/",
-          left: { type: "number", value: 1 },
-          right: arg,
-        },
-        right: dArg,
-      };
+      return { type: "binary", op: "*", left: { type: "binary", op: "/", left: { type: "number", value: 1 }, right: arg }, right: dArg };
     case "log":
       return {
         type: "binary",
@@ -1040,22 +1214,13 @@ function differentiateFunction(node) {
             type: "binary",
             op: "*",
             left: arg,
-            right: {
-              type: "func",
-              name: "ln",
-              arg: { type: "number", value: 10 },
-            },
+            right: { type: "func", name: "ln", arg: { type: "number", value: 10 } },
           },
         },
         right: dArg,
       };
     case "exp":
-      return {
-        type: "binary",
-        op: "*",
-        left: { type: "func", name: "exp", arg },
-        right: dArg,
-      };
+      return { type: "binary", op: "*", left: { type: "func", name: "exp", arg }, right: dArg };
     default:
       throw new Error(`Unsupported function: ${node.name}`);
   }
@@ -1077,10 +1242,7 @@ function simplify(node) {
     const right = simplify(node.right);
 
     if (left.type === "number" && right.type === "number") {
-      return {
-        type: "number",
-        value: evaluateBinary(node.op, left.value, right.value),
-      };
+      return { type: "number", value: evaluateBinary(node.op, left.value, right.value) };
     }
 
     switch (node.op) {
@@ -1119,6 +1281,288 @@ function simplify(node) {
   return node;
 }
 
+function evaluateBinary(op, left, right) {
+  switch (op) {
+    case "+":
+      return left + right;
+    case "-":
+      return left - right;
+    case "*":
+      return left * right;
+    case "/":
+      return left / right;
+    case "^":
+      return Math.pow(left, right);
+    default:
+      return NaN;
+  }
+}
+
+function isZero(node) {
+  return node.type === "number" && Math.abs(node.value) < 1e-12;
+}
+
+function isOne(node) {
+  return node.type === "number" && Math.abs(node.value - 1) < 1e-12;
+}
+
+function toString(node, parentPrecedence) {
+  const precedence = getPrecedence(node);
+  const needsParens = parentPrecedence && precedence < parentPrecedence;
+
+  let result;
+  switch (node.type) {
+    case "number":
+      result = formatNumber(node.value);
+      break;
+    case "variable":
+      result = node.name;
+      break;
+    case "constant":
+      result = node.name;
+      break;
+    case "unary":
+      result = "-" + toString(node.value, precedence);
+      break;
+    case "func":
+      result = `${node.name}(${toString(node.arg, 0)})`;
+      break;
+    case "binary":
+      result = formatBinary(node, precedence);
+      break;
+    default:
+      result = "";
+  }
+
+  return needsParens ? `(${result})` : result;
+}
+
+function formatBinary(node, precedence) {
+  if (node.op === "*") {
+    const left = toString(node.left, precedence);
+    const right = toString(node.right, precedence);
+    if (shouldOmitMultiply(node.left, node.right)) {
+      return `${left}${right}`;
+    }
+    return `${left} * ${right}`;
+  }
+
+  const left = toString(node.left, precedence);
+  const right = toString(node.right, precedence + (node.op === "^" ? 1 : 0));
+  return `${left} ${node.op} ${right}`;
+}
+
+function shouldOmitMultiply(left, right) {
+  if (left.type !== "number") return false;
+  if (right.type === "variable" || right.type === "func") return true;
+  if (right.type === "binary" && right.op === "^" && right.left.type === "variable") return true;
+  return false;
+}
+
+function formatNumber(value) {
+  if (!isFinite(value)) return "Error";
+  if (Math.abs(value - Math.round(value)) < 1e-10) {
+    return `${Math.round(value)}`;
+  }
+  return `${parseFloat(value.toFixed(6))}`;
+}
+
+function getPrecedence(node) {
+  if (!node) return 0;
+  if (node.type === "binary") {
+    switch (node.op) {
+      case "+":
+      case "-":
+        return 1;
+      case "*":
+      case "/":
+        return 2;
+      case "^":
+        return 3;
+      default:
+        return 0;
+    }
+  }
+  if (node.type === "unary") return 4;
+  return 5;
+}
+
+function isPrime(num) {
+  if (num <= 1) return false;
+  if (num % 2 === 0) {
+    return num === 2;
+  }
+
+  const limit = Math.sqrt(num);
+  for (let i = 3; i <= limit; i += 2) {
+    if (num % i === 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function Parser(tokens) {
+  this.tokens = tokens;
+  this.index = 0;
+}
+
+Parser.prototype.peek = function () {
+  return this.tokens[this.index];
+};
+
+Parser.prototype.advance = function () {
+  this.index += 1;
+  return this.tokens[this.index - 1];
+};
+
+Parser.prototype.isAtEnd = function () {
+  return this.index >= this.tokens.length;
+};
+
+Parser.prototype.matchOperator = function (op) {
+  const token = this.peek();
+  if (token && token.type === "operator" && token.value === op) {
+    this.advance();
+    return true;
+  }
+  return false;
+};
+
+Parser.prototype.parseExpression = function () {
+  let node = this.parseTerm();
+  while (true) {
+    if (this.matchOperator("+")) {
+      node = { type: "binary", op: "+", left: node, right: this.parseTerm() };
+      continue;
+    }
+    if (this.matchOperator("-")) {
+      node = { type: "binary", op: "-", left: node, right: this.parseTerm() };
+      continue;
+    }
+    break;
+  }
+  return node;
+};
+
+Parser.prototype.parseTerm = function () {
+  let node = this.parsePower();
+  while (true) {
+    if (this.matchOperator("*")) {
+      node = { type: "binary", op: "*", left: node, right: this.parsePower() };
+      continue;
+    }
+    if (this.matchOperator("/")) {
+      node = { type: "binary", op: "/", left: node, right: this.parsePower() };
+      continue;
+    }
+    break;
+  }
+  return node;
+};
+
+Parser.prototype.parsePower = function () {
+  let node = this.parseUnary();
+  if (this.matchOperator("^")) {
+    node = { type: "binary", op: "^", left: node, right: this.parsePower() };
+  }
+  return node;
+};
+
+Parser.prototype.parseUnary = function () {
+  if (this.matchOperator("-")) {
+    return { type: "unary", op: "-", value: this.parseUnary() };
+  }
+  return this.parsePrimary();
+};
+
+Parser.prototype.parsePrimary = function () {
+  const token = this.peek();
+  if (!token) throw new Error("Unexpected end of expression.");
+
+  if (token.type === "number") {
+    this.advance();
+    return { type: "number", value: token.value };
+  }
+
+  if (token.type === "variable") {
+    this.advance();
+    return { type: "variable", name: token.name };
+  }
+
+  if (token.type === "constant") {
+    this.advance();
+    return { type: "constant", name: token.name, value: token.value };
+  }
+
+  if (token.type === "func") {
+    const funcToken = this.advance();
+    const next = this.peek();
+    if (!next || next.type !== "lparen") {
+      throw new Error(`Expected '(' after ${funcToken.name}.`);
+    }
+    this.advance();
+    const arg = this.parseExpression();
+    if (!this.peek() || this.peek().type !== "rparen") {
+      throw new Error("Missing closing parenthesis for function.");
+    }
+    this.advance();
+    return { type: "func", name: funcToken.name, arg };
+  }
+
+  if (token.type === "lparen") {
+    this.advance();
+    const node = this.parseExpression();
+    if (!this.peek() || this.peek().type !== "rparen") {
+      throw new Error("Missing closing parenthesis.");
+    }
+    this.advance();
+    return node;
+  }
+
+  throw new Error("Invalid token in expression.");
+};
+
+// Symbolic differentiation feature removed.
+
+function convertToFraction() {
+  const display = document.getElementById("result");
+  if (!display || !display.value) return;
+
+  const value = Number(display.value);
+  if (isNaN(value)) return;
+
+  if (Number.isInteger(value)) {
+    display.value = value + "/1";
+    currentExpression = display.value;
+    return;
+  }
+
+  let tolerance = 1.0e-6;
+  let h1 = 1,
+    h2 = 0,
+    k1 = 0,
+    k2 = 1;
+  let b = value;
+
+  do {
+    let a = Math.floor(b);
+    let aux = h1;
+    h1 = a * h1 + h2;
+    h2 = aux;
+    aux = k1;
+    k1 = a * k1 + k2;
+    k2 = aux;
+    b = 1 / (b - a);
+  } while (Math.abs(value - h1 / k1) > value * tolerance);
+
+  display.value = `${h1}/${k1}`;
+  currentExpression = display.value;
+}
+
+// differentiatePower removed.
+
+// Symbolic differentiation removed.
 function evaluateBinary(op, left, right) {
   switch (op) {
     case "+":
@@ -4691,6 +5135,9 @@ function displayBitwiseResult(operation, result) {
     document.getElementById("tan-btn").textContent = inverseMode
       ? "tan⁻¹"
       : "tan";
+    document.getElementById("sinh-btn").textContent = inverseMode
+      ? "sinh⁻¹"
+      : "sinh";
   }
 
   function sinDeg(x) {
@@ -4713,6 +5160,14 @@ function displayBitwiseResult(operation, result) {
     return (Math.atan(x) * 180) / Math.PI;
   }
 
+  function sinh(x) {
+    return Math.sinh(x);
+  }
+
+  function asinh(x) {
+    return Math.asinh(x);
+  }
+
   function appendTrig(func) {
     currentExpression += func + "(";
     updateResult();
@@ -4720,8 +5175,8 @@ function displayBitwiseResult(operation, result) {
 
   function trigButtonPressed(func) {
     const map = inverseMode
-      ? { sin: "asin", cos: "acos", tan: "atan" }
-      : { sin: "sin", cos: "cos", tan: "tan" };
+      ? { sin: "asin", cos: "acos", tan: "atan", sinh: "asinh" }
+      : { sin: "sin", cos: "cos", tan: "tan", sinh: "sinh" };
 
     appendTrig(map[func]);
   }
@@ -4733,7 +5188,9 @@ function displayBitwiseResult(operation, result) {
       .replace(/atan\(/g, "atanDeg(")
       .replace(/sin\(/g, "sinDeg(")
       .replace(/cos\(/g, "cosDeg(")
-      .replace(/tan\(/g, "tanDeg(");
+      .replace(/tan\(/g, "tanDeg(")
+      .replace(/asinh\(/g, "asinh(")
+      .replace(/sinh\(/g, "sinh(");
   }
 
   function isPrime(num) {
@@ -4875,66 +5332,6 @@ function displayBitwiseResult(operation, result) {
     throw new Error("Invalid token in expression.");
   };
 
-  function differentiate(node) {
-    switch (node.type) {
-      case "number":
-        return { type: "number", value: 0 };
-      case "constant":
-        return { type: "number", value: 0 };
-      case "variable":
-        return { type: "number", value: 1 };
-      case "unary":
-        return { type: "unary", op: "-", value: differentiate(node.value) };
-      case "binary":
-        return differentiateBinary(node);
-      case "func":
-        return differentiateFunction(node);
-      default:
-        throw new Error("Unsupported expression.");
-    }
-  }
-
-  function differentiateBinary(node) {
-    const left = node.left;
-    const right = node.right;
-    const dLeft = differentiate(left);
-    const dRight = differentiate(right);
-
-    switch (node.op) {
-      case "+":
-        return { type: "binary", op: "+", left: dLeft, right: dRight };
-      case "-":
-        return { type: "binary", op: "-", left: dLeft, right: dRight };
-      case "*":
-        return {
-          type: "binary",
-          op: "+",
-          left: { type: "binary", op: "*", left: dLeft, right: right },
-          right: { type: "binary", op: "*", left: left, right: dRight },
-        };
-      case "/":
-        return {
-          type: "binary",
-          op: "/",
-          left: {
-            type: "binary",
-            op: "-",
-            left: { type: "binary", op: "*", left: dLeft, right: right },
-            right: { type: "binary", op: "*", left: left, right: dRight },
-          },
-          right: {
-            type: "binary",
-            op: "^",
-            left: right,
-            right: { type: "number", value: 2 },
-          },
-        };
-      case "^":
-        return differentiatePower(left, right);
-      default:
-        throw new Error("Unsupported operator.");
-    }
-  }
 
   function convertToFraction() {
     const display = document.getElementById("result");
@@ -4971,127 +5368,7 @@ function displayBitwiseResult(operation, result) {
     currentExpression = display.value;
   }
 
-  function differentiatePower(base, exponent) {
-    if (exponent.type === "number") {
-      return {
-        type: "binary",
-        op: "*",
-        left: {
-          type: "binary",
-          op: "*",
-          left: { type: "number", value: exponent.value },
-          right: {
-            type: "binary",
-            op: "^",
-            left: base,
-            right: { type: "number", value: exponent.value - 1 },
-          },
-        },
-        right: differentiate(base),
-      };
-    }
-
-    if (base.type === "constant" || base.type === "number") {
-      return {
-        type: "binary",
-        op: "*",
-        left: { type: "binary", op: "^", left: base, right: exponent },
-        right: {
-          type: "binary",
-          op: "*",
-          left: { type: "func", name: "ln", arg: base },
-          right: differentiate(exponent),
-        },
-      };
-    }
-
-    throw new Error("Unsupported exponent form for differentiation.");
-  }
-
-  function differentiateFunction(node) {
-    const arg = node.arg;
-    const dArg = differentiate(arg);
-
-    switch (node.name) {
-      case "sin":
-        return {
-          type: "binary",
-          op: "*",
-          left: { type: "func", name: "cos", arg },
-          right: dArg,
-        };
-      case "cos":
-        return {
-          type: "binary",
-          op: "*",
-          left: {
-            type: "unary",
-            op: "-",
-            value: { type: "func", name: "sin", arg },
-          },
-          right: dArg,
-        };
-      case "tan":
-        return {
-          type: "binary",
-          op: "*",
-          left: {
-            type: "binary",
-            op: "/",
-            left: { type: "number", value: 1 },
-            right: {
-              type: "binary",
-              op: "^",
-              left: { type: "func", name: "cos", arg },
-              right: { type: "number", value: 2 },
-            },
-          },
-          right: dArg,
-        };
-      case "ln":
-        return {
-          type: "binary",
-          op: "*",
-          left: {
-            type: "binary",
-            op: "/",
-            left: { type: "number", value: 1 },
-            right: arg,
-          },
-          right: dArg,
-        };
-      case "log":
-        return {
-          type: "binary",
-          op: "*",
-          left: {
-            type: "binary",
-            op: "/",
-            left: { type: "number", value: 1 },
-            right: {
-              type: "binary",
-              op: "*",
-              left: arg,
-              right: {
-                type: "func",
-                name: "ln",
-                arg: { type: "number", value: 10 },
-              },
-            },
-          },
-          right: dArg,
-        };
-      case "exp":
-        return {
-          type: "binary",
-          op: "*",
-          left: { type: "func", name: "exp", arg },
-          right: dArg,
-        };
-      default:
-        throw new Error(`Unsupported function: ${node.name}`);
-    }
-  }
+  // Symbolic differentiation removed from this section.
 
   function simplify(node) {
     if (!node) return node;
@@ -9236,7 +9513,8 @@ function analyzePoint() {
 
   const expression = graphFunctions[0].expression;
   const y = evaluateFunction(expression, x);
-  const derivative = approximateDerivative(expression, x);
+  // derivative feature removed; analysis will use slope approximation when needed
+  const derivative = NaN;
 
   if (y === null) {
     alert('Function is undefined at that x value.');
@@ -9246,39 +9524,36 @@ function analyzePoint() {
   const result = document.getElementById('analysis-result');
   const pointCoords = document.getElementById('point-coords');
   const pointValue = document.getElementById('point-value');
-  const pointDerivative = document.getElementById('point-derivative');
+  // derivative element removed
   const pointAnalysis = document.getElementById('point-analysis');
 
   if (!result || !pointCoords || !pointValue || !pointDerivative || !pointAnalysis) return;
 
   pointCoords.textContent = `(${x.toFixed(4)}, ${y.toFixed(4)})`;
   pointValue.textContent = y.toFixed(6);
-  pointDerivative.textContent = Number.isFinite(derivative) ? derivative.toFixed(6) : 'undefined';
 
-  if (!Number.isFinite(derivative)) {
-    pointAnalysis.textContent = 'No derivative at this point';
-  } else if (Math.abs(derivative) < 1e-4) {
-    pointAnalysis.textContent = 'Likely stationary point';
-  } else if (derivative > 0) {
-    pointAnalysis.textContent = 'Increasing at this point';
+  // Simple analysis using forward difference approximation if possible
+  const yAhead = evaluateFunction(expression, x + 1e-3);
+  const yBehind = evaluateFunction(expression, x - 1e-3);
+  if (yAhead === null || yBehind === null) {
+    pointAnalysis.textContent = 'No derivative information available';
   } else {
-    pointAnalysis.textContent = 'Decreasing at this point';
+    const approx = (yAhead - yBehind) / (2 * 1e-3);
+    if (!Number.isFinite(approx)) {
+      pointAnalysis.textContent = 'No derivative information available';
+    } else if (Math.abs(approx) < 1e-4) {
+      pointAnalysis.textContent = 'Likely stationary point';
+    } else if (approx > 0) {
+      pointAnalysis.textContent = 'Increasing at this point';
+    } else {
+      pointAnalysis.textContent = 'Decreasing at this point';
+    }
   }
 
   result.style.display = 'block';
 }
 
-function approximateDerivative(expression, x) {
-  const h = 1e-5;
-  const y1 = evaluateFunction(expression, x + h);
-  const y2 = evaluateFunction(expression, x - h);
-  if (y1 === null || y2 === null) return NaN;
-  return (y1 - y2) / (2 * h);
-}
-
-function findDerivative() {
-  analyzePoint();
-}
+// approximateDerivative and findDerivative removed
 
 function findIntegral() {
   if (graphFunctions.length === 0) {
@@ -9398,8 +9673,12 @@ function findExtrema() {
 
   for (let i = 1; i < steps; i++) {
     const x = graphBounds.xMin + i * xStep;
-    const d1 = approximateDerivative(expression, x - xStep);
-    const d2 = approximateDerivative(expression, x + xStep);
+    const h = xStep;
+    const f1 = evaluateFunction(expression, x - h);
+    const f2 = evaluateFunction(expression, x + h);
+    if (f1 === null || f2 === null) continue;
+    const d1 = (evaluateFunction(expression, x - 2 * h) - f1) / (2 * h);
+    const d2 = (f2 - evaluateFunction(expression, x + 2 * h)) / (2 * h);
     if (!Number.isFinite(d1) || !Number.isFinite(d2)) continue;
 
     if (d1 * d2 < 0) {
@@ -9528,313 +9807,4 @@ function generateTable() {
       </table>
     </div>
   `;
-}
-/* ══════════════════════════════════════════════════════
-   ⏱️  AGE & DATE MATH CALCULATOR  —  Script
-   Paste this entire <script> block into assets/js/script.js
-   ══════════════════════════════════════════════════════ */
- 
-// ── Set today as max for DOB input ──────────────────────
-(function () {
-  const dobInput = document.getElementById('adc-dob');
-  if (dobInput) dobInput.max = new Date().toISOString().split('T')[0];
-})();
- 
-// ── Tab switcher ────────────────────────────────────────
-function adcSwitchTab(name, btn) {
-  document.querySelectorAll('.adc-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.adc-tab').forEach(b => b.classList.remove('active'));
-  const pane = document.getElementById('adc-pane-' + name);
-  if (pane) pane.classList.add('active');
-  if (btn)  btn.classList.add('active');
-}
- 
-// ── Helpers ─────────────────────────────────────────────
-const DAYS  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
- 
-function adcIsLeap(y) {
-  return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-}
-function adcDaysInMonth(y, m) {           // m: 0-indexed
-  return new Date(y, m + 1, 0).getDate();
-}
-function adcDayOfYear(d) {
-  const start = new Date(d.getFullYear(), 0, 0);
-  return Math.floor((d - start) / 86400000);
-}
-function adcWeekNumber(d) {
-  const jan1 = new Date(d.getFullYear(), 0, 1);
-  return Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
-}
-function adcComma(n) {
-  return Number(n).toLocaleString();
-}
- 
-// Zodiac
-const ZODIAC = [
-  { name:'Capricorn', emoji:'♑', end:[1,19] },
-  { name:'Aquarius',  emoji:'♒', end:[2,18] },
-  { name:'Pisces',    emoji:'♓', end:[3,20] },
-  { name:'Aries',     emoji:'♈', end:[4,19] },
-  { name:'Taurus',    emoji:'♉', end:[5,20] },
-  { name:'Gemini',    emoji:'♊', end:[6,20] },
-  { name:'Cancer',    emoji:'♋', end:[7,22] },
-  { name:'Leo',       emoji:'♌', end:[8,22] },
-  { name:'Virgo',     emoji:'♍', end:[9,22] },
-  { name:'Libra',     emoji:'♎', end:[10,22] },
-  { name:'Scorpio',   emoji:'♏', end:[11,21] },
-  { name:'Sagittarius',emoji:'♐',end:[12,21] },
-  { name:'Capricorn', emoji:'♑', end:[12,31] },
-];
-function adcZodiac(month, day) {   // month: 1-indexed
-  for (const z of ZODIAC) {
-    if (month < z.end[0] || (month === z.end[0] && day <= z.end[1])) return z;
-  }
-  return ZODIAC[ZODIAC.length - 1];
-}
- 
-// Life stage
-function adcLifeStage(age) {
-  if (age < 1)   return { stage:'Infant',       desc:'First year of life' };
-  if (age < 3)   return { stage:'Toddler',      desc:'Early development' };
-  if (age < 12)  return { stage:'Child',        desc:'Childhood years' };
-  if (age < 18)  return { stage:'Teenager',     desc:'Adolescence' };
-  if (age < 25)  return { stage:'Young Adult',  desc:'Early adulthood' };
-  if (age < 40)  return { stage:'Adult',        desc:'Prime working years' };
-  if (age < 60)  return { stage:'Middle-Aged',  desc:'Midlife phase' };
-  if (age < 80)  return { stage:'Senior',       desc:'Golden years' };
-  return { stage:'Elder', desc:'A life well-lived' };
-}
- 
-// ── TAB 1: AGE CALCULATOR ───────────────────────────────
-function adcCalcAge() {
-  const errEl = document.getElementById('adc-age-err');
-  const resEl = document.getElementById('adc-age-results');
-  const val   = document.getElementById('adc-dob').value;
-  if (!val) { errEl.style.display='none'; resEl.style.display='none'; return; }
- 
-  const dob = new Date(val);
-  const now = new Date();
- 
-  if (dob >= now) {
-    errEl.style.display = 'block';
-    resEl.style.display = 'none';
-    return;
-  }
-  errEl.style.display = 'none';
-  resEl.style.display = 'block';
- 
-  // Exact age
-  let years  = now.getFullYear() - dob.getFullYear();
-  let months = now.getMonth()    - dob.getMonth();
-  let days   = now.getDate()     - dob.getDate();
- 
-  if (days < 0) {
-    months--;
-    days += adcDaysInMonth(now.getFullYear(), now.getMonth() - 1);
-  }
-  if (months < 0) { years--; months += 12; }
- 
-  // Total figures
-  const totalDays   = Math.floor((now - dob) / 86400000);
-  const totalWeeks  = Math.floor(totalDays / 7);
-  const totalHours  = totalDays * 24;
-  const heartbeats  = Math.round(totalDays * 24 * 60 * 70 / 1_000_000);
- 
-  // Next birthday
-  let nextBday = new Date(now.getFullYear(), dob.getMonth(), dob.getDate());
-  if (nextBday <= now) nextBday.setFullYear(now.getFullYear() + 1);
-  const daysToNext = Math.floor((nextBday - now) / 86400000);
- 
-  // Zodiac
-  const zodiac = adcZodiac(dob.getMonth() + 1, dob.getDate());
- 
-  // Life stage
-  const ls = adcLifeStage(years);
- 
-  // Day-of-year progress
-  const doy     = adcDayOfYear(now);
-  const doyMax  = adcIsLeap(now.getFullYear()) ? 366 : 365;
-  const doyPct  = ((doy / doyMax) * 100).toFixed(1);
- 
-  // Populate
-  document.getElementById('adc-years').textContent     = years;
-  document.getElementById('adc-months').textContent    = months;
-  document.getElementById('adc-days-age').textContent  = days;
-  document.getElementById('adc-hours').textContent     = adcComma(totalHours);
-  document.getElementById('adc-weeks').textContent     = adcComma(totalWeeks);
-  document.getElementById('adc-total-days').textContent= adcComma(totalDays);
-  document.getElementById('adc-heartbeats').textContent= adcComma(heartbeats);
-  document.getElementById('adc-next-bday').textContent = daysToNext === 0 ? '🎉 Today!' : daysToNext;
- 
-  document.getElementById('adc-zodiac-emoji').textContent = zodiac.emoji;
-  document.getElementById('adc-zodiac-name').textContent  = zodiac.name;
- 
-  document.getElementById('adc-life-stage').textContent = ls.stage;
-  document.getElementById('adc-life-desc').textContent  = ' · ' + ls.desc;
- 
-  document.getElementById('adc-doy').textContent       = doy;
-  document.getElementById('adc-doy-pct').textContent   = doyPct + '%';
-  document.getElementById('adc-doy-bar').style.width   = doyPct + '%';
- 
-  document.getElementById('adc-birth-weekday').textContent  = DAYS[dob.getDay()];
-  document.getElementById('adc-next-bday-day').textContent  = DAYS[nextBday.getDay()];
- 
-  // Push result to main calculator display if available
-  if (typeof currentExpression !== 'undefined') {
-    currentExpression = String(totalDays);
-    if (typeof updateResult === 'function') updateResult();
-  }
-}
- 
-// ── TAB 2: COUNTDOWN ────────────────────────────────────
-function adcCalcCountdown() {
-  const errEl = document.getElementById('adc-cd-err');
-  const resEl = document.getElementById('adc-cd-results');
-  const val   = document.getElementById('adc-event-date').value;
-  const name  = document.getElementById('adc-event-name').value.trim() || 'Your event';
- 
-  if (!val) { errEl.style.display='none'; resEl.style.display='none'; return; }
- 
-  const target = new Date(val);
-  target.setHours(0,0,0,0);
-  const now = new Date();
-  now.setHours(0,0,0,0);
- 
-  if (target <= now) {
-    errEl.style.display='block';
-    resEl.style.display='none';
-    return;
-  }
-  errEl.style.display = 'none';
-  resEl.style.display = 'block';
- 
-  const totalDays  = Math.floor((target - now) / 86400000);
-  const totalHours = totalDays * 24;
-  const totalMins  = totalHours * 60;
-  const totalWeeks = Math.floor(totalDays / 7);
- 
-  // Months diff (approximate)
-  let mDiff = (target.getFullYear() - now.getFullYear()) * 12
-              + target.getMonth() - now.getMonth();
-  if (target.getDate() < now.getDate()) mDiff--;
- 
-  // SVG ring — max 365 days = full circle
-  const pct    = Math.min(totalDays / 365, 1);
-  const circ   = 345.4;
-  const offset = circ * (1 - pct);
-  document.getElementById('adc-ring-fg').style.strokeDashoffset = offset;
-  document.getElementById('adc-ring-days').textContent = adcComma(totalDays);
- 
-  document.getElementById('adc-cd-weeks').textContent  = adcComma(totalWeeks);
-  document.getElementById('adc-cd-months').textContent = mDiff;
-  document.getElementById('adc-cd-hours').textContent  = adcComma(totalHours);
-  document.getElementById('adc-cd-mins').textContent   = adcComma(totalMins);
- 
-  document.getElementById('adc-cd-event-label').textContent = name;
-  document.getElementById('adc-cd-weekday').textContent     = DAYS[target.getDay()];
- 
-  const plural = totalDays === 1 ? 'day' : 'days';
-  document.getElementById('adc-cd-daysstr').textContent = totalDays + ' ' + plural;
-}
- 
-// ── TAB 3: DAY OF WEEK FINDER ───────────────────────────
-function adcCalcDOW() {
-  const val = document.getElementById('adc-dow-date').value;
-  const res = document.getElementById('adc-dow-results');
-  if (!val) { res.style.display='none'; return; }
-  res.style.display = 'block';
- 
-  const d    = new Date(val);
-  const year = d.getFullYear();
-  const mon  = d.getMonth();  // 0-indexed
-  const day  = d.getDate();
- 
-  const dayOfYear     = adcDayOfYear(d);
-  const weekNo        = adcWeekNumber(d);
-  const quarter       = Math.floor(mon / 3) + 1;
-  const daysInMonth   = adcDaysInMonth(year, mon);
-  const isLeap        = adcIsLeap(year);
-  const daysInYear    = isLeap ? 366 : 365;
-  const daysLeftYear  = daysInYear - dayOfYear;
- 
-  document.getElementById('adc-dow-day').textContent          = DAYS[d.getDay()];
-  document.getElementById('adc-dow-doy').textContent          = dayOfYear;
-  document.getElementById('adc-dow-week').textContent         = weekNo;
-  document.getElementById('adc-dow-quarter').textContent      = 'Q' + quarter;
-  document.getElementById('adc-dow-leapyear').textContent     = isLeap ? '✅ Yes' : '❌ No';
-  document.getElementById('adc-dow-days-in-month').textContent= daysInMonth;
-  document.getElementById('adc-dow-days-left-year').textContent = daysLeftYear;
- 
-  // Fun fact
-  const funFacts = [
-    `${MONTHS_SHORT[mon]} ${day}, ${year} falls in Q${quarter}.`,
-    `It's week ${weekNo} of ${year}.`,
-    `${year} has ${daysInYear} days — ${isLeap ? 'a leap year!' : 'not a leap year.'}`,
-    `There are ${daysInMonth} days in ${MONTHS_SHORT[mon]} ${year}.`,
-    `Only ${daysLeftYear} days remain in ${year} after this date.`
-  ];
-  document.getElementById('adc-dow-fun-fact').textContent =
-    funFacts[Math.floor(Math.random() * funFacts.length)];
-}
- 
-// ── TAB 4: DATE DIFFERENCE ──────────────────────────────
-function adcCalcDiff() {
-  const errEl  = document.getElementById('adc-diff-err');
-  const resEl  = document.getElementById('adc-diff-results');
-  const startV = document.getElementById('adc-diff-start').value;
-  const endV   = document.getElementById('adc-diff-end').value;
- 
-  if (!startV || !endV) { errEl.style.display='none'; resEl.style.display='none'; return; }
- 
-  const start = new Date(startV);
-  const end   = new Date(endV);
- 
-  if (end < start) {
-    errEl.style.display='block';
-    resEl.style.display='none';
-    return;
-  }
-  errEl.style.display = 'none';
-  resEl.style.display = 'block';
- 
-  const totalDays  = Math.floor((end - start) / 86400000);
-  const totalWeeks = Math.floor(totalDays / 7);
-  const totalHours = totalDays * 24;
-  const totalMins  = totalHours * 60;
- 
-  // Exact years / months / days
-  let years  = end.getFullYear() - start.getFullYear();
-  let months = end.getMonth()    - start.getMonth();
-  let days   = end.getDate()     - start.getDate();
- 
-  if (days < 0) {
-    months--;
-    days += adcDaysInMonth(end.getFullYear(), end.getMonth() - 1);
-  }
-  if (months < 0) { years--; months += 12; }
- 
-  document.getElementById('adc-diff-years').textContent      = years;
-  document.getElementById('adc-diff-months').textContent     = months;
-  document.getElementById('adc-diff-days').textContent       = days;
-  document.getElementById('adc-diff-total-days').textContent = adcComma(totalDays);
-  document.getElementById('adc-diff-total-weeks').textContent= adcComma(totalWeeks);
-  document.getElementById('adc-diff-total-hours').textContent= adcComma(totalHours);
-  document.getElementById('adc-diff-total-mins').textContent = adcComma(totalMins);
- 
-  const summary = document.getElementById('adc-diff-summary');
-  const parts = [];
-  if (years  > 0) parts.push(years  + (years  === 1 ? ' year'  : ' years'));
-  if (months > 0) parts.push(months + (months === 1 ? ' month' : ' months'));
-  if (days   > 0) parts.push(days   + (days   === 1 ? ' day'   : ' days'));
-  summary.innerHTML = parts.length
-    ? `<strong>${DAYS[start.getDay()]}, ${startV}</strong> to <strong>${DAYS[end.getDay()]}, ${endV}</strong> is exactly <strong>${parts.join(', ')}</strong>.`
-    : `<strong>Same date selected.</strong>`;
- 
-  // Push to main calculator
-  if (typeof currentExpression !== 'undefined') {
-    currentExpression = String(totalDays);
-    if (typeof updateResult === 'function') updateResult();
-  }
 }
